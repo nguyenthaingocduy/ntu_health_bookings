@@ -4,15 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Models\Time;
 
 class Appointment extends Model
 {
     use HasUuids;
 
     protected $fillable = [
-        'user_id',
+        'customer_id',
         'service_id',
-        'appointment_date',
+        'date_register',
+        'date_appointments',
+        'time_appointments_id',
+        'employee_id',
         'status',
         'notes',
         'doctor_id',
@@ -24,7 +28,8 @@ class Appointment extends Model
     ];
 
     protected $casts = [
-        'appointment_date' => 'datetime',
+        'date_register' => 'datetime',
+        'date_appointments' => 'datetime',
         'check_in_time' => 'datetime',
         'check_out_time' => 'datetime',
         'is_completed' => 'boolean'
@@ -32,7 +37,7 @@ class Appointment extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'customer_id');
     }
 
     public function service()
@@ -47,7 +52,17 @@ class Appointment extends Model
 
     public function timeSlot()
     {
-        return $this->belongsTo(TimeSlot::class);
+        return $this->belongsTo(TimeSlot::class, 'time_slot_id');
+    }
+
+    public function timeAppointment()
+    {
+        return $this->belongsTo(Time::class, 'time_appointments_id');
+    }
+
+    public function employee()
+    {
+        return $this->belongsTo(User::class, 'employee_id');
     }
 
     public function healthRecord()

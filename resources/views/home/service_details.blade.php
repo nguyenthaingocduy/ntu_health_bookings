@@ -31,20 +31,20 @@
                 </ol>
             </nav>
         </div>
-        
+
         <!-- Main Content -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <!-- Service Image -->
             <div class="lg:col-span-2">
                 <img src="{{ $service->image_url }}" alt="{{ $service->name }}" class="w-full h-auto rounded-lg shadow-lg">
-                
+
                 <!-- Service Description -->
                 <div class="mt-8">
                     <h2 class="text-2xl font-bold mb-4">Mô tả dịch vụ</h2>
                     <div class="prose max-w-none">
                         <p>{{ $service->description }}</p>
                     </div>
-                    
+
                     <!-- Service Benefits -->
                     <div class="mt-8">
                         <h3 class="text-xl font-semibold mb-4">Lợi ích</h3>
@@ -69,17 +69,17 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Sidebar -->
             <div class="lg:col-span-1">
                 <div class="bg-gray-100 p-6 rounded-lg shadow-md">
                     <h2 class="text-2xl font-bold mb-4 text-gray-800">{{ $service->name }}</h2>
-                    
+
                     <div class="mb-6">
                         <p class="text-3xl font-bold text-pink-500">{{ number_format($service->price) }}đ</p>
                         <p class="text-gray-500">Đã bao gồm VAT</p>
                     </div>
-                    
+
                     <div class="space-y-4 mb-6">
                         <div class="flex items-center">
                             <i class="fas fa-clock text-gray-600 w-6"></i>
@@ -87,20 +87,20 @@
                         </div>
                         <div class="flex items-center">
                             <i class="fas fa-map-marker-alt text-gray-600 w-6"></i>
-                            <span class="ml-2">{{ $service->clinic->name }}</span>
+                            <span class="ml-2">{{ $service->clinic ? $service->clinic->name : 'Không có thông tin' }}</span>
                         </div>
                         <div class="flex items-center">
                             <i class="fas fa-calendar-alt text-gray-600 w-6"></i>
-                            <span class="ml-2">Có sẵn: {{ \Carbon\Carbon::parse($service->start_date)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($service->end_date)->format('d/m/Y') }}</span>
+                            <span class="ml-2">Có sẵn: {{ $service->start_date ? \Carbon\Carbon::parse($service->start_date)->format('d/m/Y') : 'N/A' }} - {{ $service->end_date ? \Carbon\Carbon::parse($service->end_date)->format('d/m/Y') : 'N/A' }}</span>
                         </div>
                     </div>
-                    
+
                     <div class="mb-6">
                         <a href="{{ route('customer.appointments.create', ['service' => $service->id]) }}" class="block w-full bg-white text-pink-600 text-center font-bold py-3 px-4 rounded-full hover:bg-gray-50 transition shadow-md border border-pink-100">
                             Đặt lịch ngay
                         </a>
                     </div>
-                    
+
                     <div class="border-t border-gray-300 pt-4">
                         <h4 class="font-semibold mb-3">Chia sẻ:</h4>
                         <div class="flex space-x-3">
@@ -121,11 +121,11 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Related Services -->
         <div class="mt-16">
             <h2 class="text-2xl font-bold mb-8">Dịch vụ liên quan</h2>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Placeholder for Related Services -->
                 <div class="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -141,7 +141,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="bg-white rounded-lg shadow-lg overflow-hidden">
                     <img src="{{ asset('images/service2.jpg') }}" alt="Service" class="w-full h-48 object-cover">
                     <div class="p-6">
@@ -155,7 +155,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="bg-white rounded-lg shadow-lg overflow-hidden">
                     <img src="{{ asset('images/service3.jpg') }}" alt="Service" class="w-full h-48 object-cover">
                     <div class="p-6">
@@ -173,4 +173,4 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection

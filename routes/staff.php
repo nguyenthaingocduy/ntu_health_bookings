@@ -16,6 +16,13 @@ Route::middleware(['auth', \App\Http\Middleware\StaffMiddleware::class])->prefix
     // Dashboard
     Route::get('/dashboard', [App\Http\Controllers\Staff\DashboardController::class, 'index'])->name('dashboard');
 
+    // Work Schedule
+    Route::get('/work-schedule', [\App\Http\Controllers\Staff\WorkScheduleController::class, 'index'])->name('work-schedule');
+    Route::get('/appointments/{id}/complete', [\App\Http\Controllers\Staff\WorkScheduleController::class, 'completeAppointment'])->name('appointments.complete');
+
+    // Statistics
+    Route::get('/statistics', [\App\Http\Controllers\Staff\StatisticsController::class, 'index'])->name('statistics');
+
     // Health Check-up Routes
     Route::prefix('health-checkups')->name('health-checkups.')->middleware(\App\Http\Middleware\UniversityStaffMiddleware::class)->group(function () {
         Route::get('/', [HealthCheckupController::class, 'index'])->name('index');

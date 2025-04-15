@@ -49,14 +49,14 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="card-title">Đặt lịch khám sức khỏe</h6>
-                        <p class="mb-0">Khám sức khỏe định kỳ</p>
+                        <h6 class="card-title">Đặt lịch khám mới</h6>
+                        <p class="mb-0">Đặt lịch khám dịch vụ</p>
                     </div>
-                    <i class="fas fa-heartbeat fa-3x opacity-50"></i>
+                    <i class="fas fa-calendar-plus fa-3x opacity-50"></i>
                 </div>
             </div>
             <div class="card-footer bg-transparent border-0">
-                <a href="{{ route('staff.health-checkups.create') }}" class="text-white">Đặt lịch ngay <i class="fas fa-arrow-right ms-1"></i></a>
+                <a href="{{ route('staff.appointments.create') }}" class="text-white">Đặt lịch ngay <i class="fas fa-arrow-right ms-1"></i></a>
             </div>
         </div>
     </div>
@@ -79,50 +79,7 @@
     </div>
 </div>
 
-<!-- Health Check-up Status -->
-@if($staff->isUniversityStaff())
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card border-left-primary shadow h-100">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Trạng thái khám sức khỏe</div>
 
-                        @if($latestHealthRecord)
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                Lần khám gần nhất: {{ $latestHealthRecord->check_date->format('d/m/Y') }}
-                                @if($nextCheckDue)
-                                    <span class="badge bg-danger">Đến hạn khám lại</span>
-                                @else
-                                    <span class="badge bg-success">Còn hiệu lực</span>
-                                @endif
-                            </div>
-                            <div class="mt-2">
-                                <a href="{{ route('staff.health-checkups.records') }}" class="btn btn-sm btn-primary">Xem hồ sơ sức khỏe</a>
-                                @if($nextCheckDue)
-                                    <a href="{{ route('staff.health-checkups.create') }}" class="btn btn-sm btn-success">Đặt lịch khám mới</a>
-                                @endif
-                            </div>
-                        @else
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                Bạn chưa có hồ sơ khám sức khỏe
-                                <span class="badge bg-danger">Cần khám sức khỏe</span>
-                            </div>
-                            <div class="mt-2">
-                                <a href="{{ route('staff.health-checkups.create') }}" class="btn btn-sm btn-success">Đặt lịch khám ngay</a>
-                            </div>
-                        @endif
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-notes-medical fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-@endif
 
 <div class="row">
     <div class="col-lg-8 mb-4">
@@ -150,8 +107,8 @@
                                 @foreach($appointments as $appointment)
                                     <tr>
                                         <td>{{ $appointment->service->name }}</td>
-                                        <td>{{ $appointment->appointment_date->format('d/m/Y') }}</td>
-                                        <td>{{ $appointment->timeSlot ? $appointment->timeSlot->start_time->format('H:i') . ' - ' . $appointment->timeSlot->end_time->format('H:i') : 'N/A' }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($appointment->date_appointments)->format('d/m/Y') }}</td>
+                                        <td>{{ $appointment->timeAppointment ? $appointment->timeAppointment->started_time : 'N/A' }}</td>
                                         <td>
                                             @if($appointment->status == 'pending')
                                                 <span class="badge bg-warning">Chờ xác nhận</span>
@@ -164,15 +121,9 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @if($appointment->service->is_health_checkup)
-                                                <a href="{{ route('staff.health-checkups.show', $appointment->id) }}" class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                            @else
-                                                <a href="{{ route('staff.appointments.show', $appointment->id) }}" class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                            @endif
+                                            <a href="{{ route('staff.appointments.show', $appointment->id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -191,37 +142,9 @@
     </div>
 
     <div class="col-lg-4 mb-4">
-        @if($staff->isUniversityStaff())
-        <div class="card mb-4">
-            <div class="card-header bg-white">
-                <h5 class="mb-0">Dịch vụ khám sức khỏe</h5>
-            </div>
-            <div class="card-body">
-                @if($healthCheckupServices->count() > 0)
-                    <div class="list-group">
-                        @foreach($healthCheckupServices as $service)
-                            <a href="{{ route('staff.health-checkups.create', ['service_id' => $service->id]) }}" class="list-group-item list-group-item-action">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">{{ $service->name }}</h6>
-                                    <small>{{ $service->formatted_price }}</small>
-                                </div>
-                                <p class="mb-1 text-muted small">{{ Str::limit($service->description, 100) }}</p>
-                            </a>
-                        @endforeach
-                    </div>
-                @else
-                    <div class="text-center py-4">
-                        <i class="fas fa-heartbeat fa-3x text-muted mb-3"></i>
-                        <p class="mb-0">Không có dịch vụ khám sức khỏe nào.</p>
-                    </div>
-                @endif
-            </div>
-        </div>
-        @endif
-
         <div class="card">
             <div class="card-header bg-white">
-                <h5 class="mb-0">Dịch vụ khác</h5>
+                <h5 class="mb-0">Dịch vụ</h5>
             </div>
             <div class="card-body">
                 @if($services->count() > 0)
