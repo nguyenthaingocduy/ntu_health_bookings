@@ -1,0 +1,69 @@
+
+  GET|HEAD        / ....................................................... home › HomeController@index
+  GET|HEAD        about .................................................. about › HomeController@about
+  GET|HEAD        admin/appointments ..... admin.appointments.index › Admin\AppointmentController@index
+  POST            admin/appointments ..... admin.appointments.store › Admin\AppointmentController@store
+  GET|HEAD        admin/appointments/create admin.appointments.create › Admin\AppointmentController@cr…
+  GET|HEAD        admin/appointments/{appointment} admin.appointments.show › Admin\AppointmentControll…
+  PUT|PATCH       admin/appointments/{appointment} admin.appointments.update › Admin\AppointmentContro…
+  DELETE          admin/appointments/{appointment} admin.appointments.destroy › Admin\AppointmentContr…
+  GET|HEAD        admin/appointments/{appointment}/edit admin.appointments.edit › Admin\AppointmentCon…
+  GET|HEAD        admin/clinics .................... admin.clinics.index › Admin\ClinicController@index
+  POST            admin/clinics .................... admin.clinics.store › Admin\ClinicController@store
+  GET|HEAD        admin/clinics/create ........... admin.clinics.create › Admin\ClinicController@create
+  GET|HEAD        admin/clinics/{clinic} ............. admin.clinics.show › Admin\ClinicController@show
+  PUT|PATCH       admin/clinics/{clinic} ......... admin.clinics.update › Admin\ClinicController@update
+  DELETE          admin/clinics/{clinic} ....... admin.clinics.destroy › Admin\ClinicController@destroy
+  GET|HEAD        admin/clinics/{clinic}/edit ........ admin.clinics.edit › Admin\ClinicController@edit
+  GET|HEAD        admin/customers .............. admin.customers.index › Admin\CustomerController@index
+  GET|HEAD        admin/customers/{customer} ..... admin.customers.show › Admin\CustomerController@show
+  GET|HEAD        admin/dashboard ................... admin.dashboard › Admin\DashboardController@index
+  GET|HEAD        admin/employees .............. admin.employees.index › Admin\EmployeeController@index
+  POST            admin/employees .............. admin.employees.store › Admin\EmployeeController@store
+  GET|HEAD        admin/employees/create ..... admin.employees.create › Admin\EmployeeController@create
+  GET|HEAD        admin/employees/{employee} ..... admin.employees.show › Admin\EmployeeController@show
+  PUT|PATCH       admin/employees/{employee} . admin.employees.update › Admin\EmployeeController@update
+  DELETE          admin/employees/{employee} admin.employees.destroy › Admin\EmployeeController@destroy
+  GET|HEAD        admin/employees/{employee}/edit admin.employees.edit › Admin\EmployeeController@edit
+  GET|HEAD        admin/services ................. admin.services.index › Admin\ServiceController@index
+  POST            admin/services ................. admin.services.store › Admin\ServiceController@store
+  GET|HEAD        admin/services/create ........ admin.services.create › Admin\ServiceController@create
+  GET|HEAD        admin/services/{service} ......... admin.services.show › Admin\ServiceController@show
+  PUT|PATCH       admin/services/{service} ..... admin.services.update › Admin\ServiceController@update
+  DELETE          admin/services/{service} ... admin.services.destroy › Admin\ServiceController@destroy
+  GET|HEAD        admin/services/{service}/edit .... admin.services.edit › Admin\ServiceController@edit
+  GET|HEAD        check-auth ............................................................... check.auth
+  GET|HEAD        contact ............................................ contact › HomeController@contact
+  GET|HEAD        customer/appointments customer.appointments.index › Customer\AppointmentController@i…
+  POST            customer/appointments customer.appointments.store › Customer\AppointmentController@s…
+  GET|HEAD        customer/appointments/create/{service?} customer.appointments.create › Customer\Appo…
+  GET|HEAD        customer/appointments/{id} customer.appointments.show › Customer\AppointmentControll…
+  POST            customer/appointments/{id}/cancel customer.appointments.cancel › Customer\Appointmen…
+  GET|HEAD        customer/clinics/{clinicId}/services customer.services.by-clinic › Customer\ServiceC…
+  GET|HEAD        customer/dashboard .......... customer.dashboard › Customer\DashboardController@index
+  GET|HEAD        customer/profile ............ customer.profile.show › Customer\ProfileController@show
+  PUT             customer/profile ........ customer.profile.update › Customer\ProfileController@update
+  GET|HEAD        customer/profile/edit ....... customer.profile.edit › Customer\ProfileController@edit
+  GET|HEAD        customer/services ........ customer.services.index › Customer\ServiceController@index
+  GET|HEAD        customer/services/{id} ..... customer.services.show › Customer\ServiceController@show
+  GET|HEAD        direct-dashboard ................................................... direct.dashboard
+  GET|HEAD        home .................................................... home › HomeController@index
+  GET|HEAD        login .................................... login › Auth\LoginController@showLoginForm
+  POST            login .................................................... Auth\LoginController@login
+  GET|HEAD        login-status ........................................................... login.status
+  POST            logout ......................................... logout › Auth\LoginController@logout
+  POST            password/email .... password.email › Auth\ForgotPasswordController@sendResetLinkEmail
+  GET|HEAD        password/reset . password.request › Auth\ForgotPasswordController@showLinkRequestForm
+  POST            password/reset ................. password.update › Auth\ResetPasswordController@reset
+  GET|HEAD        password/reset/{token} .. password.reset › Auth\ResetPasswordController@showResetForm
+  GET|HEAD        register .................... register › Auth\RegisterController@showRegistrationForm
+  POST            register ........................................... Auth\RegisterController@register
+  GET|HEAD        sanctum/csrf-cookie sanctum.csrf-cookie › Laravel\Sanctum › CsrfCookieController@show
+  GET|HEAD        services ..................................... services.index › HomeController@index2
+  GET|HEAD        services/{id} ................................... services.show › HomeController@show
+  GET|HEAD        storage/{path} ........................................................ storage.local
+  GET|HEAD        test-dashboard ....................................................... test.dashboard
+  GET|HEAD        up .................................................................................. 
+
+                                                                                    Showing [65] routes
+
