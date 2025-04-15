@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Clinic;
 use App\Models\Employee;
 use App\Models\Role;
+use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -57,9 +58,10 @@ class EmployeeController extends Controller
 
     public function create()
     {
-        $roles = Role::where('name', '!=', 'customer')->get();
+        $roles = Role::where('name', '!=', 'Customer')->get();
         $clinics = Clinic::all();
-        return view('admin.employees.create', compact('roles', 'clinics'));
+        $services = Service::where('status', 'active')->get();
+        return view('admin.employees.create', compact('roles', 'clinics', 'services'));
     }
 
     public function store(Request $request)
@@ -67,25 +69,41 @@ class EmployeeController extends Controller
         $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'birthday' => 'required|date',
-            'address' => 'required|string|max:255',
+            'birthday' => 'nullable|date',
+            'address' => 'nullable|string|max:255',
             'phone' => 'required|string|max:20',
-            'gender' => 'required|in:male,female,other',
+            'email' => 'required|email|unique:employees,email',
+            'gender' => 'nullable|in:male,female,other',
             'role_id' => 'required|exists:roles,id',
             'clinic_id' => 'required|exists:clinics,id',
+            'status' => 'required|in:active,inactive',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'services' => 'nullable|array',
+            'services.*' => 'exists:services,id',
         ]);
 
-        Employee::create([
-            'id' => Str::uuid(),
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'birthday' => $request->birthday,
-            'address' => $request->address,
-            'phone' => $request->phone,
-            'gender' => $request->gender,
-            'role_id' => $request->role_id,
-            'clinic_id' => $request->clinic_id,
+        $data = $request->only([
+            'first_name', 'last_name', 'birthday', 'address', 'phone', 'email',
+            'gender', 'role_id', 'clinic_id', 'status'
         ]);
+
+        // Generate UUID
+        $data['id'] = Str::uuid();
+
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            $avatar = $request->file('avatar');
+            $avatarName = time() . '.' . $avatar->getClientOriginalExtension();
+            $avatar->move(public_path('images/employees'), $avatarName);
+            $data['avatar_url'] = 'images/employees/' . $avatarName;
+        }
+
+        $employee = Employee::create($data);
+
+        // Sync services
+        if ($request->has('services')) {
+            $employee->services()->sync($request->services);
+        }
 
         return redirect()->route('admin.employees.index')
             ->with('success', 'Nhân viên đã được thêm thành công.');
@@ -93,37 +111,60 @@ class EmployeeController extends Controller
 
     public function edit($id)
     {
-        $employee = Employee::findOrFail($id);
-        $roles = Role::where('name', '!=', 'customer')->get();
+        $employee = Employee::with('services')->findOrFail($id);
+        $roles = Role::where('name', '!=', 'Customer')->get();
         $clinics = Clinic::all();
+        $services = Service::where('status', 'active')->get();
 
-        return view('admin.employees.edit', compact('employee', 'roles', 'clinics'));
+        return view('admin.employees.edit', compact('employee', 'roles', 'clinics', 'services'));
     }
 
     public function update(Request $request, $id)
     {
+        $employee = Employee::findOrFail($id);
+
         $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'birthday' => 'required|date',
-            'address' => 'required|string|max:255',
+            'birthday' => 'nullable|date',
+            'address' => 'nullable|string|max:255',
             'phone' => 'required|string|max:20',
-            'gender' => 'required|in:male,female,other',
+            'email' => 'required|email|unique:employees,email,' . $employee->id,
+            'gender' => 'nullable|in:male,female,other',
             'role_id' => 'required|exists:roles,id',
             'clinic_id' => 'required|exists:clinics,id',
+            'status' => 'required|in:active,inactive',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'services' => 'nullable|array',
+            'services.*' => 'exists:services,id',
         ]);
 
-        $employee = Employee::findOrFail($id);
-        $employee->update([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'birthday' => $request->birthday,
-            'address' => $request->address,
-            'phone' => $request->phone,
-            'gender' => $request->gender,
-            'role_id' => $request->role_id,
-            'clinic_id' => $request->clinic_id,
+        $data = $request->only([
+            'first_name', 'last_name', 'birthday', 'address', 'phone', 'email',
+            'gender', 'role_id', 'clinic_id', 'status'
         ]);
+
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($employee->avatar_url && file_exists(public_path($employee->avatar_url))) {
+                unlink(public_path($employee->avatar_url));
+            }
+
+            $avatar = $request->file('avatar');
+            $avatarName = time() . '.' . $avatar->getClientOriginalExtension();
+            $avatar->move(public_path('images/employees'), $avatarName);
+            $data['avatar_url'] = 'images/employees/' . $avatarName;
+        }
+
+        $employee->update($data);
+
+        // Sync services
+        if ($request->has('services')) {
+            $employee->services()->sync($request->services);
+        } else {
+            $employee->services()->detach();
+        }
 
         return redirect()->route('admin.employees.index')
             ->with('success', 'Thông tin nhân viên đã được cập nhật thành công.');
