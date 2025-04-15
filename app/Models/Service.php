@@ -7,23 +7,25 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Service extends Model
 {
-    use HasUuids;
+    // The service table uses auto-incrementing IDs, not UUIDs
+    // use HasUuids;
 
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'price',
-        'duration',
-        'image_url',
-        'is_active',
-        'is_health_checkup',
+        'promotion',
         'category_id',
+        'clinic_id',
+        'image_url',
+        'status',
+        'is_health_checkup',
         'required_tests',
         'preparation_instructions'
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
         'is_health_checkup' => 'boolean',
         'required_tests' => 'array'
     ];
@@ -40,7 +42,8 @@ class Service extends Model
 
     public function getFormattedDurationAttribute()
     {
-        return $this->duration . ' phút';
+        // Default duration for health check-ups if not specified
+        return '60 phút';
     }
 
     public function getFormattedPriceAttribute()

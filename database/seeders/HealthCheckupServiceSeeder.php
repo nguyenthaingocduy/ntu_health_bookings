@@ -18,8 +18,7 @@ class HealthCheckupServiceSeeder extends Seeder
                 'name' => 'Khám sức khỏe định kỳ cơ bản',
                 'description' => 'Gói khám sức khỏe định kỳ cơ bản dành cho cán bộ viên chức Trường Đại học Nha Trang',
                 'price' => 0, // Free for university staff
-                'duration' => 60,
-                'is_active' => true,
+                'status' => 'active',
                 'is_health_checkup' => true,
                 'required_tests' => json_encode([
                     'Khám tổng quát',
@@ -33,8 +32,7 @@ class HealthCheckupServiceSeeder extends Seeder
                 'name' => 'Khám sức khỏe định kỳ nâng cao',
                 'description' => 'Gói khám sức khỏe định kỳ nâng cao dành cho cán bộ viên chức Trường Đại học Nha Trang',
                 'price' => 0, // Free for university staff
-                'duration' => 90,
-                'is_active' => true,
+                'status' => 'active',
                 'is_health_checkup' => true,
                 'required_tests' => json_encode([
                     'Khám tổng quát',
@@ -51,8 +49,7 @@ class HealthCheckupServiceSeeder extends Seeder
                 'name' => 'Khám sức khỏe chuyên khoa',
                 'description' => 'Khám chuyên khoa theo yêu cầu dành cho cán bộ viên chức Trường Đại học Nha Trang',
                 'price' => 0, // Free for university staff
-                'duration' => 45,
-                'is_active' => true,
+                'status' => 'active',
                 'is_health_checkup' => true,
                 'required_tests' => json_encode([
                     'Khám chuyên khoa theo yêu cầu'
@@ -62,7 +59,13 @@ class HealthCheckupServiceSeeder extends Seeder
         ];
 
         foreach ($services as $service) {
-            Service::create(array_merge(['id' => Str::uuid()], $service));
+            Service::create(array_merge([
+                'slug' => Str::slug($service['name']),
+                'promotion' => 0,
+                'category_id' => null,
+                'clinic_id' => null,
+                'image_url' => null
+            ], $service));
         }
     }
 }
