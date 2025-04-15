@@ -13,7 +13,7 @@
                     <h2 class="text-2xl font-bold text-gray-800 mb-4 md:mb-0">
                         Quản lý dịch vụ
                     </h2>
-                    <a href="{{ route('admin.services.create') }}" 
+                    <a href="{{ route('admin.services.create') }}"
                        class="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 rounded-md text-white shadow hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
@@ -48,7 +48,7 @@
 
                         <div>
                             <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
-                            <input type="text" name="search" id="search" value="{{ request('search') }}" 
+                            <input type="text" name="search" id="search" value="{{ request('search') }}"
                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
                                    placeholder="Tên dịch vụ...">
                         </div>
@@ -105,7 +105,7 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="text-sm font-medium text-gray-900">{{ $service->name }}</div>
-                                        <div class="text-sm text-gray-500 truncate max-w-xs">{{ Str::limit($service->descriptive, 50) }}</div>
+                                        <div class="text-sm text-gray-500 truncate max-w-xs">{{ Str::limit($service->description, 50) }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">{{ $service->category->name ?? 'Không có' }}</div>
@@ -170,4 +170,4 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection

@@ -1,6 +1,13 @@
 <?php
 
+use App\Http\Controllers\Admin\AppointmentController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ClinicController;
+use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\HealthCheckupController;
+use App\Http\Controllers\Admin\ServiceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,7 +21,23 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix('admin')->name('admin.')->group(function () {
     // Dashboard
-    Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Resources
+    Route::resource('categories', CategoryController::class);
+    Route::patch('categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
+
+    Route::resource('services', ServiceController::class);
+    Route::patch('services/{service}/toggle-status', [ServiceController::class, 'toggleStatus'])->name('services.toggle-status');
+    Route::resource('employees', EmployeeController::class);
+    Route::post('employees/{id}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('employees.toggle-status');
+    Route::resource('customers', CustomerController::class)->only(['index', 'show']);
+    Route::resource('clinics', ClinicController::class);
+    Route::patch('clinics/{id}/toggle-status', [ClinicController::class, 'toggleStatus'])->name('clinics.toggle-status');
+    Route::resource('appointments', AppointmentController::class);
+    Route::post('appointments/{id}/confirm', [AppointmentController::class, 'confirm'])->name('appointments.confirm');
+    Route::post('appointments/{id}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::post('appointments/{id}/complete', [AppointmentController::class, 'complete'])->name('appointments.complete');
 
     // Health Check-up Management
     Route::prefix('health-checkups')->name('health-checkups.')->group(function () {

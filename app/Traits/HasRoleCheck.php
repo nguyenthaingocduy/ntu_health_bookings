@@ -14,15 +14,19 @@ trait HasRoleCheck
 
         $user = Auth::user();
         if (!$user->role || strtolower($user->role->name) !== strtolower($roleName)) {
-            if ($user->role && strtolower($user->role->name) === 'admin') {
+            // Don't redirect admin to admin.dashboard to avoid circular redirects
+            if ($user->role && strtolower($user->role->name) === 'admin' && strtolower($roleName) !== 'admin') {
                 return redirect()->route('admin.dashboard');
             }
             if ($user->role && strtolower($user->role->name) === 'customer') {
                 return redirect()->route('customer.dashboard');
+            }
+            if ($user->role && strtolower($user->role->name) === 'staff') {
+                return redirect()->route('staff.dashboard');
             }
             return redirect()->route('home');
         }
 
         return null;
     }
-} 
+}

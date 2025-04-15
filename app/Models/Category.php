@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class Category extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'name',
         'icon',
-        'description'
+        'description',
+        'status'
     ];
-    
+
     public function services()
     {
         return $this->hasMany(Service::class);
     }
-} 
+}

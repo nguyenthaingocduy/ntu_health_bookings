@@ -86,19 +86,8 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::get('/clinics/{clinicId}/services', [ServiceController::class, 'byClinic'])->name('services.by-clinic');
 });
 
-// Khu vực admin
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-
-    Route::middleware([\App\Http\Middleware\AdminMiddleware::class])->group(function () {
-
-        Route::resource('services', AdminServiceController::class);
-        Route::resource('employees', EmployeeController::class);
-        Route::resource('customers', CustomerController::class)->only(['index', 'show']);
-        Route::resource('clinics', ClinicController::class);
-        Route::resource('appointments', AdminAppointmentController::class);
-    });
-});
+// Khu vực admin - Moved to admin.php
+// See routes/admin.php for all admin routes
 
 // Include admin routes from admin.php
 require __DIR__.'/admin.php';

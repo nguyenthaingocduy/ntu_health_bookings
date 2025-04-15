@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Service;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -55,7 +53,7 @@ class DashboardController extends Controller
         $monthlyRevenue = Appointment::where('employee_id', $staff->id)
             ->whereMonth('date_appointments', Carbon::now()->month)
             ->whereYear('date_appointments', Carbon::now()->year)
-            ->whereIn('status', ['completed', 'confirmed'])
+            ->whereIn('appointments.status', ['completed', 'confirmed'])
             ->join('services', 'appointments.service_id', '=', 'services.id')
             ->sum('services.price');
 
@@ -74,12 +72,12 @@ class DashboardController extends Controller
             ->get();
 
         // Get popular services
-        $popularServices = Service::select('services.*')
+        $popularServices = Service::select('services.id', 'services.name', 'services.price', 'services.description', 'services.image_url')
             ->selectRaw('COUNT(appointments.id) as appointments_count')
             ->leftJoin('appointments', 'services.id', '=', 'appointments.service_id')
             ->where('appointments.employee_id', $staff->id)
             ->whereIn('appointments.status', ['completed', 'confirmed'])
-            ->groupBy('services.id')
+            ->groupBy('services.id', 'services.name', 'services.price', 'services.description', 'services.image_url')
             ->orderByDesc('appointments_count')
             ->take(5)
             ->get();
@@ -89,7 +87,7 @@ class DashboardController extends Controller
         // Get revenue data for chart
         $revenueData = $this->getRevenueChartData();
 
-        return view('staff.dashboard_tailwind', compact(
+        return view('staff.dashboard_new', compact(
             'staff',
             'appointments',
             'upcomingAppointmentsCount',
@@ -125,7 +123,7 @@ class DashboardController extends Controller
             $revenue = Appointment::where('employee_id', Auth::id())
                 ->whereYear('date_appointments', $currentDate->year)
                 ->whereMonth('date_appointments', $currentDate->month)
-                ->whereIn('status', ['completed', 'confirmed'])
+                ->whereIn('appointments.status', ['completed', 'confirmed'])
                 ->join('services', 'appointments.service_id', '=', 'services.id')
                 ->sum('services.price');
 

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Clinic extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'name',
         'address',
@@ -16,13 +16,14 @@ class Clinic extends Model
         'email',
         'description',
         'image_url',
+        'status',
     ];
-    
+
     public function services()
     {
         return $this->hasMany(Service::class);
     }
-    
+
     public function employees()
     {
         return $this->hasMany(Employee::class);

@@ -9,11 +9,11 @@
 <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
     <form action="{{ route('admin.appointments.index') }}" method="GET" class="flex flex-wrap gap-4">
         <div class="flex-1">
-            <input type="text" name="search" value="{{ request('search') }}" 
-                placeholder="Tìm kiếm theo tên khách hàng, email, số điện thoại..." 
+            <input type="text" name="search" value="{{ request('search') }}"
+                placeholder="Tìm kiếm theo tên khách hàng, email, số điện thoại..."
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
         </div>
-        
+
         <div class="w-full md:w-auto">
             <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
                 <option value="">Tất cả trạng thái</option>
@@ -23,12 +23,12 @@
                 <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Đã hủy</option>
             </select>
         </div>
-        
+
         <div class="w-full md:w-auto">
             <input type="date" name="date" value="{{ request('date') }}"
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
         </div>
-        
+
         <button type="submit" class="bg-pink-500 text-white px-6 py-2 rounded-lg hover:bg-pink-600 transition">
             <i class="fas fa-search mr-2"></i>Tìm kiếm
         </button>
@@ -48,7 +48,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="flex items-center">
             <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
@@ -60,7 +60,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="flex items-center">
             <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
@@ -72,7 +72,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="flex items-center">
             <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
@@ -109,8 +109,8 @@
                         </td>
                         <td class="py-4">
                             <div>
-                                <p class="font-semibold">{{ $appointment->customer_name }}</p>
-                                <p class="text-sm text-gray-600">{{ $appointment->phone }}</p>
+                                <p class="font-semibold">{{ $appointment->user->first_name }} {{ $appointment->user->last_name }}</p>
+                                <p class="text-sm text-gray-600">{{ $appointment->user->phone }}</p>
                             </div>
                         </td>
                         <td class="py-4">
@@ -121,8 +121,8 @@
                         </td>
                         <td class="py-4">
                             <div>
-                                <p class="font-semibold">{{ $appointment->date->format('d/m/Y') }}</p>
-                                <p class="text-sm text-gray-600">{{ $appointment->time }}</p>
+                                <p class="font-semibold">{{ $appointment->date_appointments->format('d/m/Y') }}</p>
+                                <p class="text-sm text-gray-600">{{ optional($appointment->timeAppointment)->started_time }}</p>
                             </div>
                         </td>
                         <td class="py-4">
@@ -151,11 +151,11 @@
                         </td>
                         <td class="py-4">
                             <div class="flex items-center space-x-2">
-                                <a href="{{ route('admin.appointments.show', $appointment) }}" 
+                                <a href="{{ route('admin.appointments.show', $appointment) }}"
                                     class="text-blue-500 hover:text-blue-700" title="Xem chi tiết">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                
+
                                 @if($appointment->status == 'pending')
                                 <form action="{{ route('admin.appointments.confirm', $appointment) }}" method="POST" class="inline">
                                     @csrf
@@ -164,18 +164,18 @@
                                     </button>
                                 </form>
                                 @endif
-                                
+
                                 @if(in_array($appointment->status, ['pending', 'confirmed']))
                                 <form action="{{ route('admin.appointments.cancel', $appointment) }}" method="POST" class="inline">
                                     @csrf
-                                    <button type="submit" class="text-red-500 hover:text-red-700" 
+                                    <button type="submit" class="text-red-500 hover:text-red-700"
                                         onclick="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?')"
                                         title="Hủy lịch hẹn">
                                         <i class="fas fa-times"></i>
                                     </button>
                                 </form>
                                 @endif
-                                
+
                                 @if($appointment->status == 'confirmed')
                                 <form action="{{ route('admin.appointments.complete', $appointment) }}" method="POST" class="inline">
                                     @csrf
@@ -197,11 +197,11 @@
                 </tbody>
             </table>
         </div>
-        
+
         <!-- Pagination -->
         <div class="mt-6">
             {{ $appointments->withQueryString()->links() }}
         </div>
     </div>
 </div>
-@endsection 
+@endsection

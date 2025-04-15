@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use App\Rules\MinimumAge;
 
 class ProfileController extends Controller
 {
@@ -19,7 +20,7 @@ class ProfileController extends Controller
     public function index()
     {
         $staff = Auth::user();
-        return view('staff.profile.index', compact('staff'));
+        return view('staff.profile.index_new', compact('staff'));
     }
 
     /**
@@ -30,7 +31,7 @@ class ProfileController extends Controller
     public function edit()
     {
         $staff = Auth::user();
-        return view('staff.profile.edit', compact('staff'));
+        return view('staff.profile.edit_new', compact('staff'));
     }
 
     /**
@@ -42,14 +43,18 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $staff = Auth::user();
-        
+
         $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'address' => 'required|string|max:255',
             'gender' => 'required|in:male,female,other',
-            'birthday' => 'nullable|date',
+            'birthday' => [
+                'required',
+                'date',
+                new MinimumAge(18)
+            ],
             'email' => [
                 'required',
                 'string',
@@ -57,8 +62,12 @@ class ProfileController extends Controller
                 'max:255',
                 Rule::unique('users')->ignore($staff->id),
             ],
+        ], [
+            'birthday.required' => 'Vui lòng nhập ngày sinh.',
+            'birthday.date' => 'Ngày sinh không hợp lệ.',
+            'birthday.before_or_equal' => 'Bạn phải đủ 18 tuổi trở lên để sử dụng hệ thống.',
         ]);
-        
+
         $staff->update([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
@@ -68,7 +77,7 @@ class ProfileController extends Controller
             'birthday' => $request->birthday,
             'email' => $request->email,
         ]);
-        
+
         return redirect()->route('staff.profile.index')
             ->with('success', 'Thông tin cá nhân đã được cập nhật thành công.');
     }
@@ -80,7 +89,7 @@ class ProfileController extends Controller
      */
     public function changePassword()
     {
-        return view('staff.profile.change-password');
+        return view('staff.profile.change-password_new');
     }
 
     /**
@@ -95,17 +104,17 @@ class ProfileController extends Controller
             'current_password' => 'required',
             'password' => 'required|string|min:8|confirmed',
         ]);
-        
+
         $staff = Auth::user();
-        
+
         if (!Hash::check($request->current_password, $staff->password)) {
             return back()->withErrors(['current_password' => 'Mật khẩu hiện tại không chính xác.']);
         }
-        
+
         $staff->update([
             'password' => Hash::make($request->password),
         ]);
-        
+
         return redirect()->route('staff.profile.index')
             ->with('success', 'Mật khẩu đã được cập nhật thành công.');
     }

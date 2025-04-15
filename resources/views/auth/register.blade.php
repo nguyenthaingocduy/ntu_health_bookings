@@ -79,6 +79,18 @@
             </div>
 
             <div class="mb-4">
+                <label for="birthday" class="block text-sm font-medium text-gray-700">
+                    {{ __('Ngày sinh') }} <span class="text-red-500 text-xs">(Phải trên 18 tuổi)</span>
+                </label>
+                <input id="birthday" type="date" name="birthday" value="{{ old('birthday') }}" required
+                    max="{{ \Carbon\Carbon::now()->subYears(18)->format('Y-m-d') }}"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('birthday') border-red-500 @enderror">
+                @error('birthday')
+                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="mb-4">
                 <label for="password" class="block text-sm font-medium text-gray-700">
                     {{ __('Mật khẩu') }}
                 </label>

@@ -14,28 +14,44 @@ class AppointmentController extends Controller
 {
     public function index()
     {
-        $appointments = Appointment::with(['customer', 'service', 'employee', 'timeAppointment'])
+        $appointments = Appointment::with(['user', 'service', 'employee', 'timeAppointment'])
             ->orderBy('date_appointments', 'desc')
             ->paginate(10);
-            
-        return view('admin.appointments.index', compact('appointments'));
+
+        // Calculate statistics
+        $statistics = [
+            'total' => Appointment::count(),
+            'pending' => Appointment::where('status', 'pending')->count(),
+            'confirmed' => Appointment::where('status', 'confirmed')->count(),
+            'completed' => Appointment::where('status', 'completed')->count(),
+            'cancelled' => Appointment::where('status', 'cancelled')->count(),
+        ];
+
+        return view('admin.appointments.index', compact('appointments', 'statistics'));
     }
 
     public function show($id)
     {
-        $appointment = Appointment::with(['customer', 'service', 'employee', 'timeAppointment'])
+        $appointment = Appointment::with(['user', 'service', 'employee', 'timeAppointment'])
             ->findOrFail($id);
-            
-        return view('admin.appointments.show', compact('appointment'));
+
+        // Get customer history (other appointments by the same user)
+        $customerHistory = Appointment::where('customer_id', $appointment->customer_id)
+            ->where('id', '!=', $appointment->id)
+            ->with('service')
+            ->orderBy('date_appointments', 'desc')
+            ->get();
+
+        return view('admin.appointments.show', compact('appointment', 'customerHistory'));
     }
 
     public function edit($id)
     {
-        $appointment = Appointment::with(['customer', 'service', 'employee', 'timeAppointment'])
+        $appointment = Appointment::with(['user', 'service', 'employee', 'timeAppointment'])
             ->findOrFail($id);
         $employees = Employee::all();
         $times = Time::orderBy('started_time')->get();
-        
+
         return view('admin.appointments.edit', compact('appointment', 'employees', 'times'));
     }
 
@@ -49,14 +65,14 @@ class AppointmentController extends Controller
         ]);
 
         $appointment = Appointment::findOrFail($id);
-        
+
         // Kiểm tra xem nhân viên có lịch trùng không
         $existingAppointment = Appointment::where('employee_id', $request->employee_id)
             ->where('date_appointments', $request->date_appointments)
             ->where('time_appointments_id', $request->time_appointments_id)
             ->where('id', '!=', $id)
             ->first();
-            
+
         if ($existingAppointment) {
             return back()->with('error', 'Nhân viên đã có lịch hẹn khác trong thời gian này.');
         }
@@ -79,5 +95,29 @@ class AppointmentController extends Controller
 
         return redirect()->route('admin.appointments.index')
             ->with('success', 'Lịch hẹn đã được xóa thành công.');
+    }
+
+    public function confirm($id)
+    {
+        $appointment = Appointment::findOrFail($id);
+        $appointment->update(['status' => 'confirmed']);
+
+        return redirect()->back()->with('success', 'Lịch hẹn đã được xác nhận thành công.');
+    }
+
+    public function cancel($id)
+    {
+        $appointment = Appointment::findOrFail($id);
+        $appointment->update(['status' => 'cancelled']);
+
+        return redirect()->back()->with('success', 'Lịch hẹn đã được hủy thành công.');
+    }
+
+    public function complete($id)
+    {
+        $appointment = Appointment::findOrFail($id);
+        $appointment->update(['status' => 'completed']);
+
+        return redirect()->back()->with('success', 'Lịch hẹn đã được hoàn thành thành công.');
     }
 }

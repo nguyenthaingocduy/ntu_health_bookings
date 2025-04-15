@@ -82,5 +82,10 @@ class Appointment extends Model
 
         return $statusMap[$this->status] ?? $this->status;
     }
+
+    public function getCodeAttribute()
+    {
+        return 'APT-' . substr($this->id, 0, 8);
+    }
 }
 

@@ -17,6 +17,7 @@ class Service extends Model
         'slug',
         'description',
         'price',
+        'duration',
         'promotion',
         'category_id',
         'clinic_id',
@@ -49,8 +50,7 @@ class Service extends Model
 
     public function getFormattedDurationAttribute()
     {
-        // Default duration for health check-ups if not specified
-        return '60 phút';
+        return $this->duration . ' phút';
     }
 
     public function getFormattedPriceAttribute()

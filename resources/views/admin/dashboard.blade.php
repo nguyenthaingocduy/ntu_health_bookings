@@ -78,7 +78,7 @@
                             @foreach($recentAppointments as $appointment)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $appointment->id }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ optional($appointment->customer)->name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ optional($appointment->user)->first_name }} {{ optional($appointment->user)->last_name }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ optional($appointment->service)->name }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $appointment->date_appointments }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -110,7 +110,7 @@
                                     @endswitch
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <a href="{{ route('admin.appointments.show', $appointment->id) }}" 
+                                    <a href="{{ route('admin.appointments.show', $appointment->id) }}"
                                        class="text-indigo-600 hover:text-indigo-900">
                                         <i class="fas fa-eye"></i>
                                     </a>
@@ -137,7 +137,7 @@
                             <span class="text-sm font-medium text-gray-700">{{ $pendingAppointments }}</span>
                         </div>
                         <div class="overflow-hidden h-2 text-xs flex rounded bg-yellow-200">
-                            <div style="width: {{ ($pendingAppointments / max($totalAppointments, 1)) * 100 }}%" 
+                            <div style="width: {{ ($pendingAppointments / max($totalAppointments, 1)) * 100 }}%"
                                  class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500">
                             </div>
                         </div>
@@ -149,7 +149,7 @@
                             <span class="text-sm font-medium text-gray-700">{{ $completedAppointments }}</span>
                         </div>
                         <div class="overflow-hidden h-2 text-xs flex rounded bg-green-200">
-                            <div style="width: {{ ($completedAppointments / max($totalAppointments, 1)) * 100 }}%" 
+                            <div style="width: {{ ($completedAppointments / max($totalAppointments, 1)) * 100 }}%"
                                  class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500">
                             </div>
                         </div>
@@ -159,4 +159,4 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection

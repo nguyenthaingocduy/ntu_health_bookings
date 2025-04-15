@@ -24,6 +24,12 @@ class AdminMiddleware
 
         // Check if user's role is admin
         if (strtolower($user->role->name) === 'admin') {
+            // Log successful admin access
+            \Illuminate\Support\Facades\Log::info('Admin access granted', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'path' => $request->path()
+            ]);
             return $next($request);
         }
 

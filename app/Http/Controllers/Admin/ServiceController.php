@@ -62,6 +62,7 @@ class ServiceController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'duration' => 'required|integer|min:1',
             'promotion' => 'nullable|numeric|min:0|max:100',
             'category_id' => 'required|exists:categories,id',
             'clinic_id' => 'required|exists:clinics,id',
@@ -101,6 +102,7 @@ class ServiceController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'duration' => 'required|integer|min:1',
             'promotion' => 'nullable|numeric|min:0|max:100',
             'category_id' => 'required|exists:categories,id',
             'clinic_id' => 'required|exists:clinics,id',
@@ -120,7 +122,7 @@ class ServiceController extends Controller
                     Storage::disk('public')->delete($oldPath);
                 }
             }
-            
+
             // Lưu hình ảnh mới
             $path = $request->file('image')->store('services', 'public');
             $validated['image_url'] = Storage::url($path);
@@ -142,7 +144,7 @@ class ServiceController extends Controller
                 Storage::disk('public')->delete($path);
             }
         }
-        
+
         $service->delete();
         return redirect()->route('admin.services.index')->with('success', 'Dịch vụ đã được xóa thành công');
     }

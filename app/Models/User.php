@@ -38,6 +38,7 @@ class User extends Authenticatable
         'department',
         'position',
         'employee_code',
+        'status',
     ];
 
     /**
@@ -65,9 +66,19 @@ class User extends Authenticatable
         ];
     }
 
+    public function getStatusAttribute($value)
+    {
+        return $value ?? 'active';
+    }
+
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function roles()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
     }
 
     public function isAdmin()
@@ -92,7 +103,12 @@ class User extends Authenticatable
 
     public function appointments()
     {
-        return $this->hasMany(Appointment::class, 'user_id');
+        return $this->hasMany(Appointment::class, 'customer_id');
+    }
+
+    public function staffAppointments()
+    {
+        return $this->hasMany(Appointment::class, 'employee_id');
     }
 
     public function healthRecords()

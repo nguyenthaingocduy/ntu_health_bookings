@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use App\Rules\MinimumAge;
 
 class RegisterController extends Controller
 {
@@ -36,7 +37,7 @@ class RegisterController extends Controller
      * @var string
      */
     protected $redirectTo = '/customer/dashboard';
-    
+
     /**
      * Create a new controller instance.
      *
@@ -63,6 +64,13 @@ class RegisterController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'address' => ['required', 'string', 'max:255'],
             'gender' => ['required', 'in:male,female,other'],
+            'birthday' => [
+                'required',
+                'date',
+                new MinimumAge(18)
+            ],
+        ], [
+            'birthday.before_or_equal' => 'Bạn phải đủ 18 tuổi trở lên để đăng ký tài khoản.',
         ]);
     }
 
@@ -76,7 +84,7 @@ class RegisterController extends Controller
     {
         // Tìm role Customer - không phân biệt chữ hoa chữ thường
         $role = Role::whereRaw('LOWER(name) = ?', [strtolower('Customer')])->first();
-        
+
         // Nếu không tìm thấy, tạo mới
         if (!$role) {
             $role = Role::create([
@@ -86,10 +94,10 @@ class RegisterController extends Controller
                 'updated_at' => now(),
             ]);
         }
-        
+
         // Tìm customer type Regular
         $type = CustomerType::whereRaw('LOWER(type_name) = ?', [strtolower('Regular')])->first();
-        
+
         // Nếu không tìm thấy, tạo mới
         if (!$type) {
             $type = CustomerType::create([
@@ -99,7 +107,7 @@ class RegisterController extends Controller
                 'updated_at' => now(),
             ]);
         }
-        
+
         return User::create([
             'id' => Str::uuid(),
             'first_name' => $data['first_name'],
@@ -107,6 +115,7 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'phone' => $data['phone'],
             'gender' => $data['gender'],
+            'birthday' => $data['birthday'],
             'address' => $data['address'],
             'password' => Hash::make($data['password']),
             'role_id' => $role->id,
@@ -116,7 +125,7 @@ class RegisterController extends Controller
             'ward_id' => null,
         ]);
     }
-    
+
     protected function registered(Request $request, $user)
     {
         // Gửi email xác nhận đăng ký tài khoản
@@ -128,7 +137,7 @@ class RegisterController extends Controller
             // Ghi log lỗi nhưng không ngăn chặn đăng ký thành công
             Log::error('Không thể gửi email xác nhận đăng ký: ' . $e->getMessage());
         }
-        
+
         return redirect()->route('customer.dashboard');
     }
 }
