@@ -12,10 +12,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix('admin')->name('admin.')->group(function () {
     // Dashboard
     Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Health Check-up Management
     Route::prefix('health-checkups')->name('health-checkups.')->group(function () {
         Route::get('/', [HealthCheckupController::class, 'index'])->name('index');
@@ -24,7 +24,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/{id}', [HealthCheckupController::class, 'show'])->name('show');
         Route::get('/{id}/edit', [HealthCheckupController::class, 'edit'])->name('edit');
         Route::put('/{id}', [HealthCheckupController::class, 'update'])->name('update');
-        
+
         // Health Records Management
         Route::get('/{id}/record', [HealthCheckupController::class, 'recordForm'])->name('record.form');
         Route::post('/{id}/record', [HealthCheckupController::class, 'saveRecord'])->name('record.save');
