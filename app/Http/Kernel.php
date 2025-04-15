@@ -5,6 +5,7 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\StaffMiddleware;
+use App\Http\Middleware\UniversityStaffMiddleware;
 use App\Http\Middleware\RegisterRouteFiles;
 
 
@@ -72,5 +73,6 @@ class Kernel extends HttpKernel
         'role' => \App\Http\Middleware\CheckRole::class,
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'staff' => \App\Http\Middleware\StaffMiddleware::class,
+        'university.staff' => \App\Http\Middleware\UniversityStaffMiddleware::class,
     ];
 }

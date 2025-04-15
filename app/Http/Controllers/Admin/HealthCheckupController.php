@@ -8,6 +8,7 @@ use App\Models\HealthRecord;
 use App\Models\Service;
 use App\Models\TimeSlot;
 use App\Models\User;
+use App\Notifications\HealthCheckupAppointmentNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,20 +28,20 @@ class HealthCheckupController extends Controller
             ->whereHas('service', function ($query) {
                 $query->where('is_health_checkup', true);
             });
-            
+
         // Apply filters if provided
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
+
         if ($request->filled('date_from')) {
             $query->whereDate('appointment_date', '>=', $request->date_from);
         }
-        
+
         if ($request->filled('date_to')) {
             $query->whereDate('appointment_date', '<=', $request->date_to);
         }
-        
+
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('user', function ($q) use ($search) {
@@ -50,9 +51,9 @@ class HealthCheckupController extends Controller
                   ->orWhere('staff_id', 'like', "%{$search}%");
             });
         }
-        
+
         $appointments = $query->orderBy('appointment_date', 'desc')->paginate(15);
-        
+
         // Get statistics for dashboard
         $stats = [
             'total' => Appointment::whereHas('service', function ($q) {
@@ -71,7 +72,7 @@ class HealthCheckupController extends Controller
                 $q->where('is_health_checkup', true);
             })->where('status', 'cancelled')->count(),
         ];
-        
+
         return view('admin.health-checkups.index', compact('appointments', 'stats'));
     }
 
@@ -85,19 +86,19 @@ class HealthCheckupController extends Controller
         $services = Service::where('is_active', true)
             ->where('is_health_checkup', true)
             ->get();
-            
+
         $staff = User::whereHas('role', function ($query) {
             $query->where('name', 'staff');
         })->get();
-        
+
         $doctors = User::whereHas('role', function ($query) {
             $query->where('name', 'doctor');
         })->get();
-        
+
         $timeSlots = TimeSlot::orderBy('day_of_week')
             ->orderBy('start_time')
             ->get();
-        
+
         return view('admin.health-checkups.create', compact('services', 'staff', 'doctors', 'timeSlots'));
     }
 
@@ -123,7 +124,7 @@ class HealthCheckupController extends Controller
             // Create the appointment
             $timeSlot = TimeSlot::findOrFail($request->time_slot_id);
             $appointmentDate = Carbon::parse($request->appointment_date);
-            
+
             $appointment = Appointment::create([
                 'id' => Str::uuid(),
                 'user_id' => $request->user_id,
@@ -134,7 +135,16 @@ class HealthCheckupController extends Controller
                 'doctor_id' => $request->doctor_id,
                 'time_slot_id' => $request->time_slot_id,
             ]);
-            
+
+            // Send notification to the user
+            $user = User::find($request->user_id);
+            $user->notify(new HealthCheckupAppointmentNotification($appointment, 'created'));
+
+            // If status is confirmed, send confirmation notification
+            if ($request->status === 'confirmed') {
+                $user->notify(new HealthCheckupAppointmentNotification($appointment, 'confirmed'));
+            }
+
             return redirect()->route('admin.health-checkups.index')
                 ->with('success', 'Lịch hẹn khám sức khỏe đã được tạo thành công.');
         } catch (\Exception $e) {
@@ -152,7 +162,7 @@ class HealthCheckupController extends Controller
     {
         $appointment = Appointment::with(['user', 'service', 'doctor', 'timeSlot', 'healthRecord'])
             ->findOrFail($id);
-            
+
         return view('admin.health-checkups.show', compact('appointment'));
     }
 
@@ -166,19 +176,19 @@ class HealthCheckupController extends Controller
     {
         $appointment = Appointment::with(['user', 'service', 'doctor', 'timeSlot'])
             ->findOrFail($id);
-            
+
         $services = Service::where('is_active', true)
             ->where('is_health_checkup', true)
             ->get();
-            
+
         $doctors = User::whereHas('role', function ($query) {
             $query->where('name', 'doctor');
         })->get();
-        
+
         $timeSlots = TimeSlot::orderBy('day_of_week')
             ->orderBy('start_time')
             ->get();
-        
+
         return view('admin.health-checkups.edit', compact('appointment', 'services', 'doctors', 'timeSlots'));
     }
 
@@ -204,7 +214,7 @@ class HealthCheckupController extends Controller
             $appointment = Appointment::findOrFail($id);
             $timeSlot = TimeSlot::findOrFail($request->time_slot_id);
             $appointmentDate = Carbon::parse($request->appointment_date);
-            
+
             $appointment->update([
                 'service_id' => $request->service_id,
                 'appointment_date' => $appointmentDate->format('Y-m-d') . ' ' . $timeSlot->start_time->format('H:i:s'),
@@ -213,13 +223,25 @@ class HealthCheckupController extends Controller
                 'doctor_id' => $request->doctor_id,
                 'time_slot_id' => $request->time_slot_id,
             ]);
-            
+
             if ($request->status === 'completed' && !$appointment->is_completed) {
                 $appointment->is_completed = true;
                 $appointment->check_out_time = now();
                 $appointment->save();
+
+                // Send completed notification
+                $user = User::find($appointment->user_id);
+                $user->notify(new HealthCheckupAppointmentNotification($appointment, 'completed'));
+            } elseif ($request->status === 'confirmed' && $appointment->status !== 'confirmed') {
+                // Send confirmation notification if status changed to confirmed
+                $user = User::find($appointment->user_id);
+                $user->notify(new HealthCheckupAppointmentNotification($appointment, 'confirmed'));
+            } elseif ($request->status === 'cancelled' && $appointment->status !== 'cancelled') {
+                // Send cancellation notification if status changed to cancelled
+                $user = User::find($appointment->user_id);
+                $user->notify(new HealthCheckupAppointmentNotification($appointment, 'cancelled'));
             }
-            
+
             return redirect()->route('admin.health-checkups.index')
                 ->with('success', 'Lịch hẹn khám sức khỏe đã được cập nhật thành công.');
         } catch (\Exception $e) {
@@ -237,10 +259,10 @@ class HealthCheckupController extends Controller
     {
         $appointment = Appointment::with(['user', 'service', 'doctor'])
             ->findOrFail($id);
-            
+
         // Check if a health record already exists
         $healthRecord = HealthRecord::where('appointment_id', $id)->first();
-        
+
         return view('admin.health-checkups.record-form', compact('appointment', 'healthRecord'));
     }
 
@@ -269,10 +291,10 @@ class HealthCheckupController extends Controller
 
         try {
             $appointment = Appointment::findOrFail($id);
-            
+
             // Find or create health record
             $healthRecord = HealthRecord::firstOrNew(['appointment_id' => $id]);
-            
+
             // Set or update health record data
             $healthRecord->user_id = $appointment->user_id;
             $healthRecord->check_date = now();
@@ -287,24 +309,27 @@ class HealthCheckupController extends Controller
             $healthRecord->recommendations = $request->recommendations;
             $healthRecord->next_check_date = $request->next_check_date;
             $healthRecord->doctor_notes = $request->doctor_notes;
-            
+
             if (!$healthRecord->id) {
                 $healthRecord->id = Str::uuid();
             }
-            
+
             $healthRecord->save();
-            
+
             // Update appointment status to completed
             $appointment->status = 'completed';
             $appointment->is_completed = true;
             $appointment->check_out_time = now();
             $appointment->save();
-            
+
             // Update user's last health check date
             $user = User::find($appointment->user_id);
             $user->last_health_check = now();
             $user->save();
-            
+
+            // Send completed notification
+            $user->notify(new HealthCheckupAppointmentNotification($appointment, 'completed'));
+
             return redirect()->route('admin.health-checkups.show', $id)
                 ->with('success', 'Kết quả khám sức khỏe đã được lưu thành công.');
         } catch (\Exception $e) {
@@ -321,16 +346,16 @@ class HealthCheckupController extends Controller
     public function healthRecords(Request $request)
     {
         $query = HealthRecord::with(['user', 'appointment', 'appointment.service']);
-            
+
         // Apply filters if provided
         if ($request->filled('date_from')) {
             $query->whereDate('check_date', '>=', $request->date_from);
         }
-        
+
         if ($request->filled('date_to')) {
             $query->whereDate('check_date', '<=', $request->date_to);
         }
-        
+
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('user', function ($q) use ($search) {
@@ -340,9 +365,9 @@ class HealthCheckupController extends Controller
                   ->orWhere('staff_id', 'like', "%{$search}%");
             });
         }
-        
+
         $healthRecords = $query->orderBy('check_date', 'desc')->paginate(15);
-        
+
         return view('admin.health-checkups.records', compact('healthRecords'));
     }
 
@@ -356,7 +381,7 @@ class HealthCheckupController extends Controller
     {
         $healthRecord = HealthRecord::with(['user', 'appointment', 'appointment.service', 'appointment.doctor'])
             ->findOrFail($id);
-            
+
         return view('admin.health-checkups.record-details', compact('healthRecord'));
     }
 }

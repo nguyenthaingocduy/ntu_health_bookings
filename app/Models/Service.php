@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Models\Clinic;
+use App\Models\Category;
+use App\Models\Appointment;
 
 class Service extends Model
 {
@@ -38,6 +40,11 @@ class Service extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function clinic()
+    {
+        return $this->belongsTo(Clinic::class);
     }
 
     public function getFormattedDurationAttribute()

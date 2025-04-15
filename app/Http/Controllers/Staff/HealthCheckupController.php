@@ -8,6 +8,7 @@ use App\Models\HealthRecord;
 use App\Models\Service;
 use App\Models\TimeSlot;
 use App\Models\User;
+use App\Notifications\HealthCheckupAppointmentNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +30,7 @@ class HealthCheckupController extends Controller
             })
             ->orderBy('appointment_date', 'desc')
             ->paginate(10);
-            
+
         return view('staff.health-checkups.index', compact('appointments'));
     }
 
@@ -43,28 +44,28 @@ class HealthCheckupController extends Controller
         $services = Service::where('is_active', true)
             ->where('is_health_checkup', true)
             ->get();
-            
+
         $doctors = User::whereHas('role', function ($query) {
             $query->where('name', 'doctor');
         })->get();
-        
+
         // Get available dates (next 30 days, excluding weekends)
         $availableDates = [];
         $date = Carbon::today();
         $count = 0;
-        
+
         while (count($availableDates) < 30) {
             // Skip weekends (0 = Sunday, 6 = Saturday)
             if (!in_array($date->dayOfWeek, [0, 6])) {
                 $availableDates[] = $date->format('Y-m-d');
             }
-            
+
             $date->addDay();
-            
+
             // Safety check to prevent infinite loop
             if (++$count > 60) break;
         }
-        
+
         return view('staff.health-checkups.create', compact('services', 'doctors', 'availableDates'));
     }
 
@@ -86,7 +87,7 @@ class HealthCheckupController extends Controller
         // Check if the time slot is available for the selected date
         $timeSlot = TimeSlot::findOrFail($request->time_slot_id);
         $appointmentDate = Carbon::parse($request->appointment_date);
-        
+
         if (!$timeSlot->isAvailableForDate($appointmentDate)) {
             return back()->withInput()->with('error', 'Khung giờ này đã đầy. Vui lòng chọn khung giờ khác.');
         }
@@ -102,17 +103,21 @@ class HealthCheckupController extends Controller
                 'notes' => $request->notes,
                 'time_slot_id' => $request->time_slot_id,
             ]);
-            
+
             // Assign a doctor automatically if available
             $doctor = User::whereHas('role', function ($query) {
                 $query->where('name', 'doctor');
             })->inRandomOrder()->first();
-            
+
             if ($doctor) {
                 $appointment->doctor_id = $doctor->id;
                 $appointment->save();
             }
-            
+
+            // Send notification
+            $user = Auth::user();
+            $user->notify(new HealthCheckupAppointmentNotification($appointment, 'created'));
+
             return redirect()->route('staff.health-checkups.index')
                 ->with('success', 'Đặt lịch khám sức khỏe thành công. Vui lòng chờ xác nhận từ phòng y tế.');
         } catch (\Exception $e) {
@@ -131,7 +136,7 @@ class HealthCheckupController extends Controller
         $appointment = Appointment::with(['service', 'doctor', 'timeSlot', 'healthRecord'])
             ->where('user_id', Auth::id())
             ->findOrFail($id);
-            
+
         return view('staff.health-checkups.show', compact('appointment'));
     }
 
@@ -149,16 +154,20 @@ class HealthCheckupController extends Controller
         ]);
 
         $appointment = Appointment::where('user_id', Auth::id())->findOrFail($id);
-        
+
         // Only allow cancellation if appointment is pending or confirmed
         if (!in_array($appointment->status, ['pending', 'confirmed'])) {
             return back()->with('error', 'Không thể hủy lịch hẹn này.');
         }
-        
+
         $appointment->status = 'cancelled';
         $appointment->cancellation_reason = $request->cancellation_reason;
         $appointment->save();
-        
+
+        // Send notification
+        $user = Auth::user();
+        $user->notify(new HealthCheckupAppointmentNotification($appointment, 'cancelled'));
+
         return redirect()->route('staff.health-checkups.index')
             ->with('success', 'Lịch hẹn đã được hủy thành công.');
     }
@@ -174,7 +183,7 @@ class HealthCheckupController extends Controller
             ->where('user_id', Auth::id())
             ->orderBy('check_date', 'desc')
             ->paginate(10);
-            
+
         return view('staff.health-checkups.records', compact('healthRecords'));
     }
 
@@ -189,7 +198,7 @@ class HealthCheckupController extends Controller
         $healthRecord = HealthRecord::with(['appointment', 'appointment.service', 'appointment.doctor'])
             ->where('user_id', Auth::id())
             ->findOrFail($id);
-            
+
         return view('staff.health-checkups.record-details', compact('healthRecord'));
     }
 }
