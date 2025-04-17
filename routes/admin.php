@@ -33,7 +33,7 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix
     Route::post('employees/{id}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('employees.toggle-status');
     Route::resource('customers', CustomerController::class)->only(['index', 'show']);
     Route::resource('clinics', ClinicController::class);
-    Route::patch('clinics/{id}/toggle-status', [ClinicController::class, 'toggleStatus'])->name('clinics.toggle-status');
+    Route::post('clinics/{id}/toggle-status', [ClinicController::class, 'toggleStatus'])->name('clinics.toggle-status');
     Route::resource('appointments', AppointmentController::class);
     Route::post('appointments/{id}/confirm', [AppointmentController::class, 'confirm'])->name('appointments.confirm');
     Route::post('appointments/{id}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
@@ -54,4 +54,20 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix
         Route::get('/records', [HealthCheckupController::class, 'healthRecords'])->name('records');
         Route::get('/records/{id}', [HealthCheckupController::class, 'showHealthRecord'])->name('records.show');
     });
+
+    // Test Image Upload
+    Route::get('/test-upload', function() {
+        return view('admin.test-upload');
+    })->name('test-upload-form');
+
+    Route::post('/test-upload', function(\Illuminate\Http\Request $request) {
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = time() . '_' . $image->getClientOriginalName();
+            $path = $image->storeAs('services', $filename, 'public');
+            $imagePath = '/storage/services/' . $filename;
+            return redirect()->route('admin.test-upload-form')->with('image_path', $imagePath);
+        }
+        return redirect()->route('admin.test-upload-form')->with('error', 'No image uploaded');
+    })->name('test-upload');
 });

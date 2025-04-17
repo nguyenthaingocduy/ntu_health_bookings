@@ -30,7 +30,7 @@ class AppointmentConfirmationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Xác nhận đặt lịch thành công tại NTU Health Booking',
+            subject: 'Xác nhận đặt lịch thành công tại Beauty Salon',
         );
     }
 

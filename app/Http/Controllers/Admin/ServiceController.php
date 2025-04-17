@@ -48,7 +48,9 @@ class ServiceController extends Controller
      */
     public function create()
     {
-        $categories = Category::where('status', 'active')->get();
+        $categories = Category::with('children')
+            ->where('status', 'active')
+            ->get();
         $clinics = Clinic::where('status', 'active')->get();
         return view('admin.services.create', compact('categories', 'clinics'));
     }
@@ -75,8 +77,10 @@ class ServiceController extends Controller
 
         // Xử lý hình ảnh nếu có
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('services', 'public');
-            $validated['image_url'] = Storage::url($path);
+            $image = $request->file('image');
+            $filename = time() . '_' . $image->getClientOriginalName();
+            $path = $image->storeAs('services', $filename, 'public');
+            $validated['image_url'] = '/storage/services/' . $filename;
         }
 
         Service::create($validated);
@@ -88,7 +92,9 @@ class ServiceController extends Controller
      */
     public function edit(Service $service)
     {
-        $categories = Category::where('status', 'active')->get();
+        $categories = Category::with('children')
+            ->where('status', 'active')
+            ->get();
         $clinics = Clinic::where('status', 'active')->get();
         return view('admin.services.edit', compact('service', 'categories', 'clinics'));
     }
@@ -116,7 +122,7 @@ class ServiceController extends Controller
         // Xử lý hình ảnh mới nếu có
         if ($request->hasFile('image')) {
             // Xóa hình ảnh cũ nếu có
-            if ($service->image_url) {
+            if ($service->image_url && !str_contains($service->image_url, 'unsplash.com')) {
                 $oldPath = str_replace('/storage/', '', $service->image_url);
                 if (Storage::disk('public')->exists($oldPath)) {
                     Storage::disk('public')->delete($oldPath);
@@ -124,8 +130,10 @@ class ServiceController extends Controller
             }
 
             // Lưu hình ảnh mới
-            $path = $request->file('image')->store('services', 'public');
-            $validated['image_url'] = Storage::url($path);
+            $image = $request->file('image');
+            $filename = time() . '_' . $image->getClientOriginalName();
+            $path = $image->storeAs('services', $filename, 'public');
+            $validated['image_url'] = '/storage/services/' . $filename;
         }
 
         $service->update($validated);
@@ -138,7 +146,7 @@ class ServiceController extends Controller
     public function destroy(Service $service)
     {
         // Xóa hình ảnh liên quan nếu có
-        if ($service->image_url) {
+        if ($service->image_url && !str_contains($service->image_url, 'unsplash.com')) {
             $path = str_replace('/storage/', '', $service->image_url);
             if (Storage::disk('public')->exists($path)) {
                 Storage::disk('public')->delete($path);

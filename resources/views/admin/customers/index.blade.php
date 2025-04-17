@@ -1,11 +1,12 @@
 @extends('layouts.admin')
 
 @section('title', 'Quản lý khách hàng')
+@section('header', 'Quản lý khách hàng')
 
 @section('content')
 <div class="container mx-auto px-6 py-8">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-semibold text-gray-800">Quản lý khách hàng</h1>
+        {{-- <h1 class="text-2xl font-semibold text-gray-800">Quản lý khách hàng</h1> --}}
     </div>
 
     @if(session('success'))
@@ -51,7 +52,7 @@
     @endif
 
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="bg-gradient-to-r from-purple-500 to-indigo-600 px-6 py-4 flex justify-between items-center">
+        <div class="bg-pink-500 from-purple-500 to-indigo-600 px-6 py-4 flex justify-between items-center">
             <h2 class="text-white text-lg font-semibold">Danh sách khách hàng</h2>
             <form action="{{ route('admin.customers.index') }}" method="GET" class="relative">
                 <div class="flex">

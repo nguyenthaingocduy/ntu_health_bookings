@@ -13,11 +13,30 @@ class Category extends Model
         'name',
         'icon',
         'description',
-        'status'
+        'status',
+        'parent_id'
     ];
 
     public function services()
     {
         return $this->hasMany(Service::class);
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Category::class, 'parent_id');
+    }
+
+    public function getFullNameAttribute()
+    {
+        if ($this->parent) {
+            return $this->parent->name . ' > ' . $this->name;
+        }
+        return $this->name;
     }
 }

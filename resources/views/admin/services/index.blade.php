@@ -14,7 +14,7 @@
                         Quản lý dịch vụ
                     </h2>
                     <a href="{{ route('admin.services.create') }}"
-                       class="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 rounded-md text-white shadow hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition">
+                       class="inline-flex items-center justify-center px-4 py-2 bg-pink-500 from-pink-500 to-purple-600 rounded-md text-white shadow   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
                         </svg>

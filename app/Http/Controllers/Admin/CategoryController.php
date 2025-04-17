@@ -24,7 +24,8 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        return view('admin.categories.create');
+        $parentCategories = Category::whereNull('parent_id')->where('status', 'active')->get();
+        return view('admin.categories.create', compact('parentCategories'));
     }
 
     /**
@@ -37,6 +38,7 @@ class CategoryController extends Controller
             'icon' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'status' => ['required', Rule::in(['active', 'inactive'])],
+            'parent_id' => 'nullable|exists:categories,id',
         ]);
 
         Category::create($validated);
@@ -48,7 +50,11 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        return view('admin.categories.edit', compact('category'));
+        $parentCategories = Category::whereNull('parent_id')
+            ->where('status', 'active')
+            ->where('id', '!=', $category->id)
+            ->get();
+        return view('admin.categories.edit', compact('category', 'parentCategories'));
     }
 
     /**
@@ -61,7 +67,21 @@ class CategoryController extends Controller
             'icon' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'status' => ['required', Rule::in(['active', 'inactive'])],
+            'parent_id' => 'nullable|exists:categories,id',
         ]);
+
+        // Prevent category from being its own parent
+        if (!empty($validated['parent_id']) && $validated['parent_id'] == $category->id) {
+            return back()->withErrors(['parent_id' => 'Danh mục không thể là danh mục cha của chính nó'])->withInput();
+        }
+
+        // Prevent circular references
+        if (!empty($validated['parent_id'])) {
+            $parentCategory = Category::find($validated['parent_id']);
+            if ($parentCategory && $parentCategory->parent_id == $category->id) {
+                return back()->withErrors(['parent_id' => 'Không thể tạo vòng lặp giữa danh mục cha và con'])->withInput();
+            }
+        }
 
         $category->update($validated);
         return redirect()->route('admin.categories.index')->with('success', 'Danh mục đã được cập nhật thành công');
@@ -77,7 +97,7 @@ class CategoryController extends Controller
             return redirect()->route('admin.categories.index')
                 ->with('error', 'Không thể xóa danh mục này vì có dịch vụ đang sử dụng');
         }
-        
+
         $category->delete();
         return redirect()->route('admin.categories.index')->with('success', 'Danh mục đã được xóa thành công');
     }

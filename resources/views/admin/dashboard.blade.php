@@ -154,6 +154,13 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <h3 class="text-md font-semibold text-gray-700 mb-3">Công cụ</h3>
+                        <a href="{{ route('admin.test-upload-form') }}" class="inline-flex items-center px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600 transition-colors">
+                            <i class="fas fa-upload mr-2"></i> Kiểm tra upload ảnh
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

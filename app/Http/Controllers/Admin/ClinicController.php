@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Clinic;
 use App\Models\Employee;
+use App\Models\Service;
 use Illuminate\Http\Request;
 
 class ClinicController extends Controller
@@ -145,7 +146,15 @@ class ClinicController extends Controller
             ->withCount(['employees', 'services'])
             ->findOrFail($id);
 
-        return view('admin.clinics.show', compact('clinic'));
+        // Get total counts for statistics
+        $total_employees = Employee::count();
+        $total_services = Service::count();
+
+        // Ensure we don't have zero values to avoid division by zero
+        $total_employees = max(1, $total_employees);
+        $total_services = max(1, $total_services);
+
+        return view('admin.clinics.show', compact('clinic', 'total_employees', 'total_services'));
     }
 
     /**

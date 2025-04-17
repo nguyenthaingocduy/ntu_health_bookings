@@ -36,22 +36,24 @@ class DatabaseSeeder extends Seeder
         // Create doctor user
         User::create([
             'id' => Str::uuid(),
-            'first_name' => 'Bác Sĩ',
+            'first_name' => 'Chuyên Viên',
             'last_name' => 'Nguyễn',
-            'email' => 'doctor@ntu.edu.vn',
+            'email' => 'beautician@salon.com',
             'password' => Hash::make('password'),
             'phone' => '0123456788',
-            'address' => 'Nha Trang University Medical Center',
-            'gender' => 'male',
+            'address' => 'Nha Trang Beauty Salon',
+            'gender' => 'female',
             'role_id' => $doctorRole->id,
-            'position' => 'Bác sĩ khám sức khỏe',
-            'department' => 'Trung tâm Y tế',
+            'position' => 'Chuyên viên làm đẹp',
+            'department' => 'Trung tâm làm đẹp',
         ]);
 
         // Run other seeders
         $this->call([
             TimeSlotSeeder::class,
-            HealthCheckupServiceSeeder::class,
+            CategorySeeder::class,
+            BeautySalonServiceSeeder::class,
+            ClinicAndServiceSeeder::class,
         ]);
     }
 }

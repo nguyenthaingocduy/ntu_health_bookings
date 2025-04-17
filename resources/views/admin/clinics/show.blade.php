@@ -8,18 +8,18 @@
 <div class="bg-white rounded-lg shadow-sm p-6">
     <div class="flex justify-between items-center mb-6">
         <div class="flex items-center space-x-4">
-            <a href="{{ route('admin.clinics.index') }}" 
+            <a href="{{ route('admin.clinics.index') }}"
                 class="text-gray-500 hover:text-gray-700">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <h2 class="text-2xl font-semibold text-gray-800">{{ $clinic->name }}</h2>
         </div>
         <div class="flex space-x-4">
-            <a href="{{ route('admin.clinics.edit', $clinic) }}" 
+            <a href="{{ route('admin.clinics.edit', $clinic) }}"
                 class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
                 <i class="fas fa-edit mr-2"></i>Chỉnh sửa
             </a>
-            <form action="{{ route('admin.clinics.destroy', $clinic) }}" method="POST" 
+            <form action="{{ route('admin.clinics.destroy', $clinic) }}" method="POST"
                 onsubmit="return confirm('Bạn có chắc chắn muốn xóa cơ sở này?');">
                 @csrf
                 @method('DELETE')
@@ -35,7 +35,7 @@
         <div class="md:col-span-2 space-y-6">
             <!-- Image -->
             <div class="relative">
-                <img src="{{ $clinic->image_url }}" alt="{{ $clinic->name }}" 
+                <img src="{{ $clinic->image_url }}" alt="{{ $clinic->name }}"
                     class="w-full h-64 object-cover rounded-lg">
                 <div class="absolute top-4 right-4">
                     <span class="px-3 py-1 rounded-full text-sm font-medium
@@ -96,7 +96,7 @@
                             <span class="font-medium text-gray-900">{{ $clinic->employees_count }}</span>
                         </div>
                         <div class="mt-2 w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-pink-500 h-2 rounded-full" style="width: {{ ($clinic->employees_count / $total_employees) * 100 }}%"></div>
+                            <div class="bg-pink-500 h-2 rounded-full" style="width: {{ $total_employees > 0 ? ($clinic->employees_count / $total_employees) * 100 : 0 }}%"></div>
                         </div>
                     </div>
                     <div>
@@ -105,7 +105,7 @@
                             <span class="font-medium text-gray-900">{{ $clinic->services_count }}</span>
                         </div>
                         <div class="mt-2 w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-pink-500 h-2 rounded-full" style="width: {{ ($clinic->services_count / $total_services) * 100 }}%"></div>
+                            <div class="bg-pink-500 h-2 rounded-full" style="width: {{ $total_services > 0 ? ($clinic->services_count / $total_services) * 100 : 0 }}%"></div>
                         </div>
                     </div>
                 </div>
@@ -115,7 +115,7 @@
             <div>
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-medium text-gray-900">Nhân viên</h3>
-                    <a href="{{ route('admin.employees.create', ['clinic_id' => $clinic->id]) }}" 
+                    <a href="{{ route('admin.employees.create', ['clinic_id' => $clinic->id]) }}"
                         class="text-pink-500 hover:text-pink-600">
                         <i class="fas fa-plus"></i> Thêm nhân viên
                     </a>
@@ -123,13 +123,13 @@
                 <div class="space-y-4">
                     @foreach($clinic->employees as $employee)
                     <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                        <img src="{{ $employee->image_url }}" alt="{{ $employee->name }}" 
+                        <img src="{{ $employee->image_url }}" alt="{{ $employee->name }}"
                             class="w-12 h-12 rounded-full object-cover">
                         <div class="flex-1">
                             <h4 class="font-medium text-gray-900">{{ $employee->name }}</h4>
                             <p class="text-sm text-gray-500">{{ $employee->position }}</p>
                         </div>
-                        <a href="{{ route('admin.employees.show', $employee) }}" 
+                        <a href="{{ route('admin.employees.show', $employee) }}"
                             class="text-gray-500 hover:text-gray-700">
                             <i class="fas fa-chevron-right"></i>
                         </a>
@@ -140,4 +140,4 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection
