@@ -5,7 +5,7 @@
     <div class="max-w-4xl mx-auto">
         <!-- Tiêu đề -->
         <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-gray-800 mb-4">Giới thiệu về NTU Health</h1>
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Giới thiệu về Beauty Salon</h1>
             <div class="h-1 w-24 bg-gradient-to-r from-pink-500 to-purple-600 mx-auto"></div>
         </div>
         
@@ -13,7 +13,7 @@
         <div class="bg-white rounded-xl shadow-lg p-8 mb-10">
             <div class="prose prose-lg max-w-none">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-4">Câu chuyện của chúng tôi</h2>
-                <p class="mb-4">NTU Health được thành lập vào năm 2020 với sứ mệnh mang đến những dịch vụ chăm sóc sức khỏe và sắc đẹp chất lượng cao, kết hợp giữa y học hiện đại và phương pháp truyền thống.</p>
+                <p class="mb-4">BeautySalon được thành lập vào năm 2020 với sứ mệnh mang đến những dịch vụ chăm sóc sức khỏe và sắc đẹp chất lượng cao, kết hợp giữa y học hiện đại và phương pháp truyền thống.</p>
                 
                 <p class="mb-4">Với đội ngũ bác sĩ, chuyên gia thẩm mỹ và kỹ thuật viên có trình độ chuyên môn cao, cùng với trang thiết bị hiện đại, chúng tôi cam kết mang đến cho khách hàng những trải nghiệm dịch vụ tốt nhất.</p>
                 
@@ -36,7 +36,7 @@
                 <div class="grid md:grid-cols-3 gap-4">
                     <div class="border border-gray-200 p-4 rounded-lg text-center">
                         <div class="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <i class="fas fa-heart text-white text-2xl"></i>
+                            <i class="fas fa-heart text-black text-2xl"></i>
                         </div>
                         <h3 class="text-lg font-semibold mb-2">Tận tâm</h3>
                         <p class="text-gray-600">Đặt khách hàng làm trung tâm, luôn lắng nghe và thấu hiểu nhu cầu.</p>
@@ -44,7 +44,7 @@
                     
                     <div class="border border-gray-200 p-4 rounded-lg text-center">
                         <div class="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <i class="fas fa-medal text-white text-2xl"></i>
+                            <i class="fas fa-medal text-black text-2xl"></i>
                         </div>
                         <h3 class="text-lg font-semibold mb-2">Chất lượng</h3>
                         <p class="text-gray-600">Cam kết cung cấp dịch vụ chất lượng cao với quy trình chuẩn quốc tế.</p>
@@ -52,7 +52,7 @@
                     
                     <div class="border border-gray-200 p-4 rounded-lg text-center">
                         <div class="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <i class="fas fa-shield-alt text-white text-2xl"></i>
+                            <i class="fas fa-shield-alt text-black text-2xl"></i>
                         </div>
                         <h3 class="text-lg font-semibold mb-2">An toàn</h3>
                         <p class="text-gray-600">Đặt sự an toàn của khách hàng lên hàng đầu trong mọi dịch vụ.</p>
@@ -91,8 +91,8 @@
         
         <!-- CTA -->
         <div class="bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl shadow-lg p-8 text-center text-white">
-            <h2 class="text-3xl font-bold mb-4 text-white">Hãy đến với NTU Health</h2>
-            <p class="text-lg mb-6 text-white font-medium">Trải nghiệm dịch vụ chăm sóc sức khỏe và sắc đẹp chất lượng cao</p>
+            <h2 class="text-3xl font-bold mb-4 text-black">Hãy đến với Beauty Salon</h2>
+            <p class="text-lg mb-6 text-black font-medium">Trải nghiệm dịch vụ chăm sóc sức khỏe và sắc đẹp chất lượng cao</p>
             <a href="{{ route('customer.appointments.create') }}" class="inline-block px-6 py-3 bg-pink text-pink-500 font-semibold rounded-full hover:bg-gray-50 transition shadow-md border border-pink-100">Đặt lịch ngay</a>
         </div>
     </div>

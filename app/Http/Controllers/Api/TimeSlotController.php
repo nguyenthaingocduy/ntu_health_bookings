@@ -11,6 +11,14 @@ use Illuminate\Support\Facades\Log;
 class TimeSlotController extends Controller
 {
     /**
+     * Get available time slots for a given date and service
+     */
+    public function getAvailableTimeSlots(Request $request)
+    {
+        return $this->checkAvailableSlots($request);
+    }
+
+    /**
      * Kiểm tra và trả về các khung giờ khả dụng cho ngày và dịch vụ được chọn
      */
     public function checkAvailableSlots(Request $request)
@@ -24,22 +32,22 @@ class TimeSlotController extends Controller
                 'user_agent' => $request->header('User-Agent'),
                 'request_all' => $request->all()
             ]);
-            
+
             // Validate request
             $validated = $request->validate([
                 'service_id' => 'required|exists:services,id',
                 'date' => 'required|date|after_or_equal:today',
             ]);
-            
+
             // Debug log
             Log::info('Validation passed, tìm các time slots');
-            
+
             // Kiểm tra xem ngày đã chọn có phải ngày hôm nay không
             $isToday = date('Y-m-d', strtotime('now +7 hours')) === $request->date;
             $currentTime = now()->setTimezone('Asia/Ho_Chi_Minh');
-            
+
             Log::info('Kiểm tra thời gian', [
-                'isToday' => $isToday, 
+                'isToday' => $isToday,
                 'currentTime' => $currentTime->format('H:i:s'),
                 'date_requested' => $request->date,
                 'today_date' => date('Y-m-d', strtotime('now +7 hours')),
@@ -47,12 +55,12 @@ class TimeSlotController extends Controller
                 'timezone_vietnam' => 'Asia/Ho_Chi_Minh',
                 'local_time' => now()->setTimezone('Asia/Ho_Chi_Minh')->format('Y-m-d H:i:s')
             ]);
-            
+
             // Lấy tất cả các khung giờ
             $allTimeSlots = Time::orderBy('started_time')->get();
-            
+
             Log::info('Tổng số time slots: ' . $allTimeSlots->count());
-            
+
             // Nếu không có khung giờ nào, trả về thông báo lỗi
             if ($allTimeSlots->isEmpty()) {
                 Log::warning('Không tìm thấy time slots nào trong hệ thống');
@@ -62,36 +70,36 @@ class TimeSlotController extends Controller
                     'available_slots' => []
                 ]);
             }
-            
+
             // Lấy các khung giờ đã được đặt trong ngày đã chọn
             $bookedTimeSlots = Appointment::where('date_appointments', $request->date)
                 ->whereIn('status', ['pending', 'confirmed'])
                 ->pluck('time_appointments_id')
                 ->toArray();
-            
+
             Log::info('Các time slots đã đặt: ' . count($bookedTimeSlots), [
                 'slot_ids' => $bookedTimeSlots
             ]);
-            
+
             // Lọc ra các khung giờ còn trống và nếu là ngày hôm nay, chỉ lấy các giờ trong tương lai
-            $availableSlots = $allTimeSlots->filter(function($timeSlot) use ($bookedTimeSlots, $isToday, $currentTime) {
-                // Kiểm tra nếu khung giờ đã bị đặt
-                if (in_array($timeSlot->id, $bookedTimeSlots)) {
-                    Log::info("Khung giờ {$timeSlot->id} đã được đặt", ['time' => $timeSlot->started_time]);
+            $availableSlots = $allTimeSlots->filter(function($timeSlot) use ($isToday, $currentTime) {
+                // Kiểm tra nếu khung giờ đã đầy
+                if ($timeSlot->isFull()) {
+                    Log::info("Khung giờ {$timeSlot->id} đã đầy", ['time' => $timeSlot->started_time, 'booked' => $timeSlot->booked_count, 'capacity' => $timeSlot->capacity]);
                     return false;
                 }
-                
+
                 // Nếu là ngày hôm nay, kiểm tra xem khung giờ có nằm trong tương lai không
                 if ($isToday) {
                     // Lấy giờ và phút từ started_time
                     $slotTime = \Carbon\Carbon::parse($timeSlot->started_time);
                     $slotHour = $slotTime->hour;
                     $slotMinute = $slotTime->minute;
-                    
+
                     // Lấy giờ và phút hiện tại
                     $currentHour = $currentTime->hour;
                     $currentMinute = $currentTime->minute;
-                    
+
                     // Ghi chi tiết thông tin so sánh thời gian
                     Log::info("So sánh khung giờ {$timeSlot->id}", [
                         'slot_time' => $slotTime->format('H:i'),
@@ -102,7 +110,7 @@ class TimeSlotController extends Controller
                         'current_minute' => $currentMinute,
                         'is_future' => ($slotHour > $currentHour || ($slotHour == $currentHour && $slotMinute > $currentMinute)) ? 'true' : 'false'
                     ]);
-                    
+
                     // So sánh theo giờ và phút
                     if ($slotHour > $currentHour) {
                         return true; // Giờ sau hiện tại
@@ -112,17 +120,20 @@ class TimeSlotController extends Controller
                         return false; // Thời gian đã qua
                     }
                 }
-                
+
                 return true;
             })->map(function($timeSlot) {
                 return [
                     'id' => $timeSlot->id,
                     'time' => $timeSlot->started_time,
+                    'booked_count' => $timeSlot->booked_count,
+                    'capacity' => $timeSlot->capacity,
+                    'available_slots' => $timeSlot->available_slots
                 ];
             })->values();
-            
+
             Log::info('Các time slots khả dụng: ' . $availableSlots->count());
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Lấy danh sách khung giờ khả dụng thành công',
@@ -147,7 +158,7 @@ class TimeSlotController extends Controller
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Đã xảy ra lỗi: ' . $e->getMessage(),

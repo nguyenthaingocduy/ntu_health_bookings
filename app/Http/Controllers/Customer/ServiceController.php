@@ -27,7 +27,7 @@ class ServiceController extends Controller
     {
         // Sử dụng with('category') để tải kèm dữ liệu category
         $service = Service::with('category')->findOrFail($id);
-        
+
         // Lấy các dịch vụ liên quan (cùng danh mục hoặc cùng phòng khám)
         $relatedServices = Service::where('id', '!=', $id)
             ->where(function($query) use ($service) {
@@ -40,10 +40,35 @@ class ServiceController extends Controller
             ->where('status', 'active')
             ->limit(3)
             ->get();
-        
-        // Tạo dữ liệu giả cho các khung giờ và FAQs
-        $timeSlots = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'];
-        
+
+        // Lấy dữ liệu thời gian từ model Time hoặc tạo dữ liệu giả
+        $times = \App\Models\Time::all();
+
+        // Nếu không có dữ liệu thời gian, tạo dữ liệu giả
+        if ($times->isEmpty()) {
+            $timeSlots = [
+                ['time' => '08:00', 'capacity' => 20, 'booked' => 10],
+                ['time' => '09:00', 'capacity' => 20, 'booked' => 5],
+                ['time' => '10:00', 'capacity' => 20, 'booked' => 8],
+                ['time' => '11:00', 'capacity' => 20, 'booked' => 12],
+                ['time' => '13:00', 'capacity' => 20, 'booked' => 3],
+                ['time' => '14:00', 'capacity' => 20, 'booked' => 7],
+                ['time' => '15:00', 'capacity' => 20, 'booked' => 15],
+                ['time' => '16:00', 'capacity' => 20, 'booked' => 9],
+            ];
+        } else {
+            // Chuyển đổi dữ liệu từ model Time sang định dạng phù hợp
+            $timeSlots = $times->map(function($time) {
+                return [
+                    'time' => $time->started_time,
+                    'capacity' => $time->capacity,
+                    'booked' => $time->booked_count,
+                    'available' => $time->getAvailableSlotsAttribute(),
+                    'id' => $time->id
+                ];
+            })->toArray();
+        }
+
         $faqs = collect([
             (object) [
                 'question' => 'Dịch vụ này có đau không?',
@@ -57,13 +82,17 @@ class ServiceController extends Controller
                 'question' => 'Có cần kiêng khem gì sau khi sử dụng dịch vụ không?',
                 'answer' => 'Tùy vào từng dịch vụ cụ thể, chuyên viên sẽ tư vấn chi tiết cho bạn sau khi thực hiện.'
             ],
+            (object) [
+                'question' => 'Dịch vụ này có phù hợp với mọi loại da không?',
+                'answer' => 'Dịch vụ của chúng tôi được thiết kế để phù hợp với nhiều loại da khác nhau. Tuy nhiên, chuyên viên sẽ tư vấn cụ thể dựa trên tình trạng da của bạn.'
+            ],
         ]);
-        
+
         // Thêm các dữ liệu khuyết thiếu
         if (!isset($service->duration)) {
             $service->duration = '60'; // Thời gian mặc định 60 phút
         }
-        
+
         // Đảm bảo bạn có view tại 'resources/views/customer/services/show.blade.php'
         return view('customer.services.show', compact('service', 'relatedServices', 'timeSlots', 'faqs'));
     }

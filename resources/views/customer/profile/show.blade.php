@@ -3,7 +3,7 @@
 @section('title', 'Thông tin cá nhân')
 
 @section('content')
-<div class="bg-gradient-to-r from-pink-500 to-purple-600 text-white py-12">
+<div class="bg-gradient-to-r from-pink-500 to-purple-600 text-black py-12">
     <div class="container mx-auto px-6">
         <h1 class="text-3xl font-bold">Thông tin cá nhân</h1>
         <p class="mt-2">Quản lý thông tin cá nhân của bạn</p>

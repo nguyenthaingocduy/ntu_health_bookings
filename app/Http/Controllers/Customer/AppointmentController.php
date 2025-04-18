@@ -8,6 +8,7 @@ use App\Models\Service;
 use App\Models\Time;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -20,7 +21,7 @@ class AppointmentController extends Controller
             ->where('customer_id', Auth::id())
             ->orderBy('date_appointments', 'desc')
             ->paginate(10);
-            
+
         return view('customer.appointments.index', compact('appointments'));
     }
 
@@ -30,12 +31,13 @@ class AppointmentController extends Controller
         if ($serviceId) {
             $service = Service::findOrFail($serviceId);
         }
-        
+
         $services = Service::where('status', 'active')
             ->get();
-            
+
+        // Get times with booking counts
         $times = Time::orderBy('started_time')->get();
-        
+
         return view('customer.appointments.create', compact('services', 'times', 'service'));
     }
 
@@ -48,42 +50,52 @@ class AppointmentController extends Controller
             'notes' => 'nullable|string|max:500',
         ]);
 
-        // Kiểm tra xem thời gian đã có ai đặt chưa
-        $existingAppointment = Appointment::where('date_appointments', $request->date_appointments)
-            ->where('time_appointments_id', $request->time_appointments_id)
-            ->whereIn('status', ['pending', 'confirmed'])
-            ->first();
-            
-        if ($existingAppointment) {
-            return back()->withInput()->with('error', 'Thời gian này đã có người đặt. Vui lòng chọn thời gian khác.');
+        // Kiểm tra xem thời gian đã đầy chưa
+        $timeSlot = Time::findOrFail($request->time_appointments_id);
+
+        if ($timeSlot->isFull()) {
+            return back()->withInput()->with('error', 'Thời gian này đã đầy. Vui lòng chọn thời gian khác.');
         }
 
         try {
-            // Tìm một nhân viên bất kỳ để gán tạm thời
-            $service = Service::findOrFail($request->service_id);
-            
+            // Kiểm tra dịch vụ tồn tại
+            Service::findOrFail($request->service_id);
+
             // Tìm một employee có role là nhân viên
             $employee = \App\Models\User::whereHas('role', function($query) {
                 $query->where('name', 'employee');
             })->first();
-            
+
             // Nếu không tìm thấy employee nào, lấy user ID đầu tiên
             $employeeId = $employee ? $employee->id : \App\Models\User::first()->id;
-            
+
             // Tạo UUID cho id
             $uuid = Str::uuid()->toString();
-            
-            $appointment = Appointment::create([
-                'id' => $uuid,
-                'customer_id' => Auth::id(),
-                'service_id' => $request->service_id,
-                'date_register' => now(),
-                'status' => 'pending',
-                'date_appointments' => $request->date_appointments,
-                'time_appointments_id' => $request->time_appointments_id,
-                'employee_id' => $employeeId, // Gán nhân viên tạm thời
-                'notes' => $request->notes,
-            ]);
+
+            // Bắt đầu transaction để đảm bảo tính nhất quán dữ liệu
+            DB::beginTransaction();
+
+            try {
+                // Tăng số lượng đặt chỗ cho khung giờ này
+                $timeSlot->increment('booked_count');
+
+                $appointment = Appointment::create([
+                    'id' => $uuid,
+                    'customer_id' => Auth::id(),
+                    'service_id' => $request->service_id,
+                    'date_register' => now(),
+                    'status' => 'pending',
+                    'date_appointments' => $request->date_appointments,
+                    'time_appointments_id' => $request->time_appointments_id,
+                    'employee_id' => $employeeId, // Gán nhân viên tạm thời
+                    'notes' => $request->notes,
+                ]);
+
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
 
             // Gửi email xác nhận đặt lịch
             try {
@@ -109,7 +121,7 @@ class AppointmentController extends Controller
         $appointment = Appointment::with(['service', 'employee', 'customer', 'timeAppointment'])
             ->where('customer_id', Auth::id())
             ->findOrFail($id);
-            
+
         return view('customer.appointments.show', compact('appointment'));
     }
 
@@ -117,13 +129,29 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::where('customer_id', Auth::id())
             ->findOrFail($id);
-            
+
         if (!in_array($appointment->status, ['pending', 'confirmed'])) {
             return back()->with('error', 'Không thể hủy lịch hẹn này.');
         }
-        
-        $appointment->update(['status' => 'cancelled']);
-        
+
+        // Bắt đầu transaction
+        DB::beginTransaction();
+
+        try {
+            // Giảm số lượng đặt chỗ cho khung giờ này
+            $timeSlot = Time::findOrFail($appointment->time_appointments_id);
+            if ($timeSlot->booked_count > 0) {
+                $timeSlot->decrement('booked_count');
+            }
+
+            $appointment->update(['status' => 'cancelled']);
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Đã xảy ra lỗi khi hủy lịch hẹn: ' . $e->getMessage());
+        }
+
         return redirect()->route('customer.appointments.index')
             ->with('success', 'Hủy lịch hẹn thành công.');
     }

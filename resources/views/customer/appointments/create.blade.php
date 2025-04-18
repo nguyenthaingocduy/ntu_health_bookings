@@ -26,7 +26,7 @@
 
             <form action="{{ route('customer.appointments.store') }}" method="POST" class="bg-white rounded-lg shadow-lg p-8">
                 @csrf
-                
+
                 <div class="flex items-center justify-between mb-8">
                     <div class="flex items-center">
                         <div class="step-circle w-8 h-8 bg-pink-500 text-white rounded-full flex items-center justify-center font-semibold" data-step="1">1</div>
@@ -43,10 +43,10 @@
                         <div class="ml-3"><p class="font-semibold text-gray-600 step-text" data-step="3">Xác nhận</p></div>
                     </div>
                 </div>
-                
+
                 <div class="mb-8" id="step-1-content">
                     <h3 class="text-xl font-semibold mb-4">Chọn dịch vụ</h3>
-                    
+
                     @if($services->isEmpty())
                     <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
                         <p>Hiện tại không có dịch vụ nào khả dụng. Vui lòng quay lại sau.</p>
@@ -57,16 +57,16 @@
                         @foreach($services as $service)
                         <div class="service-card relative border rounded-lg p-4 cursor-pointer hover:border-pink-500 transition {{ (old('service_id') == $service->id || (isset($serviceId) && $serviceId == $service->id)) ? 'selected-service border-pink-500' : '' }}">
                             <label for="service-{{ $service->id }}" class="absolute inset-0 cursor-pointer z-10"></label>
-                            
-                            <input type="radio" name="service_id" id="service-{{ $service->id }}" value="{{ $service->id }}" 
+
+                            <input type="radio" name="service_id" id="service-{{ $service->id }}" value="{{ $service->id }}"
                                 {{ (old('service_id') == $service->id || (isset($serviceId) && $serviceId == $service->id)) ? 'checked' : '' }}
                                 class="absolute opacity-0" required>
-                            
+
                             <div class="flex items-start relative z-0">
                                 <div class="w-20 h-20 bg-pink-100 rounded flex items-center justify-center text-pink-500">
                                     <i class="fas fa-spa text-2xl"></i>
                                 </div>
-                                
+
                                 <div class="ml-4 flex-1">
                                     <h4 class="font-semibold">{{ $service->name }}</h4>
                                     <p class="text-gray-600 text-sm mb-2">{{ Str::limit($service->descriptive, 80) }}</p>
@@ -80,7 +80,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="absolute top-4 right-4 w-5 h-5 border-2 rounded-full flex items-center justify-center service-radio pointer-events-none">
                                 <div class="w-3 h-3 bg-pink-500 rounded-full service-radio-dot" style="opacity: {{ (old('service_id') == $service->id || (isset($serviceId) && $serviceId == $service->id)) ? '1' : '0' }};"></div>
                             </div>
@@ -93,10 +93,10 @@
                     <div class="text-red-500 mt-2 text-sm">{{ $message }}</div>
                     @enderror
                 </div>
-                
+
                 <div class="mb-8" id="step-2-content">
                     <h3 class="text-xl font-semibold mb-4">Chọn thời gian</h3>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="date_appointments" class="block text-gray-700 mb-2">Ngày <span class="text-red-500">*</span></label>
@@ -109,7 +109,7 @@
                             <div class="text-red-500 mt-2 text-sm">{{ $message }}</div>
                             @enderror
                         </div>
-                        
+
                         <div>
                             <label class="block text-gray-700 mb-2">Thời gian <span class="text-red-500">*</span></label>
                             {{-- Container for Event Delegation --}}
@@ -131,7 +131,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="mb-8" id="step-3-content">
                     <h3 class="text-xl font-semibold mb-4">Thông tin khách hàng</h3>
                     @php $user = auth()->user(); @endphp
@@ -168,7 +168,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="text-center mt-10">
                     <button type="submit" class="bg-pink-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-pink-600 transition disabled:opacity-50" id="submit-button" disabled>
                         Đặt lịch ngay
@@ -266,19 +266,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const timeSlotContainer = document.getElementById('time-slots-container');
     const submitButton = document.getElementById('submit-button');
     const submitHint = document.getElementById('submit-hint');
-    
+
     // Thiết lập ngày tối thiểu là ngày hôm nay thay vì ngày mai
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
-    
+
     console.log('DEBUG DATE:');
     console.log('- Today: ' + today.toISOString());
     console.log('- Today string: ' + todayStr);
     console.log('- Current min attribute: ' + dateInput.min);
-    
+
     dateInput.min = todayStr;
     console.log('- Set min to: ' + dateInput.min);
-    
+
     // Lấy radio button được chọn ban đầu (nếu có)
     let selectedServiceId = null;
     const checkedRadio = document.querySelector('input[name="service_id"]:checked');
@@ -286,21 +286,21 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedServiceId = checkedRadio.value;
         updateServiceDisplay(selectedServiceId);
     }
-    
+
     // Lấy mốc thời gian được chọn (nếu có)
     let selectedTimeSlotId = null;
     const checkedTimeRadio = document.querySelector('input[name="time_appointments_id"]:checked');
     if (checkedTimeRadio) {
         selectedTimeSlotId = checkedTimeRadio.value;
     }
-    
+
     // Thêm sự kiện change cho các radio button dịch vụ
     document.querySelectorAll('input[name="service_id"]').forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.checked) {
                 selectedServiceId = this.value;
                 updateServiceDisplay(selectedServiceId);
-                
+
                 // Nếu đã chọn ngày, cập nhật các khung giờ
                 if (dateInput.value) {
                     fetchAvailableTimeSlots(selectedServiceId, dateInput.value);
@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // Xử lý sự kiện click trên service-card (để hỗ trợ chọn cả khi click vào card)
     document.querySelectorAll('.service-card').forEach(card => {
         card.addEventListener('click', function(e) {
@@ -322,14 +322,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // Cập nhật giao diện theo dịch vụ được chọn
     function updateServiceDisplay(serviceId) {
         // Cập nhật trạng thái card
         document.querySelectorAll('.service-card').forEach(card => {
             const radio = card.querySelector('input[name="service_id"]');
             const dot = card.querySelector('.service-radio-dot');
-            
+
             if (radio && radio.value === serviceId) {
                 card.classList.add('selected-service', 'border-pink-500');
                 if (dot) dot.style.opacity = '1';
@@ -338,16 +338,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (dot) dot.style.opacity = '0';
             }
         });
-        
+
         // Kiểm tra nút Submit
         checkSubmitButton();
     }
-    
+
     // Khi chọn ngày
     dateInput.addEventListener('change', function() {
         const selectedDate = this.value;
         console.log('Ngày đã chọn:', selectedDate);
-        
+
         if (!selectedServiceId) {
             timeSlotContainer.innerHTML = `
                 <div class="col-span-3 text-yellow-600 p-4 rounded-lg border border-yellow-200 bg-yellow-50">
@@ -357,18 +357,18 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             return;
         }
-        
+
         // Kiểm tra xem ngày chọn có lớn hơn hoặc bằng ngày hiện tại không
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const selectedDateObj = new Date(selectedDate);
         selectedDateObj.setHours(0, 0, 0, 0);
-        
+
         console.log('So sánh ngày:');
         console.log('- Today:', today);
         console.log('- Selected:', selectedDateObj);
         console.log('- Difference (days):', Math.floor((selectedDateObj - today) / (1000 * 60 * 60 * 24)));
-        
+
         if (selectedDateObj < today) {
             timeSlotContainer.innerHTML = `
                 <div class="col-span-3 text-red-500 p-4 rounded-lg border border-red-200 bg-red-50">
@@ -378,10 +378,10 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             return;
         }
-        
+
         fetchAvailableTimeSlots(selectedServiceId, selectedDate);
     });
-    
+
     // Hàm lấy các khung giờ có sẵn
     function fetchAvailableTimeSlots(serviceId, date) {
         // Hiển thị loading
@@ -390,11 +390,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="loading-spinner mr-3"></div> Đang kiểm tra khung giờ khả dụng...
             </div>
         `;
-        
+
         // Gọi API để lấy khung giờ - sử dụng API cũ
         const apiUrl = `/api/check-available-slots?service_id=${serviceId}&date=${date}`;
         console.log('Gọi API:', apiUrl);
-        
+
         fetch(apiUrl)
             .then(response => {
                 console.log('API status:', response.status);
@@ -405,41 +405,46 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
                 console.log('Dữ liệu từ API:', data);
-                
+
                 if (data.success && data.available_slots && data.available_slots.length > 0) {
                     // Hiển thị các khung giờ khả dụng
                     timeSlotContainer.innerHTML = '';
-                    
+
                     data.available_slots.forEach(slot => {
+                        const availableText = slot.available_slots > 0
+                            ? `<span class="text-xs text-green-600 block mt-1">${slot.available_slots}/${slot.capacity} chỗ trống</span>`
+                            : '<span class="text-xs text-red-600 block mt-1">Đã đầy</span>';
+
                         const timeSlotHTML = `
                             <div class="time-slot-wrapper">
-                                <label for="time-input-${slot.id}" class="text-center px-4 py-3 border rounded-lg cursor-pointer hover:border-pink-500 transition time-slot-div block">
+                                <label for="time-input-${slot.id}" class="text-center px-4 py-2 border rounded-lg cursor-pointer hover:border-pink-500 transition time-slot-div block">
                                     ${slot.time}
+                                    ${availableText}
                                 </label>
                                 <input type="radio" name="time_appointments_id" id="time-input-${slot.id}" value="${slot.id}" class="hidden time-radio" required>
                             </div>
                         `;
-                        
+
                         timeSlotContainer.insertAdjacentHTML('beforeend', timeSlotHTML);
                     });
-                    
+
                     // Thêm sự kiện change cho các radio button thời gian
                     document.querySelectorAll('input[name="time_appointments_id"]').forEach(radio => {
                         radio.addEventListener('change', function() {
                             if (this.checked) {
                                 selectedTimeSlotId = this.value;
-                                
+
                                 // Cập nhật hiển thị
                                 document.querySelectorAll('.time-slot-div').forEach(slot => {
                                     slot.classList.remove('bg-pink-500', 'text-white', 'border-pink-500');
                                 });
-                                
+
                                 // Highlight slot được chọn
                                 const label = document.querySelector(`label[for="time-input-${selectedTimeSlotId}"]`);
                                 if (label) {
                                     label.classList.add('bg-pink-500', 'text-white', 'border-pink-500');
                                 }
-                                
+
                                 // Kiểm tra nút Submit
                                 checkSubmitButton();
                             }
@@ -465,27 +470,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
             });
     }
-    
+
     // Kiểm tra và cập nhật trạng thái nút Submit
     function checkSubmitButton() {
         const serviceSelected = !!selectedServiceId && document.querySelector('input[name="service_id"]:checked');
         const dateSelected = !!dateInput.value;
         const timeSelected = !!selectedTimeSlotId && document.querySelector('input[name="time_appointments_id"]:checked');
-        
+
         const allSelected = serviceSelected && dateSelected && timeSelected;
-        
+
         if (submitButton) {
             submitButton.disabled = !allSelected;
         }
-        
+
         if (submitHint) {
             submitHint.style.display = allSelected ? 'none' : 'block';
         }
     }
-    
+
     // Kích hoạt kiểm tra lần đầu
     checkSubmitButton();
-    
+
     // Nếu đã có cả dịch vụ và ngày được chọn khi trang load, kiểm tra khung giờ
     if (selectedServiceId && dateInput.value) {
         fetchAvailableTimeSlots(selectedServiceId, dateInput.value);
