@@ -125,7 +125,7 @@
                         </span>
                     </div>
                     <p class="text-sm text-gray-500 mt-1">
-                        {{ $appointment->appointment_date->format('d/m/Y H:i') }}
+                        {{ \Carbon\Carbon::parse($appointment->date_appointments)->format('d/m/Y H:i') }}
                     </p>
                 </div>
                 @empty
@@ -133,7 +133,7 @@
                 @endforelse
             </div>
 
-            @if($recentAppointments->hasMorePages())
+            @if($appointments->count() > 5)
             <div class="mt-4 text-center">
                 <a href="{{ route('admin.appointments.index', ['employee' => $employee->id]) }}"
                     class="text-pink-500 hover:text-pink-600">

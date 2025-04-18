@@ -31,7 +31,7 @@
             <h2 class="text-white text-lg font-semibold">Thông tin nhân viên</h2>
         </div>
         <div class="p-6">
-            <form action="{{ route('admin.employees.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <form action="{{ route('admin.employees.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="employeeForm">
                 @csrf
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -180,16 +180,17 @@
                 </div>
 
                 <div>
-                    <label for="avatar" class="block text-sm font-medium text-gray-700 mb-1">Ảnh đại diện</label>
+                    <label for="avatar_file" class="block text-sm font-medium text-gray-700 mb-1">Ảnh đại diện</label>
                     <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition-all duration-200">
                         <div class="space-y-1 text-center">
                             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
                                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                             <div class="flex text-sm text-gray-600">
-                                <label for="avatar" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                                <label for="avatar_file" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
                                     <span>Tải ảnh lên</span>
-                                    <input id="avatar" name="avatar" type="file" accept="image/*" class="sr-only">
+                                    <input id="avatar_file" type="file" accept="image/*" class="hidden">
+                                    <input id="avatar" name="avatar" type="file" accept="image/*" class="hidden">
                                 </label>
                                 <p class="pl-1">hoặc kéo thả vào đây</p>
                             </div>
@@ -229,10 +230,31 @@
             theme: "classic"
         });
 
+        // Global function to remove avatar
+        window.removeAvatar = function() {
+            $("#avatar").val('');
+            $("#avatar_file").val('');
+            $("#avatarPreview").html('');
+        };
+
+        // Form submit handler
+        $("#employeeForm").submit(function(e) {
+            // Log form data for debugging
+            console.log('Form submitted');
+            const formData = new FormData(this);
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
+            }
+            // Continue with form submission
+            return true;
+        });
+
         // Preview avatar before upload
-        $("#avatar").change(function() {
+        $("#avatar_file").change(function() {
             const file = this.files[0];
             if (file) {
+                console.log('File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
+
                 // Check file size
                 if (file.size > 2 * 1024 * 1024) {
                     alert('Kích thước file quá lớn. Vui lòng chọn file nhỏ hơn 2MB.');
@@ -250,19 +272,22 @@
                     return;
                 }
 
+                // Copy the file to the hidden input for form submission
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                document.getElementById('avatar').files = dataTransfer.files;
+
                 let reader = new FileReader();
                 reader.onload = function(event) {
                     $("#avatarPreview").html('<div class="relative group"><img src="' + event.target.result + '" class="mt-2 rounded-full w-24 h-24 object-cover border-2 border-blue-200 shadow-md" /><div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onclick="removeAvatar()"><i class="fas fa-times text-white"></i></div></div>');
                 }
+                reader.onerror = function(event) {
+                    console.error('FileReader error:', event);
+                    alert('Lỗi khi đọc file. Vui lòng thử lại.');
+                }
                 reader.readAsDataURL(file);
             }
         });
-
-        // Function to remove avatar
-        function removeAvatar() {
-            $("#avatar").val('');
-            $("#avatarPreview").html('');
-        }
     });
 </script>
 @endpush

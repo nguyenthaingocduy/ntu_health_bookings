@@ -31,6 +31,10 @@ class Employee extends Model
         'status' => 'active',
     ];
 
+    protected $casts = [
+        'birthday' => 'date',
+    ];
+
     public function role()
     {
         return $this->belongsTo(Role::class);

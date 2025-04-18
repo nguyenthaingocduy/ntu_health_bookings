@@ -9,10 +9,10 @@
     <form action="{{ route('admin.employees.update', $employee->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
         @method('PUT')
-        
+
         <div class="mb-6">
             <h3 class="text-lg font-semibold mb-4">Thông tin cơ bản</h3>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">Họ <span class="text-red-500">*</span></label>
@@ -22,7 +22,7 @@
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-                
+
                 <div>
                     <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">Tên <span class="text-red-500">*</span></label>
                     <input type="text" name="last_name" id="last_name" value="{{ old('last_name', $employee->last_name) }}" required
@@ -31,7 +31,7 @@
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-                
+
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email <span class="text-red-500">*</span></label>
                     <input type="email" name="email" id="email" value="{{ old('email', $employee->email) }}" required
@@ -40,7 +40,7 @@
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-                
+
                 <div>
                     <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Số điện thoại <span class="text-red-500">*</span></label>
                     <input type="text" name="phone" id="phone" value="{{ old('phone', $employee->phone) }}" required
@@ -51,10 +51,10 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="mb-6">
             <h3 class="text-lg font-semibold mb-4">Thông tin cá nhân</h3>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="birthday" class="block text-sm font-medium text-gray-700 mb-2">Ngày sinh</label>
@@ -64,7 +64,7 @@
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-                
+
                 <div>
                     <label for="gender" class="block text-sm font-medium text-gray-700 mb-2">Giới tính</label>
                     <select name="gender" id="gender"
@@ -78,7 +78,7 @@
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-                
+
                 <div>
                     <label for="role_id" class="block text-sm font-medium text-gray-700 mb-2">Vai trò <span class="text-red-500">*</span></label>
                     <select name="role_id" id="role_id" required
@@ -94,7 +94,7 @@
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-                
+
                 <div>
                     <label for="clinic_id" class="block text-sm font-medium text-gray-700 mb-2">Cơ sở làm việc <span class="text-red-500">*</span></label>
                     <select name="clinic_id" id="clinic_id" required
@@ -112,10 +112,10 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="mb-6">
             <h3 class="text-lg font-semibold mb-4">Thông tin công việc</h3>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Trạng thái <span class="text-red-500">*</span></label>
@@ -128,14 +128,14 @@
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-                
+
                 <div>
                     <label for="services" class="block text-sm font-medium text-gray-700 mb-2">Dịch vụ đảm nhận</label>
                     <select name="services[]" id="services" multiple
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         @foreach($services ?? [] as $service)
-                            <option value="{{ $service->id }}" 
-                                {{ (old('services') && in_array($service->id, old('services'))) || 
+                            <option value="{{ $service->id }}"
+                                {{ (old('services') && in_array($service->id, old('services'))) ||
                                    (isset($employee) && $employee->services->contains($service->id)) ? 'selected' : '' }}>
                                 {{ $service->name }}
                             </option>
@@ -148,7 +148,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="mb-6">
             <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Địa chỉ</label>
             <textarea name="address" id="address" rows="3"
@@ -157,10 +157,10 @@
                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
             @enderror
         </div>
-        
+
         <div class="mb-6">
             <h3 class="text-lg font-semibold mb-4">Ảnh đại diện</h3>
-            
+
             <div>
                 @if($employee->avatar_url)
                     <div class="mb-4">
@@ -168,7 +168,7 @@
                         <img src="{{ asset($employee->avatar_url) }}" alt="{{ $employee->first_name }}" class="w-32 h-32 object-cover rounded-full">
                     </div>
                 @endif
-                
+
                 <label for="avatar" class="block text-sm font-medium text-gray-700 mb-2">Thay đổi ảnh đại diện</label>
                 <input type="file" name="avatar" id="avatar" accept="image/*"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -178,7 +178,7 @@
                 @enderror
             </div>
         </div>
-        
+
         <div class="flex justify-end space-x-4">
             <a href="{{ route('admin.employees.index') }}" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
                 Hủy bỏ
