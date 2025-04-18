@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class EmployeeController extends Controller
 {
@@ -66,36 +67,88 @@ class EmployeeController extends Controller
 
     public function store(Request $request)
     {
+        // Pre-process the address field to ensure it's not null
+        if ($request->has('address') && $request->input('address') === null) {
+            $request->merge(['address' => 'N/A']);
+        }
+
         $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'birthday' => 'nullable|date',
-            'address' => 'nullable|string|max:255',
+            'birthday' => 'required|date|before_or_equal:' . now()->subYears(18)->format('Y-m-d'),
+            'address' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'email' => 'required|email|unique:employees,email',
-            'gender' => 'nullable|in:male,female,other',
+            'gender' => 'required|in:male,female,other',
             'role_id' => 'required|exists:roles,id',
             'clinic_id' => 'required|exists:clinics,id',
             'status' => 'required|in:active,inactive',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'services' => 'nullable|array',
             'services.*' => 'exists:services,id',
+        ], [
+            'birthday.before_or_equal' => 'Nhân viên phải từ 18 tuổi trở lên.',
+            'address.required' => 'Vui lòng nhập địa chỉ của nhân viên.',
+            'gender.required' => 'Vui lòng chọn giới tính của nhân viên.'
         ]);
 
         $data = $request->only([
-            'first_name', 'last_name', 'birthday', 'address', 'phone', 'email',
-            'gender', 'role_id', 'clinic_id', 'status'
+            'first_name', 'last_name', 'birthday', 'phone', 'email',
+            'gender', 'role_id', 'clinic_id', 'status', 'address'
         ]);
 
         // Generate UUID
         $data['id'] = Str::uuid();
 
+        // Set default avatar if no avatar is uploaded
+        $data['avatar_url'] = 'images/employees/default-avatar.jpg';
+
         // Handle avatar upload
         if ($request->hasFile('avatar')) {
-            $avatar = $request->file('avatar');
-            $avatarName = time() . '.' . $avatar->getClientOriginalExtension();
-            $avatar->move(public_path('images/employees'), $avatarName);
-            $data['avatar_url'] = 'images/employees/' . $avatarName;
+            try {
+                $avatar = $request->file('avatar');
+
+                // Debug information
+                Log::info('Avatar upload attempt', [
+                    'original_name' => $avatar->getClientOriginalName(),
+                    'mime_type' => $avatar->getMimeType(),
+                    'size' => $avatar->getSize(),
+                    'error' => $avatar->getError()
+                ]);
+
+                // Check if the file is valid
+                if ($avatar->isValid()) {
+                    $avatarName = time() . '.' . $avatar->getClientOriginalExtension();
+
+                    // Make sure the directory exists with proper permissions
+                    $directory = public_path('images/employees');
+                    if (!file_exists($directory)) {
+                        mkdir($directory, 0777, true);
+                    } else {
+                        chmod($directory, 0777);
+                    }
+
+                    // Move the file with explicit path
+                    $path = $directory . '/' . $avatarName;
+                    if (move_uploaded_file($avatar->getRealPath(), $path)) {
+                        $data['avatar_url'] = 'images/employees/' . $avatarName;
+                        Log::info('Avatar uploaded successfully', ['path' => $path]);
+                    } else {
+                        Log::error('Failed to move uploaded file', [
+                            'from' => $avatar->getRealPath(),
+                            'to' => $path,
+                            'permissions' => substr(sprintf('%o', fileperms($directory)), -4)
+                        ]);
+                    }
+                } else {
+                    Log::error('Invalid avatar file', ['error' => $avatar->getError()]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Exception during avatar upload', [
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
         }
 
         $employee = Employee::create($data);
@@ -123,38 +176,89 @@ class EmployeeController extends Controller
     {
         $employee = Employee::findOrFail($id);
 
+        // Pre-process the address field to ensure it's not null
+        if ($request->has('address') && $request->input('address') === null) {
+            $request->merge(['address' => 'N/A']);
+        }
+
         $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'birthday' => 'nullable|date',
-            'address' => 'nullable|string|max:255',
+            'birthday' => 'required|date|before_or_equal:' . now()->subYears(18)->format('Y-m-d'),
+            'address' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'email' => 'required|email|unique:employees,email,' . $employee->id,
-            'gender' => 'nullable|in:male,female,other',
+            'gender' => 'required|in:male,female,other',
             'role_id' => 'required|exists:roles,id',
             'clinic_id' => 'required|exists:clinics,id',
             'status' => 'required|in:active,inactive',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'services' => 'nullable|array',
             'services.*' => 'exists:services,id',
+        ], [
+            'birthday.before_or_equal' => 'Nhân viên phải từ 18 tuổi trở lên.',
+            'address.required' => 'Vui lòng nhập địa chỉ của nhân viên.',
+            'gender.required' => 'Vui lòng chọn giới tính của nhân viên.'
         ]);
 
         $data = $request->only([
-            'first_name', 'last_name', 'birthday', 'address', 'phone', 'email',
-            'gender', 'role_id', 'clinic_id', 'status'
+            'first_name', 'last_name', 'birthday', 'phone', 'email',
+            'gender', 'role_id', 'clinic_id', 'status', 'address'
         ]);
 
         // Handle avatar upload
         if ($request->hasFile('avatar')) {
-            // Delete old avatar if exists
-            if ($employee->avatar_url && file_exists(public_path($employee->avatar_url))) {
-                unlink(public_path($employee->avatar_url));
-            }
+            try {
+                $avatar = $request->file('avatar');
 
-            $avatar = $request->file('avatar');
-            $avatarName = time() . '.' . $avatar->getClientOriginalExtension();
-            $avatar->move(public_path('images/employees'), $avatarName);
-            $data['avatar_url'] = 'images/employees/' . $avatarName;
+                // Debug information
+                Log::info('Avatar upload attempt (update)', [
+                    'original_name' => $avatar->getClientOriginalName(),
+                    'mime_type' => $avatar->getMimeType(),
+                    'size' => $avatar->getSize(),
+                    'error' => $avatar->getError()
+                ]);
+
+                // Check if the file is valid
+                if ($avatar->isValid()) {
+                    // Delete old avatar if exists and not the default avatar
+                    if ($employee->avatar_url &&
+                        file_exists(public_path($employee->avatar_url)) &&
+                        $employee->avatar_url != 'images/employees/default-avatar.jpg') {
+                        unlink(public_path($employee->avatar_url));
+                    }
+
+                    $avatarName = time() . '.' . $avatar->getClientOriginalExtension();
+
+                    // Make sure the directory exists with proper permissions
+                    $directory = public_path('images/employees');
+                    if (!file_exists($directory)) {
+                        mkdir($directory, 0777, true);
+                    } else {
+                        chmod($directory, 0777);
+                    }
+
+                    // Move the file with explicit path
+                    $path = $directory . '/' . $avatarName;
+                    if (move_uploaded_file($avatar->getRealPath(), $path)) {
+                        $data['avatar_url'] = 'images/employees/' . $avatarName;
+                        Log::info('Avatar uploaded successfully (update)', ['path' => $path]);
+                    } else {
+                        Log::error('Failed to move uploaded file (update)', [
+                            'from' => $avatar->getRealPath(),
+                            'to' => $path,
+                            'permissions' => substr(sprintf('%o', fileperms($directory)), -4)
+                        ]);
+                    }
+                } else {
+                    Log::error('Invalid avatar file (update)', ['error' => $avatar->getError()]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Exception during avatar upload (update)', [
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
         }
 
         $employee->update($data);

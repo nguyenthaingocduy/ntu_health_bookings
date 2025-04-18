@@ -33,28 +33,28 @@
 
             <!-- Main Menu - Desktop -->
             <div class="hidden md:flex items-center space-x-3">
-                <a href="{{ route('home') }}" class="group relative overflow-hidden px-5 py-2.5 rounded-md bg-black text-black-700 shadow-sm hover:text-white transition-all duration-300 ease-out">
+                <a href="{{ route('home') }}" style="color: #374151 !important;" class="group relative overflow-hidden px-5 py-2.5 rounded-md bg-white shadow-sm hover:text-white transition-all duration-300 ease-out">
                     <span class="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     <span class="relative flex items-center justify-center font-medium">
-                        <i class="fas fa-home mr-2 text-pink-500 group-hover:text-white transition-colors"></i> Trang chủ
+                        <i class="fas fa-home mr-2 text-pink-500 group-hover:text-white transition-colors"></i> <span class="group-hover:text-white">Trang chủ</span>
                     </span>
                 </a>
-                <a href="{{ route('services.index') }}" class="group relative overflow-hidden px-5 py-2.5 rounded-md bg-white text-gray-700 shadow-sm hover:text-white transition-all duration-300 ease-out">
+                <a href="{{ route('services.index') }}" style="color: #374151 !important;" class="group relative overflow-hidden px-5 py-2.5 rounded-md bg-white shadow-sm hover:text-white transition-all duration-300 ease-out">
                     <span class="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     <span class="relative flex items-center justify-center font-medium">
-                        <i class="fas fa-spa mr-2 text-pink-500 group-hover:text-white transition-colors"></i> Dịch vụ
+                        <i class="fas fa-spa mr-2 text-pink-500 group-hover:text-white transition-colors"></i> <span class="group-hover:text-white">Dịch vụ</span>
                     </span>
                 </a>
-                <a href="{{ route('about') }}" class="group relative overflow-hidden px-5 py-2.5 rounded-md bg-white text-gray-700 shadow-sm hover:text-white transition-all duration-300 ease-out">
+                <a href="{{ route('about') }}" style="color: #374151 !important;" class="group relative overflow-hidden px-5 py-2.5 rounded-md bg-white shadow-sm hover:text-white transition-all duration-300 ease-out">
                     <span class="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     <span class="relative flex items-center justify-center font-medium">
-                        <i class="fas fa-info-circle mr-2 text-pink-500 group-hover:text-white transition-colors"></i> Giới thiệu
+                        <i class="fas fa-info-circle mr-2 text-pink-500 group-hover:text-white transition-colors"></i> <span class="group-hover:text-white">Giới thiệu</span>
                     </span>
                 </a>
-                <a href="{{ route('contact') }}" class="group relative overflow-hidden px-5 py-2.5 rounded-md bg-white text-gray-700 shadow-sm hover:text-white transition-all duration-300 ease-out">
+                <a href="{{ route('contact') }}" style="color: #374151 !important;" class="group relative overflow-hidden px-5 py-2.5 rounded-md bg-white shadow-sm hover:text-white transition-all duration-300 ease-out">
                     <span class="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     <span class="relative flex items-center justify-center font-medium">
-                        <i class="fas fa-envelope mr-2 text-pink-500 group-hover:text-white transition-colors"></i> Liên hệ
+                        <i class="fas fa-envelope mr-2 text-pink-500 group-hover:text-white transition-colors"></i> <span class="group-hover:text-white">Liên hệ</span>
                     </span>
                 </a>
             </div>
@@ -72,7 +72,7 @@
                         <a href="{{ route('login') }}" class="px-5 py-2 text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-pink-600 transition whitespace-nowrap text-sm font-medium">
                             <i class="fas fa-sign-in-alt mr-1.5"></i> Đăng nhập
                         </a>
-                        <a href="{{ route('register') }}" class="px-5 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg shadow-sm hover:shadow-md transition whitespace-nowrap text-sm font-medium">
+                        <a href="{{ route('register') }}" class="px-5 py-2 text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-pink-600 transition whitespace-nowrap text-sm font-medium">
                             <i class="fas fa-user-plus mr-1.5"></i> Đăng ký
                         </a>
                     </div>

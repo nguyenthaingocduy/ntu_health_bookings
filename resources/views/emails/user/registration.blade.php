@@ -50,7 +50,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>NTU Health Booking</h1>
+            <h1>Beauty Salon</h1>
         </div>
         
         <div class="content">
@@ -74,11 +74,11 @@
             <p>Nếu bạn có bất kỳ câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi qua email hoặc hotline.</p>
             
             <p>Trân trọng,<br>
-            Đội ngũ NTU Health Booking</p>
+            Đội ngũ Beauty Salon</p>
         </div>
         
         <div class="footer">
-            <p>&copy; {{ date('Y') }} NTU Health Booking. Tất cả các quyền được bảo lưu.</p>
+            <p>&copy; {{ date('Y') }} Beauty Salon. Tất cả các quyền được bảo lưu.</p>
             <p>Đây là email tự động, vui lòng không trả lời email này.</p>
         </div>
     </div>

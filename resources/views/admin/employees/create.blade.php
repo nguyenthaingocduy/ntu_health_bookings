@@ -76,17 +76,18 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="birthday" class="block text-sm font-medium text-gray-700 mb-1">Ngày sinh</label>
-                        <input type="date" id="birthday" name="birthday" value="{{ old('birthday') }}"
+                        <label for="birthday" class="block text-sm font-medium text-gray-700 mb-1">Ngày sinh <span class="text-red-500">*</span></label>
+                        <input type="date" id="birthday" name="birthday" value="{{ old('birthday') }}" required max="{{ now()->subYears(18)->format('Y-m-d') }}"
                             class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('birthday') border-red-500 @enderror">
+                        <p class="text-xs text-gray-500 mt-1">Nhân viên phải từ 18 tuổi trở lên</p>
                         @error('birthday')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Giới tính</label>
-                        <select id="gender" name="gender"
+                        <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Giới tính <span class="text-red-500">*</span></label>
+                        <select id="gender" name="gender" required
                             class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('gender') border-red-500 @enderror">
                             <option value="">Chọn giới tính</option>
                             <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Nam</option>
@@ -169,9 +170,10 @@
                 </div>
 
                 <div>
-                    <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
-                    <textarea id="address" name="address" rows="3"
-                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('address') border-red-500 @enderror">{{ old('address') }}</textarea>
+                    <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ <span class="text-red-500">*</span></label>
+                    <textarea id="address" name="address" rows="3" required
+                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('address') border-red-500 @enderror">{{ old('address', 'N/A') }}</textarea>
+                    <p class="text-xs text-gray-500 mt-1">Vui lòng nhập địa chỉ của nhân viên</p>
                     @error('address')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -179,7 +181,7 @@
 
                 <div>
                     <label for="avatar" class="block text-sm font-medium text-gray-700 mb-1">Ảnh đại diện</label>
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition-all duration-200">
                         <div class="space-y-1 text-center">
                             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
                                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -187,7 +189,7 @@
                             <div class="flex text-sm text-gray-600">
                                 <label for="avatar" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
                                     <span>Tải ảnh lên</span>
-                                    <input id="avatar" name="avatar" type="file" class="sr-only">
+                                    <input id="avatar" name="avatar" type="file" accept="image/*" class="sr-only">
                                 </label>
                                 <p class="pl-1">hoặc kéo thả vào đây</p>
                             </div>
@@ -196,7 +198,8 @@
                             </p>
                         </div>
                     </div>
-                    <div id="avatarPreview" class="mt-2"></div>
+                    <div id="avatarPreview" class="mt-2 flex justify-center"></div>
+                    <p class="text-xs text-gray-500 mt-1 text-center">Nếu không tải ảnh lên, hệ thống sẽ sử dụng ảnh mặc định</p>
                     @error('avatar')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -230,13 +233,36 @@
         $("#avatar").change(function() {
             const file = this.files[0];
             if (file) {
+                // Check file size
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Kích thước file quá lớn. Vui lòng chọn file nhỏ hơn 2MB.');
+                    this.value = '';
+                    $("#avatarPreview").html('');
+                    return;
+                }
+
+                // Check file type
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Loại file không hợp lệ. Vui lòng chọn file ảnh (JPG, PNG, GIF).');
+                    this.value = '';
+                    $("#avatarPreview").html('');
+                    return;
+                }
+
                 let reader = new FileReader();
                 reader.onload = function(event) {
-                    $("#avatarPreview").html('<img src="' + event.target.result + '" class="mt-2 rounded-full w-24 h-24 object-cover mx-auto border-2 border-blue-200" />');
+                    $("#avatarPreview").html('<div class="relative group"><img src="' + event.target.result + '" class="mt-2 rounded-full w-24 h-24 object-cover border-2 border-blue-200 shadow-md" /><div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onclick="removeAvatar()"><i class="fas fa-times text-white"></i></div></div>');
                 }
                 reader.readAsDataURL(file);
             }
         });
+
+        // Function to remove avatar
+        function removeAvatar() {
+            $("#avatar").val('');
+            $("#avatarPreview").html('');
+        }
     });
 </script>
 @endpush

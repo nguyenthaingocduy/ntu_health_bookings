@@ -387,7 +387,7 @@
                 </div>
                 
                 <div class="text-center text-gray-600 text-sm mt-4">
-                    &copy; {{ date('Y') }} NTU Health. Tất cả quyền được bảo lưu.
+                    &copy; {{ date('Y') }} Beauty Salon. Tất cả quyền được bảo lưu.
                 </div>
             </div>
         </footer>

@@ -61,7 +61,7 @@
                         <a href="{{ route('customer.profile.show') }}" class="inline-flex items-center px-4 py-2 bg-white rounded-lg border border-gray-200 shadow-sm text-pink-600 hover:bg-gray-50 transition">
                             <i class="fas fa-user-edit mr-2"></i> Cập nhật hồ sơ
                         </a>
-                        <a href="{{ route('customer.appointments.create') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg shadow-sm text-white hover:from-pink-600 hover:to-purple-700 transition">
+                        <a href="{{ route('customer.appointments.create') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg shadow-sm text-black hover:from-pink-600 hover:to-purple-700 transition">
                             <i class="fas fa-calendar-plus mr-2"></i> Đặt lịch
                         </a>
                     </div>
@@ -83,7 +83,7 @@
                             <div class="text-gray-600 font-medium text-lg">Lịch hẹn</div>
                         </div>
                         <div class="w-16 h-16 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center shadow-md">
-                            <i class="fas fa-calendar-alt text-white text-xl"></i>
+                            <i class="fas fa-calendar-alt text-black text-xl"></i>
                         </div>
                     </div>
                 </div>
@@ -107,7 +107,7 @@
                             <div class="text-gray-600 font-medium text-lg">Dịch vụ đã dùng</div>
                         </div>
                         <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-md">
-                            <i class="fas fa-spa text-white text-xl"></i>
+                            <i class="fas fa-spa text-black text-xl"></i>
                         </div>
                     </div>
                 </div>
@@ -131,7 +131,7 @@
                             <div class="text-gray-600 font-medium text-lg">Điểm tích lũy</div>
                         </div>
                         <div class="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center shadow-md">
-                            <i class="fas fa-star text-white text-xl"></i>
+                            <i class="fas fa-star text-black text-xl"></i>
                         </div>
                     </div>
                 </div>
@@ -303,7 +303,7 @@
                         Chọn dịch vụ và thời gian phù hợp để đặt lịch hẹn dễ dàng và nhanh chóng. Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng phục vụ bạn.
                     </p>
                     <a href="{{ route('customer.appointments.create') }}" 
-                        class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-pink-600 text-white font-medium rounded-full hover:from-pink-600 hover:to-pink-700 transition shadow-md group">
+                        class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-pink-600 text-black font-medium rounded-full hover:from-pink-600 hover:to-pink-700 transition shadow-md group">
                         Đặt lịch ngay
                         <i class="fas fa-arrow-right ml-2 transition-transform group-hover:translate-x-1"></i>
                     </a>
@@ -324,7 +324,7 @@
                         Tìm hiểu về các dịch vụ chăm sóc sức khỏe và làm đẹp cao cấp của chúng tôi. Đa dạng lựa chọn với chất lượng đảm bảo.
                     </p>
                     <a href="{{ route('customer.services.index') }}" 
-                        class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-medium rounded-full hover:from-purple-600 hover:to-purple-700 transition shadow-md group">
+                        class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-black font-medium rounded-full hover:from-purple-600 hover:to-purple-700 transition shadow-md group">
                         Xem dịch vụ
                         <i class="fas fa-arrow-right ml-2 transition-transform group-hover:translate-x-1"></i>
                     </a>
