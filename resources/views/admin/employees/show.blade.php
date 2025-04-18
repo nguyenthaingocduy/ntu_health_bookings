@@ -11,7 +11,7 @@
         <div class="bg-white rounded-lg shadow-sm p-6">
             <div class="flex justify-between items-start mb-6">
                 <div class="flex items-center">
-                    <img src="{{ $employee->avatar_url }}" alt="{{ $employee->name }}"
+                    <img src="{{ asset($employee->avatar_url ?? 'images/employees/default-avatar.svg') }}" alt="{{ $employee->name }}"
                         class="w-20 h-20 rounded-full object-cover mr-4">
                     <div>
                         <h2 class="text-2xl font-bold text-gray-900">{{ $employee->name }}</h2>

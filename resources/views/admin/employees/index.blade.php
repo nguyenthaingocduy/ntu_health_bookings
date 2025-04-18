@@ -9,11 +9,11 @@
 <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
     <form action="{{ route('admin.employees.index') }}" method="GET" class="flex flex-wrap gap-4">
         <div class="flex-1">
-            <input type="text" name="search" value="{{ request('search') }}" 
-                placeholder="Tìm kiếm theo tên hoặc email..." 
+            <input type="text" name="search" value="{{ request('search') }}"
+                placeholder="Tìm kiếm theo tên hoặc email..."
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
         </div>
-        
+
         <div class="w-full md:w-auto">
             <select name="clinic" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
                 <option value="">Tất cả cơ sở</option>
@@ -24,7 +24,7 @@
                 @endforeach
             </select>
         </div>
-        
+
         <div class="w-full md:w-auto">
             <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
                 <option value="">Tất cả trạng thái</option>
@@ -32,7 +32,7 @@
                 <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Đã nghỉ việc</option>
             </select>
         </div>
-        
+
         <button type="submit" class="bg-pink-500 text-white px-6 py-2 rounded-lg hover:bg-pink-600 transition">
             <i class="fas fa-search mr-2"></i>Tìm kiếm
         </button>
@@ -52,7 +52,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="flex items-center">
             <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
@@ -64,7 +64,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="flex items-center">
             <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
@@ -76,7 +76,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="flex items-center">
             <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
@@ -99,7 +99,7 @@
                 <i class="fas fa-plus mr-2"></i>Thêm nhân viên
             </a>
         </div>
-        
+
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead>
@@ -116,7 +116,7 @@
                     @forelse($employees as $employee)
                     <tr>
                         <td class="py-4">
-                            <img src="{{ $employee->avatar_url }}" alt="{{ $employee->name }}" 
+                            <img src="{{ asset($employee->avatar_url ?? 'images/employees/default-avatar.svg') }}" alt="{{ $employee->name }}"
                                 class="w-16 h-16 rounded-full object-cover">
                         </td>
                         <td class="py-4">
@@ -148,16 +148,16 @@
                         </td>
                         <td class="py-4">
                             <div class="flex items-center space-x-2">
-                                <a href="{{ route('admin.employees.show', $employee) }}" 
+                                <a href="{{ route('admin.employees.show', $employee) }}"
                                     class="text-blue-500 hover:text-blue-700" title="Xem chi tiết">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                
-                                <a href="{{ route('admin.employees.edit', $employee) }}" 
+
+                                <a href="{{ route('admin.employees.edit', $employee) }}"
                                     class="text-yellow-500 hover:text-yellow-700" title="Chỉnh sửa">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                
+
                                 <form action="{{ route('admin.employees.destroy', $employee) }}" method="POST" class="inline">
                                     @csrf
                                     @method('DELETE')
@@ -167,7 +167,7 @@
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
-                                
+
                                 <form action="{{ route('admin.employees.toggle-status', $employee) }}" method="POST" class="inline">
                                     @csrf
                                     <button type="submit" class="text-gray-500 hover:text-gray-700"
@@ -188,11 +188,11 @@
                 </tbody>
             </table>
         </div>
-        
+
         <!-- Pagination -->
         <div class="mt-6">
             {{ $employees->withQueryString()->links() }}
         </div>
     </div>
 </div>
-@endsection 
+@endsection

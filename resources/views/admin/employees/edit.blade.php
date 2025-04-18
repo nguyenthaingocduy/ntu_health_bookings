@@ -6,7 +6,7 @@
 
 @section('content')
 <div class="bg-white rounded-lg shadow-sm p-6">
-    <form action="{{ route('admin.employees.update', $employee->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+    <form action="{{ route('admin.employees.update', $employee->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="employeeEditForm">
         @csrf
         @method('PUT')
 
@@ -165,13 +165,13 @@
                 @if($employee->avatar_url)
                     <div class="mb-4">
                         <p class="text-sm font-medium text-gray-700 mb-2">Ảnh đại diện hiện tại</p>
-                        <img src="{{ asset($employee->avatar_url) }}" alt="{{ $employee->first_name }}" class="w-32 h-32 object-cover rounded-full">
+                        <img src="{{ asset($employee->avatar_url ?? 'images/employees/default-avatar.svg') }}" alt="{{ $employee->first_name }}" class="w-32 h-32 object-cover rounded-full">
                     </div>
                 @endif
 
                 <label for="avatar" class="block text-sm font-medium text-gray-700 mb-2">Thay đổi ảnh đại diện</label>
-                <input type="file" name="avatar" id="avatar" accept="image/*"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="file" id="avatar" name="avatar" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                <div id="avatarPreview" class="mt-2 flex justify-center"></div>
                 <p class="text-sm text-gray-500 mt-1">Chọn hình ảnh có kích thước tối đa 2MB, định dạng JPG, PNG, GIF. Để trống nếu không muốn thay đổi ảnh đại diện.</p>
                 @error('avatar')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -201,6 +201,53 @@
                 allowClear: true
             });
         }
+
+        // Form submit handler for debugging
+        $("#employeeEditForm").submit(function(e) {
+            // Log form data for debugging
+            console.log('Form submitted');
+            const formData = new FormData(this);
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
+            }
+            // Continue with form submission
+            return true;
+        });
+
+        // Preview avatar before upload
+        $("#avatar").change(function() {
+            const file = this.files[0];
+            if (file) {
+                console.log('File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
+
+                // Check file size
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Kích thước file quá lớn. Vui lòng chọn file nhỏ hơn 2MB.');
+                    this.value = '';
+                    $("#avatarPreview").html('');
+                    return;
+                }
+
+                // Check file type
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Loại file không hợp lệ. Vui lòng chọn file ảnh (JPG, PNG, GIF).');
+                    this.value = '';
+                    $("#avatarPreview").html('');
+                    return;
+                }
+
+                let reader = new FileReader();
+                reader.onload = function(event) {
+                    $("#avatarPreview").html('<div><img src="' + event.target.result + '" class="mt-2 rounded-full w-24 h-24 object-cover border-2 border-blue-200 shadow-md" /></div>');
+                }
+                reader.onerror = function(event) {
+                    console.error('FileReader error:', event);
+                    alert('Lỗi khi đọc file. Vui lòng thử lại.');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
     });
 </script>
 @endpush
