@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Clinic;
+use App\Models\CustomerType;
 use App\Models\Employee;
 use App\Models\Role;
 use App\Models\Service;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 
 class EmployeeController extends Controller
 {
@@ -130,6 +133,7 @@ class EmployeeController extends Controller
             Log::info('Avatar uploaded successfully', ['path' => $directory . '/' . $avatarName]);
         }
 
+        // Create the employee record
         $employee = Employee::create($data);
 
         // Sync services
@@ -137,8 +141,43 @@ class EmployeeController extends Controller
             $employee->services()->sync($request->services);
         }
 
+        // Create a corresponding user account for authentication
+        $defaultPassword = 'password123'; // Default password, should be changed by the employee
+
+        // Get a default customer type ID
+        $defaultTypeId = null;
+        try {
+            $defaultType = CustomerType::first();
+            if ($defaultType) {
+                $defaultTypeId = $defaultType->id;
+            }
+        } catch (\Exception $e) {
+            Log::error("Error getting default customer type: {$e->getMessage()}");
+        }
+
+        $user = User::create([
+            'id' => Str::uuid(),
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'],
+            'address' => $data['address'],
+            'gender' => $data['gender'],
+            'birthday' => $data['birthday'],
+            'password' => Hash::make($defaultPassword),
+            'role_id' => $data['role_id'],
+            'type_id' => $defaultTypeId,
+            'status' => $data['status'],
+        ]);
+
+        Log::info('Created user account for employee', [
+            'employee_id' => $employee->id,
+            'user_id' => $user->id,
+            'email' => $user->email
+        ]);
+
         return redirect()->route('admin.employees.index')
-            ->with('success', 'Nhân viên đã được thêm thành công.');
+            ->with('success', 'Nhân viên đã được thêm thành công. Tài khoản đăng nhập đã được tạo với mật khẩu mặc định: ' . $defaultPassword);
     }
 
     public function edit($id)
@@ -219,6 +258,7 @@ class EmployeeController extends Controller
             Log::info('Avatar uploaded successfully (update)', ['path' => $directory . '/' . $avatarName]);
         }
 
+        // Update the employee record
         $employee->update($data);
 
         // Sync services
@@ -226,6 +266,66 @@ class EmployeeController extends Controller
             $employee->services()->sync($request->services);
         } else {
             $employee->services()->detach();
+        }
+
+        // Update the corresponding user account if it exists
+        $user = User::where('email', $data['email'])->first();
+
+        if ($user) {
+            $user->update([
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'phone' => $data['phone'],
+                'address' => $data['address'],
+                'gender' => $data['gender'],
+                'birthday' => $data['birthday'],
+                'role_id' => $data['role_id'],
+                'status' => $data['status'],
+            ]);
+
+            Log::info('Updated user account for employee', [
+                'employee_id' => $employee->id,
+                'user_id' => $user->id,
+                'email' => $user->email
+            ]);
+        } else {
+            // If no user account exists, create one
+            $defaultPassword = 'password123';
+
+            // Get a default customer type ID
+            $defaultTypeId = null;
+            try {
+                $defaultType = CustomerType::first();
+                if ($defaultType) {
+                    $defaultTypeId = $defaultType->id;
+                }
+            } catch (\Exception $e) {
+                Log::error("Error getting default customer type: {$e->getMessage()}");
+            }
+
+            $user = User::create([
+                'id' => Str::uuid(),
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'email' => $data['email'],
+                'phone' => $data['phone'],
+                'address' => $data['address'],
+                'gender' => $data['gender'],
+                'birthday' => $data['birthday'],
+                'password' => Hash::make($defaultPassword),
+                'role_id' => $data['role_id'],
+                'type_id' => $defaultTypeId,
+                'status' => $data['status'],
+            ]);
+
+            Log::info('Created user account for existing employee', [
+                'employee_id' => $employee->id,
+                'user_id' => $user->id,
+                'email' => $user->email
+            ]);
+
+            return redirect()->route('admin.employees.index')
+                ->with('success', 'Thông tin nhân viên đã được cập nhật thành công. Tài khoản đăng nhập đã được tạo với mật khẩu mặc định: ' . $defaultPassword);
         }
 
         return redirect()->route('admin.employees.index')
@@ -239,6 +339,17 @@ class EmployeeController extends Controller
         // Kiểm tra xem nhân viên có lịch hẹn nào không
         if ($employee->appointments()->count() > 0) {
             return back()->with('error', 'Không thể xóa nhân viên này vì đã có lịch hẹn.');
+        }
+
+        // Find and delete the corresponding user account
+        $user = User::where('email', $employee->email)->first();
+        if ($user) {
+            Log::info('Deleting user account for employee', [
+                'employee_id' => $employee->id,
+                'user_id' => $user->id,
+                'email' => $user->email
+            ]);
+            $user->delete();
         }
 
         $employee->delete();
@@ -255,6 +366,20 @@ class EmployeeController extends Controller
         $employee = Employee::findOrFail($id);
         $employee->status = $employee->status === 'active' ? 'inactive' : 'active';
         $employee->save();
+
+        // Update the corresponding user account status
+        $user = User::where('email', $employee->email)->first();
+        if ($user) {
+            $user->status = $employee->status;
+            $user->save();
+
+            Log::info('Updated user status for employee', [
+                'employee_id' => $employee->id,
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'new_status' => $employee->status
+            ]);
+        }
 
         $statusText = $employee->status === 'active' ? 'được kích hoạt' : 'được chuyển sang trạng thái không hoạt động';
 

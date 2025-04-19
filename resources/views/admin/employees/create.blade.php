@@ -27,7 +27,7 @@
     @endif
 
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4">
+        <div class="bg-pink-500 from-pink-500 to-indigo-600 px-6 py-4">
             <h2 class="text-white text-lg font-semibold">Thông tin nhân viên</h2>
         </div>
         <div class="p-6">
@@ -58,7 +58,7 @@
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
                         <input type="email" id="email" name="email" value="{{ old('email') }}" required
-                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('email') border-red-500 @enderror">
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent @error('email') border-red-500 @enderror">
                         @error('email')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -139,11 +139,11 @@
                         <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Trạng thái <span class="text-red-500">*</span></label>
                         <div class="flex space-x-4">
                             <label class="inline-flex items-center">
-                                <input type="radio" name="status" value="active" class="h-4 w-4 text-blue-600 focus:ring-blue-500" {{ old('status', 'active') == 'active' ? 'checked' : '' }}>
+                                <input type="radio" name="status" value="active" class="h-4 w-4 text-pink-600 focus:ring-pink-500" {{ old('status', 'active') == 'active' ? 'checked' : '' }}>
                                 <span class="ml-2 text-gray-700">Đang làm việc</span>
                             </label>
                             <label class="inline-flex items-center">
-                                <input type="radio" name="status" value="inactive" class="h-4 w-4 text-blue-600 focus:ring-blue-500" {{ old('status') == 'inactive' ? 'checked' : '' }}>
+                                <input type="radio" name="status" value="inactive" class="h-4 w-4 text-pink-600 focus:ring-pink-500" {{ old('status') == 'inactive' ? 'checked' : '' }}>
                                 <span class="ml-2 text-gray-700">Đã nghỉ việc</span>
                             </label>
                         </div>
@@ -181,7 +181,7 @@
 
                 <div>
                     <label for="avatar" class="block text-sm font-medium text-gray-700 mb-1">Ảnh đại diện</label>
-                    <input type="file" id="avatar" name="avatar" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <input type="file" id="avatar" name="avatar" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-blue-100">
                     <div id="avatarPreview" class="mt-2 flex justify-center"></div>
                     <p class="text-xs text-gray-500 mt-1 text-center">Nếu không tải ảnh lên, hệ thống sẽ sử dụng ảnh mặc định</p>
                     @error('avatar')
@@ -193,7 +193,7 @@
                     <a href="{{ route('admin.employees.index') }}" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-300">
                         Hủy bỏ
                     </a>
-                    <button type="submit" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:opacity-90 transition duration-300">
+                    <button type="submit" class="px-6 py-2 bg-pink-500 from-blue-500 to-indigo-600 text-white rounded-lg hover:opacity-90 transition duration-300">
                         <i class="fas fa-save mr-2"></i>Lưu nhân viên
                     </button>
                 </div>

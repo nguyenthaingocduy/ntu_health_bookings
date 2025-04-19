@@ -26,8 +26,7 @@
                 <form action="{{ route('admin.services.index') }}" method="GET" class="mb-6 bg-gray-50 p-4 rounded-lg">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
-                            <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Danh mục</label>
-                            <select name="category" id="category" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500">
+                            <select name="category" id="category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
                                 <option value="">Tất cả danh mục</option>
                                 @foreach($categories as $category)
                                     <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
@@ -37,9 +36,8 @@
                             </select>
                         </div>
 
-                        <div>
-                            <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-                            <select name="status" id="status" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500">
+                        <div class="w-full md:w-auto">
+                            <select name="status" id="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
                                 <option value="">Tất cả trạng thái</option>
                                 <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Đang hoạt động</option>
                                 <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Ngừng hoạt động</option>
@@ -47,9 +45,8 @@
                         </div>
 
                         <div>
-                            <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
                             <input type="text" name="search" id="search" value="{{ request('search') }}"
-                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
                                    placeholder="Tên dịch vụ...">
                         </div>
 

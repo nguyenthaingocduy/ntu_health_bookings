@@ -10,14 +10,14 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-    
+
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Scripts and Styles -->
     @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+
     <style>
         :root {
             --primary: #FF69B4;
@@ -242,25 +242,25 @@
             position: relative;
             z-index: 10;
         }
-        
+
         #user-menu-button:hover {
             border-color: var(--primary);
             transform: scale(1.05);
         }
-        
+
         .user-menu {
             z-index: 100;
             min-width: 200px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
         }
-        
+
         .user-menu a {
             display: block;
             padding: 10px 15px;
             border-radius: 6px;
             transition: all 0.2s ease;
         }
-        
+
         .user-menu a:hover {
             background-color: #f3f4f6;
             transform: translateX(5px);
@@ -287,31 +287,31 @@
             padding: 1.5rem 0;
             margin-top: 2rem;
         }
-        
+
         .footer-content {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: flex-start;
         }
-        
+
         .footer-brand {
             margin-bottom: 1rem;
             flex: 1 1 250px;
         }
-        
+
         .footer-info {
             margin-bottom: 1rem;
             flex: 2 1 400px;
             font-size: 0.9rem;
         }
-        
+
         .footer-socials {
             flex: 1 1 150px;
             display: flex;
             justify-content: flex-end;
         }
-        
+
         .footer-socials a {
             display: inline-flex;
             align-items: center;
@@ -324,28 +324,28 @@
             margin-left: 0.5rem;
             transition: all 0.3s ease;
         }
-        
+
         .footer-socials a:hover {
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
         }
-        
+
         @media (max-width: 768px) {
             .footer-content {
                 flex-direction: column;
             }
-            
+
             .footer-socials {
                 justify-content: flex-start;
                 margin-top: 1rem;
             }
-            
+
             .footer-socials a:first-child {
                 margin-left: 0;
             }
         }
     </style>
-    
+
     @stack('styles')
 </head>
 <body>
@@ -353,7 +353,10 @@
         @include('partials.navigation')
 
         @yield('content')
-        
+
+        <!-- Service Promotion Popup -->
+        @include('components.service-popup')
+
         <!-- Footer -->
         <footer class="footer">
             <div class="container mx-auto px-6">
@@ -362,7 +365,7 @@
                         <span class="text-xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">Beauty Salon</span>
                         <p class="text-sm text-gray-600 mt-1">Chăm sóc sức khỏe và sắc đẹp của bạn</p>
                     </div>
-                    
+
                     <div class="footer-info">
                         <div class="mb-2">
                             <i class="fas fa-map-marker-alt text-pink-500 mr-2"></i>
@@ -377,7 +380,7 @@
                             <span class="text-gray-700">contact@ntuhealth.com</span>
                         </div>
                     </div>
-                    
+
                     <div class="footer-socials">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
                         <a href="#"><i class="fab fa-instagram"></i></a>
@@ -385,7 +388,7 @@
                         <a href="#"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
-                
+
                 <div class="text-center text-gray-600 text-sm mt-4">
                     &copy; {{ date('Y') }} Beauty Salon. Tất cả quyền được bảo lưu.
                 </div>
@@ -394,25 +397,27 @@
     </div>
 
     @stack('scripts')
+    <!-- Service Popup JS -->
+    <script src="{{ asset('js/service-popup.js') }}"></script>
     <!-- Toastr JS -->
     <script>
         // Script chạy ngay lập tức
         (function() {
             console.log('Script menu dropdown đang chạy');
-            
+
             // Lấy button và menu dropdown
             const userMenuButton = document.getElementById('user-menu-button');
             const dropdownMenu = document.querySelector('.dropdown-menu');
-            
+
             if (userMenuButton && dropdownMenu) {
                 console.log('Đã tìm thấy phần tử menu');
-                
+
                 // Thêm sự kiện click cho button
                 userMenuButton.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     console.log('Đã nhấp vào avatar');
-                    
+
                     // Toggle hiển thị dropdown menu
                     if (dropdownMenu.style.display === 'none' || dropdownMenu.style.display === '') {
                         dropdownMenu.style.display = 'block';
@@ -420,19 +425,19 @@
                         dropdownMenu.style.display = 'none';
                     }
                 });
-                
+
                 // Đóng dropdown khi click ra ngoài
                 document.addEventListener('click', function(e) {
                     if (!userMenuButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
                         dropdownMenu.style.display = 'none';
                     }
                 });
-                
+
                 // Thêm các sự kiện hover nếu cần
                 userMenuButton.addEventListener('mouseenter', function() {
                     userMenuButton.classList.add('ring-2', 'ring-indigo-500');
                 });
-                
+
                 userMenuButton.addEventListener('mouseleave', function() {
                     if (dropdownMenu.style.display !== 'block') {
                         userMenuButton.classList.remove('ring-2', 'ring-indigo-500');
@@ -444,4 +449,4 @@
         })();
     </script>
 </body>
-</html> 
+</html>
