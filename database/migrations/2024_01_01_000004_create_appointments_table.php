@@ -8,19 +8,20 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('appointments', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
-            $table->foreignUuid('service_id')->constrained()->onDelete('cascade');
-            $table->dateTime('appointment_date');
-            $table->enum('status', ['pending', 'confirmed', 'completed', 'cancelled'])->default('pending');
-            $table->text('notes')->nullable();
-            $table->timestamps();
-        });
+        // This migration is skipped as the appointments table already exists
+        // Schema::create('appointments', function (Blueprint $table) {
+        //     $table->uuid('id')->primary();
+        //     $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
+        //     $table->foreignUuid('service_id')->constrained()->onDelete('cascade');
+        //     $table->dateTime('appointment_date');
+        //     $table->enum('status', ['pending', 'confirmed', 'completed', 'cancelled'])->default('pending');
+        //     $table->text('notes')->nullable();
+        //     $table->timestamps();
+        // });
     }
 
     public function down()
     {
-        Schema::dropIfExists('appointments');
+        // Schema::dropIfExists('appointments');
     }
 };
