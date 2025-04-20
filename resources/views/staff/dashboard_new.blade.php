@@ -10,7 +10,7 @@
         <div class="p-6 sm:p-8">
             <div class="flex flex-col sm:flex-row items-center">
                 <div class="w-20 h-20 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center mr-6 mb-4 sm:mb-0 shadow-lg">
-                    <i class="fas fa-user-md text-white text-3xl"></i>
+                    <i class="fas fa-user-md text-black text-3xl"></i>
                 </div>
                 <div class="text-center sm:text-left">
                     <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600 mb-2">Xin chào, {{ Auth::user()->first_name }}!</h2>
@@ -37,10 +37,10 @@
                         <p class="text-gray-600">{{ Auth::user()->email }}</p>
                         <div class="flex items-center mt-1">
                             <span class="flex items-center text-purple-600 font-medium text-sm mr-4">
-                                <i class="fas fa-user-tie mr-1"></i> Cán bộ viên chức
+                                <i class="fas fa-user-tie mr-2"></i> Cán bộ viên chức
                             </span>
                             <span class="flex items-center text-gray-600 text-sm">
-                                <i class="fas fa-map-marker-alt mr-1"></i> {{ Auth::user()->address ?? 'Chưa cập nhật' }}
+                                <i class="fas fa-map-marker-alt mr-2"></i> {{ Auth::user()->address ?? 'Chưa cập nhật' }}
                             </span>
                         </div>
                     </div>
@@ -49,7 +49,7 @@
                     <a href="{{ route('staff.profile.index') }}" class="inline-flex items-center px-4 py-2 bg-white rounded-lg border border-gray-200 shadow-sm text-pink-600 hover:bg-gray-50 transition">
                         <i class="fas fa-user-edit mr-2"></i> Cập nhật hồ sơ
                     </a>
-                    <a href="{{ route('staff.appointments.create') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg shadow-sm text-white hover:from-pink-600 hover:to-purple-700 transition">
+                    <a href="{{ route('staff.appointments.create') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg shadow-sm text-black hover:from-pink-600 hover:to-purple-700 transition">
                         <i class="fas fa-calendar-plus mr-2"></i> Tạo lịch hẹn
                     </a>
                 </div>
@@ -58,7 +58,7 @@
     </div>
 
     <!-- Stats Section -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <!-- Upcoming Appointments -->
         <div class="bg-white overflow-hidden shadow-xl rounded-2xl transform transition duration-300 hover:scale-105 border border-gray-100">
             <div class="p-6 relative overflow-hidden">
@@ -71,7 +71,7 @@
                         <div class="text-gray-600 font-medium text-lg">Lịch hẹn sắp tới</div>
                     </div>
                     <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-md">
-                        <i class="fas fa-calendar-alt text-white text-xl"></i>
+                        <i class="fas fa-calendar-alt text-black text-xl"></i>
                     </div>
                 </div>
             </div>
@@ -95,7 +95,7 @@
                         <div class="text-gray-600 font-medium text-lg">Lịch hẹn hôm nay</div>
                     </div>
                     <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-md">
-                        <i class="fas fa-calendar-day text-white text-xl"></i>
+                        <i class="fas fa-calendar-day text-black text-xl"></i>
                     </div>
                 </div>
             </div>
@@ -119,7 +119,7 @@
                         <div class="text-gray-600 font-medium text-lg">Lịch hẹn hoàn thành</div>
                     </div>
                     <div class="w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-md">
-                        <i class="fas fa-check-circle text-white text-xl"></i>
+                        <i class="fas fa-check-circle text-black text-xl"></i>
                     </div>
                 </div>
             </div>
@@ -143,7 +143,7 @@
                         <div class="text-gray-600 font-medium text-lg">Doanh thu (VNĐ)</div>
                     </div>
                     <div class="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-md">
-                        <i class="fas fa-coins text-white text-xl"></i>
+                        <i class="fas fa-coins text-black text-xl"></i>
                     </div>
                 </div>
             </div>
@@ -157,7 +157,7 @@
     </div>
 
     <!-- Today's Schedule & Revenue Chart -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         <!-- Today's Schedule - 2/3 width on larger screens -->
         <div class="lg:col-span-2 bg-white overflow-hidden shadow-xl rounded-2xl border border-gray-100">
             <div class="p-6 sm:p-8">
@@ -280,7 +280,7 @@
                 </div>
                 
                 <div class="mt-6 text-center">
-                    <a href="{{ route('staff.statistics') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-medium rounded-lg hover:from-amber-600 hover:to-amber-700 transition">
+                    <a href="{{ route('staff.statistics') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-medium rounded-lg hover:from-amber-600 hover:to-amber-700 transition">
                         <i class="fas fa-chart-bar mr-2"></i> Xem thống kê chi tiết
                     </a>
                 </div>
@@ -289,14 +289,14 @@
     </div>
 
     <!-- Quick Actions -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
         <div class="bg-gradient-to-br from-pink-50 to-pink-100 overflow-hidden shadow-lg rounded-2xl transform transition duration-300 hover:shadow-xl border border-pink-100 relative">
             <div class="absolute top-0 right-0 w-40 h-40 bg-pink-200 rounded-full opacity-20 transform translate-x-10 -translate-y-20"></div>
             <div class="absolute bottom-0 left-0 w-32 h-32 bg-pink-200 rounded-full opacity-20 transform -translate-x-10 translate-y-10"></div>
             <div class="p-8 relative">
                 <div class="mb-6">
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-r from-pink-500 to-pink-600 flex items-center justify-center shadow-lg">
-                        <i class="fas fa-calendar-week text-white text-xl"></i>
+                        <i class="fas fa-calendar-week text-black text-xl"></i>
                     </div>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-800 mb-3">Lịch làm việc</h3>
@@ -304,7 +304,7 @@
                     Xem lịch làm việc của bạn, quản lý các cuộc hẹn và theo dõi lịch trình hàng ngày. Dễ dàng cập nhật trạng thái các cuộc hẹn.
                 </p>
                 <a href="{{ route('staff.work-schedule') }}" 
-                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-pink-600 text-white font-medium rounded-full hover:from-pink-600 hover:to-pink-700 transition shadow-md group">
+                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-pink-600 text-black font-medium rounded-full hover:from-pink-600 hover:to-pink-700 transition shadow-md group">
                     Xem lịch làm việc
                     <i class="fas fa-arrow-right ml-2 transition-transform group-hover:translate-x-1"></i>
                 </a>
@@ -317,7 +317,7 @@
             <div class="p-8 relative">
                 <div class="mb-6">
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center shadow-lg">
-                        <i class="fas fa-chart-bar text-white text-xl"></i>
+                        <i class="fas fa-chart-bar text-black text-xl"></i>
                     </div>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-800 mb-3">Thống kê</h3>
@@ -325,7 +325,7 @@
                     Theo dõi số lượng khách hàng, doanh thu và hiệu suất làm việc của bạn. Xem báo cáo chi tiết và phân tích dữ liệu.
                 </p>
                 <a href="{{ route('staff.statistics') }}" 
-                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-medium rounded-full hover:from-purple-600 hover:to-purple-700 transition shadow-md group">
+                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-black font-medium rounded-full hover:from-purple-600 hover:to-purple-700 transition shadow-md group">
                     Xem thống kê
                     <i class="fas fa-arrow-right ml-2 transition-transform group-hover:translate-x-1"></i>
                 </a>
@@ -338,7 +338,7 @@
         <div class="p-6 sm:p-8">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-2xl font-bold text-gray-800 flex items-center">
-                    <span class="bg-purple-100 text-purple-600 p-2 rounded-lg mr-3">
+                    <span class="bg-pink-100 text-pink-600 p-2 rounded-lg mr-3">
                         <i class="fas fa-spa"></i>
                     </span>
                     Dịch vụ phổ biến

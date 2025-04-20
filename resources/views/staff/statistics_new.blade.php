@@ -11,7 +11,7 @@
             <div class="flex flex-col sm:flex-row items-center justify-between">
                 <div class="flex items-center mb-4 sm:mb-0">
                     <div class="w-14 h-14 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center mr-4 shadow-lg">
-                        <i class="fas fa-chart-bar text-white text-xl"></i>
+                        <i class="fas fa-chart-bar text-black text-xl"></i>
                     </div>
                     <div>
                         <h2 class="text-2xl font-bold text-gray-800">Thống kê</h2>
@@ -50,7 +50,7 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-6 mb-8">
         <!-- Total Appointments -->
         <div class="bg-white overflow-hidden shadow-xl rounded-2xl transform transition duration-300 hover:scale-105 border border-gray-100">
             <div class="p-6 relative overflow-hidden">
@@ -63,7 +63,7 @@
                         <div class="text-gray-600 font-medium text-lg">Tổng số lịch hẹn</div>
                     </div>
                     <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-md">
-                        <i class="fas fa-calendar-check text-white text-xl"></i>
+                        <i class="fas fa-calendar-check text-black text-xl"></i>
                     </div>
                 </div>
                 <div class="mt-4 flex items-center text-sm">

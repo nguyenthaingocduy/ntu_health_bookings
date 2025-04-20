@@ -52,7 +52,7 @@
                             Lịch hẹn đã hoàn thành
                         </dt>
                         <dd>
-                            <div class="text-lg font-semibold text-white">
+                            <div class="text-lg font-semibold text-black">
                                 {{ $completedAppointmentsCount }}
                             </div>
                         </dd>
