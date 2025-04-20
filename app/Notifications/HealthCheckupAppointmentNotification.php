@@ -35,7 +35,24 @@ class HealthCheckupAppointmentNotification extends Notification implements Shoul
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $channels = ['database']; // Always send to database
+
+        // Check if email notifications are enabled for this user
+        if ($notifiable->email_notifications_enabled) {
+            // Check specific notification preferences based on type
+            if ($this->type === 'confirmed' && $notifiable->notify_appointment_confirmation) {
+                $channels[] = 'mail';
+            } elseif ($this->type === 'reminder' && $notifiable->notify_appointment_reminder) {
+                $channels[] = 'mail';
+            } elseif ($this->type === 'cancelled' && $notifiable->notify_appointment_cancellation) {
+                $channels[] = 'mail';
+            } elseif ($this->type !== 'confirmed' && $this->type !== 'reminder' && $this->type !== 'cancelled') {
+                // For other types like 'created' or 'completed', send email by default
+                $channels[] = 'mail';
+            }
+        }
+
+        return $channels;
     }
 
     /**

@@ -23,8 +23,8 @@
                 <!-- Sidebar -->
                 <div class="bg-gray-50 md:w-1/3 p-6 border-r">
                     <div class="flex flex-col items-center text-center mb-6">
-                        <img class="h-32 w-32 rounded-full object-cover border-4 border-pink-200 mb-4" 
-                             src="https://ui-avatars.com/api/?name={{ Auth::user()->first_name }} {{ Auth::user()->last_name }}&background=f9a8d4&color=ffffff&size=256" 
+                        <img class="h-32 w-32 rounded-full object-cover border-4 border-pink-200 mb-4"
+                             src="https://ui-avatars.com/api/?name={{ Auth::user()->first_name }} {{ Auth::user()->last_name }}&background=f9a8d4&color=ffffff&size=256"
                              alt="{{ Auth::user()->first_name }}">
                         <h2 class="text-xl font-semibold">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</h2>
                         <p class="text-gray-600 mt-1">{{ Auth::user()->email }}</p>
@@ -67,7 +67,7 @@
                 <!-- Main Content -->
                 <div class="md:w-2/3 p-6">
                     <h3 class="text-xl font-semibold mb-4">Lịch sử đặt lịch</h3>
-                    
+
                     @if($appointments->isEmpty())
                         <div class="bg-gray-50 rounded-lg p-8 text-center">
                             <img src="https://cdn.iconscout.com/icon/free/png-256/free-calendar-empty-3099718-2588872.png" alt="Empty calendar" class="w-20 h-20 mx-auto mb-4 opacity-50">
@@ -110,7 +110,7 @@
                                     </div>
                                 </div>
                             @endforeach
-                            
+
                             @if($appointments->count() > 3)
                                 <div class="text-center mt-4">
                                     <a href="{{ route('customer.appointments.index') }}" class="text-pink-600 hover:text-pink-700">
@@ -120,9 +120,9 @@
                             @endif
                         </div>
                     @endif
-                    
+
                     <hr class="my-6">
-                    
+
                     <h3 class="text-xl font-semibold mb-4">Thông tin tài khoản</h3>
                     <div class="space-y-4">
                         <div class="border rounded-lg p-4">
@@ -131,19 +131,19 @@
                                     <h4 class="font-semibold text-gray-900">Đổi mật khẩu</h4>
                                     <p class="text-gray-600 text-sm mt-1">Cập nhật mật khẩu để bảo mật tài khoản của bạn</p>
                                 </div>
-                                <a href="#" class="text-pink-600 hover:text-pink-700">
+                                <a href="{{ route('customer.profile.change-password') }}" class="text-pink-600 hover:text-pink-700">
                                     <i class="fas fa-key mr-1"></i> Đổi mật khẩu
                                 </a>
                             </div>
                         </div>
-                        
+
                         <div class="border rounded-lg p-4">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <h4 class="font-semibold text-gray-900">Thông báo</h4>
                                     <p class="text-gray-600 text-sm mt-1">Quản lý cài đặt thông báo của bạn</p>
                                 </div>
-                                <a href="#" class="text-pink-600 hover:text-pink-700">
+                                <a href="{{ route('customer.profile.notification-settings') }}" class="text-pink-600 hover:text-pink-700">
                                     <i class="fas fa-bell mr-1"></i> Cài đặt
                                 </a>
                             </div>
@@ -154,4 +154,4 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection

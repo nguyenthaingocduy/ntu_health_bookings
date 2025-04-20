@@ -19,6 +19,29 @@ class TimeSlotController extends Controller
     }
 
     /**
+     * Get a specific time slot.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getTimeSlot($id)
+    {
+        $timeSlot = Time::find($id);
+
+        if (!$timeSlot) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Time slot not found'
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'time_slot' => $timeSlot
+        ]);
+    }
+
+    /**
      * Kiểm tra và trả về các khung giờ khả dụng cho ngày và dịch vụ được chọn
      */
     public function checkAvailableSlots(Request $request)
@@ -34,9 +57,10 @@ class TimeSlotController extends Controller
             ]);
 
             // Validate request
-            $validated = $request->validate([
+            $request->validate([
                 'service_id' => 'required|exists:services,id',
                 'date' => 'required|date|after_or_equal:today',
+                'exclude_appointment_id' => 'nullable|string',
             ]);
 
             // Debug log
@@ -72,10 +96,15 @@ class TimeSlotController extends Controller
             }
 
             // Lấy các khung giờ đã được đặt trong ngày đã chọn
-            $bookedTimeSlots = Appointment::where('date_appointments', $request->date)
-                ->whereIn('status', ['pending', 'confirmed'])
-                ->pluck('time_appointments_id')
-                ->toArray();
+            $query = Appointment::where('date_appointments', $request->date)
+                ->whereIn('status', ['pending', 'confirmed']);
+
+            // Exclude the specified appointment if provided
+            if ($request->has('exclude_appointment_id')) {
+                $query->where('id', '!=', $request->exclude_appointment_id);
+            }
+
+            $bookedTimeSlots = $query->pluck('time_appointments_id')->toArray();
 
             Log::info('Các time slots đã đặt: ' . count($bookedTimeSlots), [
                 'slot_ids' => $bookedTimeSlots

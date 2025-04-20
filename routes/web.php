@@ -65,6 +65,10 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
+    Route::get('/profile/notification-settings', [ProfileController::class, 'notificationSettings'])->name('profile.notification-settings');
+    Route::put('/profile/notifications', [ProfileController::class, 'updateNotifications'])->name('profile.update-notifications');
 
     Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
     Route::get('/appointments/create/{service?}', [AppointmentController::class, 'create'])->name('appointments.create');
@@ -94,6 +98,8 @@ Route::middleware(['auth'])->prefix('staff')->name('staff.')->group(function () 
         Route::get('/appointments/create/{serviceId?}', [\App\Http\Controllers\Staff\AppointmentController::class, 'create'])->name('appointments.create');
         Route::post('/appointments', [\App\Http\Controllers\Staff\AppointmentController::class, 'store'])->name('appointments.store');
         Route::get('/appointments/{id}', [\App\Http\Controllers\Staff\AppointmentController::class, 'show'])->name('appointments.show');
+        Route::get('/appointments/{id}/edit', [\App\Http\Controllers\Staff\AppointmentController::class, 'edit'])->name('appointments.edit');
+        Route::put('/appointments/{id}', [\App\Http\Controllers\Staff\AppointmentController::class, 'update'])->name('appointments.update');
         Route::post('/appointments/{id}/cancel', [\App\Http\Controllers\Staff\AppointmentController::class, 'cancel'])->name('appointments.cancel');
 
         // Quản lý thông tin cá nhân
@@ -163,6 +169,7 @@ Route::get('/home', [HomeController::class, 'index'])->name('dashboard.home');
 // API routes for time slots and services
 Route::prefix('api')->group(function () {
     Route::get('/available-time-slots', [\App\Http\Controllers\Api\TimeSlotController::class, 'getAvailableTimeSlots']);
+    Route::get('/time-slots/{id}', [\App\Http\Controllers\Api\TimeSlotController::class, 'getTimeSlot']);
     Route::get('/services/{id}', [\App\Http\Controllers\Api\ServiceController::class, 'show']);
 });
 

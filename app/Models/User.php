@@ -39,6 +39,11 @@ class User extends Authenticatable
         'position',
         'employee_code',
         'status',
+        'email_notifications_enabled',
+        'notify_appointment_confirmation',
+        'notify_appointment_reminder',
+        'notify_appointment_cancellation',
+        'notify_promotions',
     ];
 
     /**
@@ -63,6 +68,11 @@ class User extends Authenticatable
             'password' => 'hashed',
             'birthday' => 'date',
             'last_health_check' => 'date',
+            'email_notifications_enabled' => 'boolean',
+            'notify_appointment_confirmation' => 'boolean',
+            'notify_appointment_reminder' => 'boolean',
+            'notify_appointment_cancellation' => 'boolean',
+            'notify_promotions' => 'boolean',
         ];
     }
 

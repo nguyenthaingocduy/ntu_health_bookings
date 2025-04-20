@@ -10,20 +10,85 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-    
+
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Scripts and Styles -->
     @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
+
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
+    <!-- Additional Staff UI Styles -->
+    <style>
+        /* Form element consistency */
+        .form-input, .form-select, .form-textarea,
+        input[type="text"], input[type="email"], input[type="password"],
+        input[type="date"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        /* Consistent card styling */
+        .staff-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .staff-card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+        }
+
+        .staff-card-body {
+            padding: 1.5rem;
+        }
+
+        /* Consistent button styling */
+        .staff-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+        }
+
+        /* Consistent spacing */
+        .staff-section {
+            margin-bottom: 2rem;
+        }
+
+        .staff-mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .staff-mb-6 {
+            margin-bottom: 1.5rem;
+        }
+
+        .staff-p-4 {
+            padding: 1rem;
+        }
+
+        .staff-p-6 {
+            padding: 1.5rem;
+        }
+    </style>
+
     <style>
         :root {
             --primary: #FF69B4;
@@ -248,25 +313,25 @@
             position: relative;
             z-index: 10;
         }
-        
+
         #user-menu-button:hover {
             border-color: var(--primary);
             transform: scale(1.05);
         }
-        
+
         .user-menu {
             z-index: 100;
             min-width: 200px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
         }
-        
+
         .user-menu a {
             display: block;
             padding: 10px 15px;
             border-radius: 6px;
             transition: all 0.2s ease;
         }
-        
+
         .user-menu a:hover {
             background-color: #f3f4f6;
             transform: translateX(5px);
@@ -293,31 +358,31 @@
             padding: 1.5rem 0;
             margin-top: 2rem;
         }
-        
+
         .footer-content {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: flex-start;
         }
-        
+
         .footer-brand {
             margin-bottom: 1rem;
             flex: 1 1 250px;
         }
-        
+
         .footer-info {
             margin-bottom: 1rem;
             flex: 2 1 400px;
             font-size: 0.9rem;
         }
-        
+
         .footer-socials {
             flex: 1 1 150px;
             display: flex;
             justify-content: flex-end;
         }
-        
+
         .footer-socials a {
             display: inline-flex;
             align-items: center;
@@ -330,22 +395,22 @@
             margin-left: 0.5rem;
             transition: all 0.3s ease;
         }
-        
+
         .footer-socials a:hover {
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
         }
-        
+
         @media (max-width: 768px) {
             .footer-content {
                 flex-direction: column;
             }
-            
+
             .footer-socials {
                 justify-content: flex-start;
                 margin-top: 1rem;
             }
-            
+
             .footer-socials a:first-child {
                 margin-left: 0;
             }
@@ -428,7 +493,7 @@
             scrollbar-width: none;
         }
     </style>
-    
+
     @stack('styles')
 </head>
 <body>
@@ -440,7 +505,7 @@
                     <span class="text-3xl font-extrabold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">NTU</span>
                     <span class="text-3xl font-bold text-gray-800 ml-1">Health</span>
                 </a>
-                
+
                 <div class="space-y-2">
                     <a href="{{ route('staff.dashboard') }}" class="sidebar-link flex items-center px-4 py-3 text-gray-700 hover:text-pink-600 {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}">
                         <div class="sidebar-icon">
@@ -448,37 +513,37 @@
                         </div>
                         <span>Trang chủ</span>
                     </a>
-                    
+
                     <a href="{{ route('staff.work-schedule') }}" class="sidebar-link flex items-center px-4 py-3 text-gray-700 hover:text-pink-600 {{ request()->routeIs('staff.work-schedule') ? 'active' : '' }}">
                         <div class="sidebar-icon">
                             <i class="fas fa-calendar-week text-sm"></i>
                         </div>
                         <span>Lịch làm việc</span>
                     </a>
-                    
+
                     <a href="{{ route('staff.appointments.index') }}" class="sidebar-link flex items-center px-4 py-3 text-gray-700 hover:text-pink-600 {{ request()->routeIs('staff.appointments.*') ? 'active' : '' }}">
                         <div class="sidebar-icon">
                             <i class="fas fa-calendar-check text-sm"></i>
                         </div>
                         <span>Lịch hẹn</span>
                     </a>
-                    
+
                     <a href="{{ route('staff.statistics') }}" class="sidebar-link flex items-center px-4 py-3 text-gray-700 hover:text-pink-600 {{ request()->routeIs('staff.statistics') ? 'active' : '' }}">
                         <div class="sidebar-icon">
                             <i class="fas fa-chart-bar text-sm"></i>
                         </div>
                         <span>Thống kê</span>
                     </a>
-                    
+
                     <div class="border-t border-gray-200 my-4"></div>
-                    
+
                     <a href="{{ route('staff.profile.index') }}" class="sidebar-link flex items-center px-4 py-3 text-gray-700 hover:text-pink-600 {{ request()->routeIs('staff.profile.*') ? 'active' : '' }}">
                         <div class="sidebar-icon">
                             <i class="fas fa-user text-sm"></i>
                         </div>
                         <span>Hồ sơ cá nhân</span>
                     </a>
-                    
+
                     <form action="{{ route('logout') }}" method="POST" class="mt-2">
                         @csrf
                         <button type="submit" class="sidebar-link flex items-center w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg">
@@ -491,10 +556,10 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Mobile sidebar overlay -->
         <div class="sidebar-overlay" id="sidebar-overlay"></div>
-        
+
         <!-- Main Content -->
         <div class="flex-1">
             <!-- Top Navigation -->
@@ -507,7 +572,7 @@
                                 <i class="fas fa-bars text-xl"></i>
                             </button>
                         </div>
-                        
+
                         <!-- Logo (visible only on mobile) -->
                         <div class="md:hidden flex items-center">
                             <a href="{{ route('staff.dashboard') }}" class="flex items-center">
@@ -515,26 +580,26 @@
                                 <span class="text-2xl font-bold text-gray-800 ml-1">Health</span>
                             </a>
                         </div>
-                        
+
                         <!-- Page Title (visible on desktop) -->
                         <div class="hidden md:flex items-center">
                             <h1 class="text-xl font-bold text-gray-800">@yield('page-title', 'Trang chủ')</h1>
                         </div>
-                        
+
                         <!-- User Profile -->
                         <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                             <button @click="open = !open" class="flex items-center px-3 py-2 text-gray-700 hover:text-pink-600 transition">
                                 <span class="mr-2 font-medium hidden sm:inline-block">{{ Auth::user()->first_name }}</span>
-                                <img class="h-9 w-9 rounded-full object-cover border-2 border-pink-200 hover:border-pink-400 transition-colors" 
-                                     src="https://ui-avatars.com/api/?name={{ Auth::user()->first_name }}&background=f9a8d4&color=ffffff" 
+                                <img class="h-9 w-9 rounded-full object-cover border-2 border-pink-200 hover:border-pink-400 transition-colors"
+                                     src="https://ui-avatars.com/api/?name={{ Auth::user()->first_name }}&background=f9a8d4&color=ffffff"
                                      alt="{{ Auth::user()->first_name }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
-                            
+
                             <!-- Dropdown menu -->
-                            <div x-show="open" 
+                            <div x-show="open"
                                  x-transition:enter="transition ease-out duration-200"
                                  x-transition:enter-start="opacity-51 transform scale-95"
                                  x-transition:enter-end="opacity-100 transform scale-100"
@@ -566,16 +631,16 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Mobile Page Title -->
                     <div class="md:hidden py-2 -mt-1">
                         <h1 class="text-xl font-bold text-gray-800">@yield('page-title', 'Trang chủ')</h1>
                     </div>
                 </div>
             </nav>
-            
+
             <!-- Main Content Area -->
-            <main class="py-6 px-4 sm:px-6 lg:px-8">
+            <main class="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
                 <!-- Alerts -->
                 @if(session('success'))
                     <div class="mb-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow" role="alert">
@@ -597,7 +662,7 @@
                         </div>
                     </div>
                 @endif
-                
+
                 @if(session('error'))
                     <div class="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow" role="alert">
                         <div class="flex">
@@ -618,10 +683,10 @@
                         </div>
                     </div>
                 @endif
-                
+
                 @yield('content')
             </main>
-            
+
             <!-- Footer -->
             <footer class="footer">
                 <div class="container mx-auto px-6">
@@ -630,7 +695,7 @@
                             <span class="text-xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">NTU Health</span>
                             <p class="text-sm text-gray-600 mt-1">Chăm sóc sức khỏe và sắc đẹp của bạn</p>
                         </div>
-                        
+
                         <div class="footer-info">
                             <div class="mb-2">
                                 <i class="fas fa-map-marker-alt text-pink-500 mr-2"></i>
@@ -645,7 +710,7 @@
                                 <span class="text-gray-700">dhnt@ntu.edu.vn</span>
                             </div>
                         </div>
-                        
+
                         <div class="footer-socials">
                             <a href="#"><i class="fab fa-facebook-f"></i></a>
                             <a href="#"><i class="fab fa-instagram"></i></a>
@@ -653,7 +718,7 @@
                             <a href="#"><i class="fab fa-youtube"></i></a>
                         </div>
                     </div>
-                    
+
                     <div class="text-center text-gray-600 text-sm mt-4">
                         &copy; {{ date('Y') }} Trường Đại học Nha Trang. Tất cả quyền được bảo lưu.
                     </div>
@@ -668,14 +733,14 @@
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const sidebar = document.getElementById('sidebar');
             const sidebarOverlay = document.getElementById('sidebar-overlay');
-            
+
             if (mobileMenuButton && sidebar && sidebarOverlay) {
                 mobileMenuButton.addEventListener('click', function() {
                     sidebar.classList.toggle('open');
                     sidebarOverlay.classList.toggle('active');
                     document.body.classList.toggle('overflow-hidden');
                 });
-                
+
                 sidebarOverlay.addEventListener('click', function() {
                     sidebar.classList.remove('open');
                     sidebarOverlay.classList.remove('active');
@@ -684,7 +749,7 @@
             }
         });
     </script>
-    
+
     @stack('scripts')
 </body>
 </html>
