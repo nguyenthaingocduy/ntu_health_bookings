@@ -508,9 +508,9 @@
 
                 <div class="space-y-2">
                     <a href="{{ route('staff.dashboard') }}" class="sidebar-link flex items-center px-4 py-3 text-gray-700 hover:text-pink-600 {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}">
-                        <div class="sidebar-icon">
+                        {{-- <div class="sidebar-icon">
                             <i class="fas fa-home text-sm"></i>
-                        </div>
+                        </div> --}}
                         <span>Trang chủ</span>
                     </a>
 
@@ -558,7 +558,7 @@
         </div>
 
         <!-- Mobile sidebar overlay -->
-        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        {{-- <div class="sidebar-overlay" id="sidebar-overlay"></div> --}}
 
         <!-- Main Content -->
         <div class="flex-1">
@@ -569,7 +569,7 @@
                         <!-- Mobile menu button -->
                         <div class="flex items-center md:hidden">
                             <button id="mobile-menu-button" class="text-gray-700 hover:text-pink-600 focus:outline-none">
-                                <i class="fas fa-bars text-xl"></i>
+                                {{-- <i class="fas fa-bars text-xl"></i> --}}
                             </button>
                         </div>
 

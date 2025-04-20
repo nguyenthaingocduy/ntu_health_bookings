@@ -57,7 +57,7 @@
                 <div class="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-blue-100 opacity-40"></div>
                 <div class="flex items-center justify-between relative">
                     <div>
-                        <div class="text-4xl font-extrabold text-gray-800 mb-0">
+                        <div class="text-4xl font-extrabold text-gray-800 mb-1">
                             {{ $stats['total_appointments'] ?? 0 }}
                         </div>
                         <div class="text-gray-600 font-medium text-lg">Tổng số lịch hẹn</div>
@@ -66,7 +66,7 @@
                         <i class="fas fa-calendar-check text-black text-xl"></i>
                     </div>
                 </div>
-                <div class="mt-4 flex items-center text-sm">
+                <div class="mt-8 flex items-center text-sm">
                     <span class="{{ $stats['appointment_change'] >= 0 ? 'text-green-600' : 'text-red-600' }} font-medium">
                         <i class="fas {{ $stats['appointment_change'] >= 0 ? 'fa-arrow-up' : 'fa-arrow-down' }} mr-1"></i>
                         {{ abs($stats['appointment_change']) }}%
@@ -88,7 +88,7 @@
                         <div class="text-gray-600 font-medium text-lg">Tổng số khách hàng</div>
                     </div>
                     <div class="w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-md">
-                        <i class="fas fa-users text-white text-xl"></i>
+                        <i class="fas fa-users text-black text-xl"></i>
                     </div>
                 </div>
                 <div class="mt-4 flex items-center text-sm">
@@ -113,7 +113,7 @@
                         <div class="text-gray-600 font-medium text-lg">Tổng doanh thu (VNĐ)</div>
                     </div>
                     <div class="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-md">
-                        <i class="fas fa-coins text-white text-xl"></i>
+                        <i class="fas fa-coins text-black text-xl"></i>
                     </div>
                 </div>
                 <div class="mt-4 flex items-center text-sm">
@@ -138,7 +138,7 @@
                         <div class="text-gray-600 font-medium text-lg">Doanh thu TB/lịch (VNĐ)</div>
                     </div>
                     <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-md">
-                        <i class="fas fa-chart-line text-white text-xl"></i>
+                        <i class="fas fa-chart-line text-black text-xl"></i>
                     </div>
                 </div>
                 <div class="mt-4 flex items-center text-sm">
