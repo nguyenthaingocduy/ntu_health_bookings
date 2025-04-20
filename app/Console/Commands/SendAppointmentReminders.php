@@ -4,8 +4,10 @@ namespace App\Console\Commands;
 
 use App\Models\Appointment;
 use App\Notifications\HealthCheckupAppointmentNotification;
+use App\Services\EmailNotificationService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class SendAppointmentReminders extends Command
 {
@@ -29,34 +31,63 @@ class SendAppointmentReminders extends Command
     public function handle()
     {
         $tomorrow = Carbon::tomorrow()->format('Y-m-d');
-        
+
         $this->info("Sending reminders for appointments scheduled on {$tomorrow}");
-        
+
         // Get all confirmed appointments for tomorrow
-        $appointments = Appointment::with(['user', 'service', 'doctor', 'timeSlot'])
-            ->whereDate('appointment_date', $tomorrow)
-            ->where('status', 'confirmed')
+        $appointments = Appointment::with(['customer', 'service', 'timeAppointment'])
+            ->whereDate('date_appointments', $tomorrow)
+            ->whereIn('status', ['pending', 'confirmed'])
             ->get();
-            
-        $this->info("Found {$appointments->count()} appointments to remind");
-        
+
+        $count = $appointments->count();
+        $this->info("Found {$count} appointments to remind");
+
+        if ($count === 0) {
+            return 0;
+        }
+
+        // Initialize email service
+        $emailService = new EmailNotificationService();
+        $successCount = 0;
+
         foreach ($appointments as $appointment) {
             try {
-                // Skip if the user doesn't exist
-                if (!$appointment->user) {
-                    $this->warn("User not found for appointment {$appointment->id}. Skipping...");
+                // Skip if the customer doesn't exist
+                if (!$appointment->customer) {
+                    $this->warn("Customer not found for appointment {$appointment->id}. Skipping...");
                     continue;
                 }
-                
-                // Send reminder notification
-                $appointment->user->notify(new HealthCheckupAppointmentNotification($appointment, 'reminder'));
-                
-                $this->info("Reminder sent to {$appointment->user->email} for appointment at {$appointment->appointment_date->format('H:i')}");
+
+                // Try to send using the new email service
+                $notification = $emailService->sendAppointmentReminder($appointment);
+
+                if ($notification && $notification->status === 'sent') {
+                    $successCount++;
+                    $this->info("Reminder sent to {$appointment->customer->email} for appointment on {$tomorrow}");
+                } else {
+                    // Fallback to the old notification method
+                    $this->warn("Using fallback notification method for appointment {$appointment->id}");
+
+                    // Only use the old method if the user property exists
+                    if ($appointment->user) {
+                        $appointment->user->notify(new HealthCheckupAppointmentNotification($appointment, 'reminder'));
+                        $successCount++;
+                        $this->info("Reminder sent (fallback) to {$appointment->user->email}");
+                    } else {
+                        $this->warn("User not found for fallback notification. Skipping...");
+                    }
+                }
             } catch (\Exception $e) {
                 $this->error("Failed to send reminder for appointment {$appointment->id}: {$e->getMessage()}");
+                Log::error("Failed to send appointment reminder", [
+                    'appointment_id' => $appointment->id,
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
-        
-        $this->info('Appointment reminders sent successfully');
+
+        $this->info("Appointment reminders completed. Success: {$successCount}/{$count}");
+        return 0;
     }
 }

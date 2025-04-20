@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use App\Services\EmailNotificationService;
 
 class AppointmentController extends Controller
 {
@@ -100,11 +101,23 @@ class AppointmentController extends Controller
             // Gửi email xác nhận đặt lịch
             try {
                 Log::info('Bắt đầu gửi email xác nhận đặt lịch cho: ' . Auth::user()->email);
+
+                // Load appointment with relations
                 $appointmentWithRelations = Appointment::with(['service', 'customer', 'timeAppointment'])
                     ->findOrFail($appointment->id);
-                Mail::to(Auth::user()->email)
-                    ->send(new \App\Mail\AppointmentConfirmationMail($appointmentWithRelations));
-                Log::info('Đã gửi email xác nhận đặt lịch thành công cho: ' . Auth::user()->email);
+
+                // Use the new email notification service
+                $emailService = new EmailNotificationService();
+                $notification = $emailService->sendBookingConfirmation($appointmentWithRelations);
+
+                if ($notification && $notification->status === 'sent') {
+                    Log::info('Đã gửi email xác nhận đặt lịch thành công cho: ' . Auth::user()->email);
+                } else {
+                    // Fallback to the old method if the new one fails
+                    Mail::to(Auth::user()->email)
+                        ->send(new \App\Mail\AppointmentConfirmationMail($appointmentWithRelations));
+                    Log::info('Đã gửi email xác nhận đặt lịch thành công (fallback) cho: ' . Auth::user()->email);
+                }
             } catch (\Exception $e) {
                 Log::error('Không thể gửi email xác nhận đặt lịch: ' . $e->getMessage());
             }

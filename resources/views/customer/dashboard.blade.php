@@ -22,7 +22,7 @@
             <div class="p-6 sm:p-8">
                 <div class="flex flex-col sm:flex-row items-center">
                     <div class="w-20 h-20 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center mr-6 mb-4 sm:mb-0 shadow-lg">
-                        <i class="fas fa-spa text-white text-3xl"></i>
+                        <i class="fas fa-spa text-black text-3xl"></i>
                     </div>
                     <div class="text-center sm:text-left">
                         <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600 mb-2">Xin chào, {{ Auth::user()->first_name }}!</h2>
@@ -233,7 +233,7 @@
                             <h3 class="text-gray-700 font-semibold text-xl mb-2">Không có lịch hẹn sắp tới</h3>
                             <p class="text-gray-500 mb-6 max-w-md mx-auto">Bạn chưa có lịch hẹn nào. Hãy đặt lịch để trải nghiệm dịch vụ của chúng tôi.</p>
                             <a href="{{ route('customer.appointments.create') }}" 
-                               class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium rounded-full hover:from-pink-600 hover:to-purple-700 transition shadow-md">
+                               class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-black font-medium rounded-full hover:from-pink-600 hover:to-purple-700 transition shadow-md">
                                 <i class="fas fa-calendar-plus mr-2"></i>
                                 Đặt lịch ngay
                             </a>

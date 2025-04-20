@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use App\Rules\MinimumAge;
+use App\Services\EmailNotificationService;
 
 class RegisterController extends Controller
 {
@@ -131,8 +132,18 @@ class RegisterController extends Controller
         // Gửi email xác nhận đăng ký tài khoản
         try {
             Log::info('Bắt đầu gửi email xác nhận đăng ký cho: ' . $user->email);
-            Mail::to($user->email)->send(new \App\Mail\UserRegistrationMail($user));
-            Log::info('Đã gửi email xác nhận đăng ký thành công cho: ' . $user->email);
+
+            // Use the new email notification service
+            $emailService = new EmailNotificationService();
+            $notification = $emailService->sendRegistrationConfirmation($user);
+
+            if ($notification && $notification->status === 'sent') {
+                Log::info('Đã gửi email xác nhận đăng ký thành công cho: ' . $user->email);
+            } else {
+                // Fallback to the old method if the new one fails
+                Mail::to($user->email)->send(new \App\Mail\UserRegistrationMail($user));
+                Log::info('Đã gửi email xác nhận đăng ký thành công (fallback) cho: ' . $user->email);
+            }
         } catch (\Exception $e) {
             // Ghi log lỗi nhưng không ngăn chặn đăng ký thành công
             Log::error('Không thể gửi email xác nhận đăng ký: ' . $e->getMessage());

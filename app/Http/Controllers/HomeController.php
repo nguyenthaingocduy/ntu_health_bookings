@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Clinic;
+use App\Models\Contact;
 use App\Models\Service;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -16,9 +18,9 @@ class HomeController extends Controller
             ->orderBy('created_at', 'desc')
             ->limit(6)
             ->get();
-            
+
         $clinics = Clinic::all();
-        
+
         // Thêm dữ liệu mẫu tạm thời cho testimonials
         $testimonials = collect([
             (object) [
@@ -40,33 +42,76 @@ class HomeController extends Controller
                 'content' => 'Tôi đã thử nhiều spa nhưng đây là nơi tôi hài lòng nhất.'
             ],
         ]);
-        
+
         return view('home.index', compact('featuredServices', 'clinics', 'testimonials'));
     }
-    
+
     public function index2()
     {
         $services = Service::with('clinic')
             ->where('status', 'active')
             ->paginate(9);
-            
+
         return view('home.services', compact('services'));
     }
-    
+
     public function show($id)
     {
         $service = Service::with('clinic')->findOrFail($id);
-        
+
         return view('home.service_details', compact('service'));
     }
-    
+
     public function about()
     {
         return view('home.about');
     }
-    
+
     public function contact()
     {
         return view('home.contact');
+    }
+
+    /**
+     * Handle contact form submission
+     */
+    public function submitContact(Request $request)
+    {
+        // Validate the form data
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:20',
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string',
+        ]);
+
+        try {
+            // Save the contact message to database
+            Contact::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+                'subject' => $validated['subject'],
+                'message' => $validated['message'],
+            ]);
+
+            Log::info('New contact form submission', [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+            ]);
+
+            // You could also send an email notification here
+
+            return redirect()->back()->with('success', 'Cảm ơn bạn đã liên hệ với chúng tôi. Chúng tôi sẽ phản hồi trong thời gian sớm nhất!');
+        } catch (\Exception $e) {
+            Log::error('Error saving contact form', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại sau.');
+        }
     }
 }

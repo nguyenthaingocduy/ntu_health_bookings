@@ -56,6 +56,11 @@
                     class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition">
                     <i class="fas fa-edit mr-2"></i>Chỉnh sửa
                 </a>
+                <button type="button"
+                    class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+                    onclick="document.getElementById('resetPasswordModal').classList.remove('hidden')">
+                    <i class="fas fa-key mr-2"></i>Đặt lại mật khẩu
+                </button>
                 <form action="{{ route('admin.employees.destroy', $employee) }}" method="POST" class="inline">
                     @csrf
                     @method('DELETE')
@@ -142,6 +147,44 @@
             </div>
             @endif
         </div>
+    </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div id="resetPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">Đặt lại mật khẩu cho {{ $employee->first_name }} {{ $employee->last_name }}</h3>
+            <button type="button" class="text-gray-500 hover:text-gray-700" onclick="document.getElementById('resetPasswordModal').classList.add('hidden')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form action="{{ route('admin.employees.reset-password', $employee->id) }}" method="POST">
+            @csrf
+            <div class="mb-4">
+                <label for="new_password" class="block text-sm font-medium text-gray-700 mb-2">Mật khẩu mới <span class="text-red-500">*</span></label>
+                <input type="password" id="new_password" name="password" required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p class="text-sm text-gray-500 mt-1">Tối thiểu 8 ký tự</p>
+            </div>
+
+            <div class="mb-4">
+                <label for="new_password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Xác nhận mật khẩu mới <span class="text-red-500">*</span></label>
+                <input type="password" id="new_password_confirmation" name="password_confirmation" required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                    onclick="document.getElementById('resetPasswordModal').classList.add('hidden')">
+                    Hủy bỏ
+                </button>
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                    <i class="fas fa-save mr-2"></i>Lưu mật khẩu
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 @endsection

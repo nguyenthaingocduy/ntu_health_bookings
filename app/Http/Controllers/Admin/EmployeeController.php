@@ -89,10 +89,14 @@ class EmployeeController extends Controller
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'services' => 'nullable|array',
             'services.*' => 'exists:services,id',
+            'password' => 'required|min:8|confirmed',
         ], [
             'birthday.before_or_equal' => 'Nhân viên phải từ 18 tuổi trở lên.',
             'address.required' => 'Vui lòng nhập địa chỉ của nhân viên.',
-            'gender.required' => 'Vui lòng chọn giới tính của nhân viên.'
+            'gender.required' => 'Vui lòng chọn giới tính của nhân viên.',
+            'password.required' => 'Vui lòng nhập mật khẩu.',
+            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp.'
         ]);
 
         $data = $request->only([
@@ -142,7 +146,7 @@ class EmployeeController extends Controller
         }
 
         // Create a corresponding user account for authentication
-        $defaultPassword = 'password123'; // Default password, should be changed by the employee
+        $password = $request->input('password');
 
         // Get a default customer type ID
         $defaultTypeId = null;
@@ -164,7 +168,7 @@ class EmployeeController extends Controller
             'address' => $data['address'],
             'gender' => $data['gender'],
             'birthday' => $data['birthday'],
-            'password' => Hash::make($defaultPassword),
+            'password' => Hash::make($password),
             'role_id' => $data['role_id'],
             'type_id' => $defaultTypeId,
             'status' => $data['status'],
@@ -177,7 +181,7 @@ class EmployeeController extends Controller
         ]);
 
         return redirect()->route('admin.employees.index')
-            ->with('success', 'Nhân viên đã được thêm thành công. Tài khoản đăng nhập đã được tạo với mật khẩu mặc định: ' . $defaultPassword);
+            ->with('success', 'Nhân viên đã được thêm thành công. Tài khoản đăng nhập đã được tạo.');
     }
 
     public function edit($id)
@@ -199,7 +203,8 @@ class EmployeeController extends Controller
             $request->merge(['address' => 'N/A']);
         }
 
-        $request->validate([
+        // Build validation rules
+        $rules = [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'birthday' => 'required|date|before_or_equal:' . now()->subYears(18)->format('Y-m-d'),
@@ -213,10 +218,19 @@ class EmployeeController extends Controller
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'services' => 'nullable|array',
             'services.*' => 'exists:services,id',
-        ], [
+        ];
+
+        // Add password validation if password is provided
+        if ($request->filled('password')) {
+            $rules['password'] = 'required|min:8|confirmed';
+        }
+
+        $request->validate($rules, [
             'birthday.before_or_equal' => 'Nhân viên phải từ 18 tuổi trở lên.',
             'address.required' => 'Vui lòng nhập địa chỉ của nhân viên.',
-            'gender.required' => 'Vui lòng chọn giới tính của nhân viên.'
+            'gender.required' => 'Vui lòng chọn giới tính của nhân viên.',
+            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp.'
         ]);
 
         $data = $request->only([
@@ -272,7 +286,7 @@ class EmployeeController extends Controller
         $user = User::where('email', $data['email'])->first();
 
         if ($user) {
-            $user->update([
+            $userData = [
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
                 'phone' => $data['phone'],
@@ -281,16 +295,33 @@ class EmployeeController extends Controller
                 'birthday' => $data['birthday'],
                 'role_id' => $data['role_id'],
                 'status' => $data['status'],
-            ]);
+            ];
+
+            // Update password if provided
+            if ($request->filled('password')) {
+                $userData['password'] = Hash::make($request->input('password'));
+                $passwordChanged = true;
+            } else {
+                $passwordChanged = false;
+            }
+
+            $user->update($userData);
 
             Log::info('Updated user account for employee', [
                 'employee_id' => $employee->id,
                 'user_id' => $user->id,
-                'email' => $user->email
+                'email' => $user->email,
+                'password_changed' => $passwordChanged
             ]);
+
+            $successMessage = 'Thông tin nhân viên đã được cập nhật thành công.';
+            if ($passwordChanged) {
+                $successMessage .= ' Mật khẩu đã được thay đổi.';
+            }
+
         } else {
             // If no user account exists, create one
-            $defaultPassword = 'password123';
+            $password = $request->filled('password') ? $request->input('password') : Str::random(10);
 
             // Get a default customer type ID
             $defaultTypeId = null;
@@ -312,7 +343,7 @@ class EmployeeController extends Controller
                 'address' => $data['address'],
                 'gender' => $data['gender'],
                 'birthday' => $data['birthday'],
-                'password' => Hash::make($defaultPassword),
+                'password' => Hash::make($password),
                 'role_id' => $data['role_id'],
                 'type_id' => $defaultTypeId,
                 'status' => $data['status'],
@@ -324,12 +355,11 @@ class EmployeeController extends Controller
                 'email' => $user->email
             ]);
 
-            return redirect()->route('admin.employees.index')
-                ->with('success', 'Thông tin nhân viên đã được cập nhật thành công. Tài khoản đăng nhập đã được tạo với mật khẩu mặc định: ' . $defaultPassword);
+            $successMessage = 'Thông tin nhân viên đã được cập nhật thành công. Tài khoản đăng nhập đã được tạo.';
         }
 
         return redirect()->route('admin.employees.index')
-            ->with('success', 'Thông tin nhân viên đã được cập nhật thành công.');
+            ->with('success', $successMessage);
     }
 
     public function destroy($id)
@@ -431,5 +461,43 @@ class EmployeeController extends Controller
         ];
 
         return view('admin.employees.show', compact('employee', 'appointments', 'statistics', 'recentAppointments'));
+    }
+
+    /**
+     * Reset the employee's password.
+     */
+    public function resetPassword(Request $request, $id)
+    {
+        $employee = Employee::findOrFail($id);
+
+        $request->validate([
+            'password' => 'required|min:8|confirmed',
+        ], [
+            'password.required' => 'Vui lòng nhập mật khẩu mới.',
+            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp.'
+        ]);
+
+        // Find the corresponding user account
+        $user = User::where('email', $employee->email)->first();
+
+        if (!$user) {
+            return redirect()->route('admin.employees.show', $employee->id)
+                ->with('error', 'Không tìm thấy tài khoản người dùng tương ứng.');
+        }
+
+        // Update the password
+        $user->update([
+            'password' => Hash::make($request->input('password'))
+        ]);
+
+        Log::info('Reset password for employee', [
+            'employee_id' => $employee->id,
+            'user_id' => $user->id,
+            'email' => $user->email
+        ]);
+
+        return redirect()->route('admin.employees.show', $employee->id)
+            ->with('success', 'Mật khẩu đã được đặt lại thành công.');
     }
 }

@@ -369,15 +369,15 @@
                     <div class="footer-info">
                         <div class="mb-2">
                             <i class="fas fa-map-marker-alt text-pink-500 mr-2"></i>
-                            <span class="text-gray-700">02 Nguyen Dinh Chieu, Quận 1, TP. Hồ Chí Minh</span>
+                            <span class="text-gray-700">Đ. Nguyễn Đình Chiểu, Vĩnh Thọ, Nha Trang, Khánh Hòa, Vietnam </span>
                         </div>
                         <div class="mb-2">
                             <i class="fas fa-phone-alt text-pink-500 mr-2"></i>
-                            <span class="text-gray-700">0987.654.321</span>
+                            <span class="text-gray-700">+84 123 456 789</span>
                         </div>
                         <div>
                             <i class="fas fa-envelope text-pink-500 mr-2"></i>
-                            <span class="text-gray-700">contact@ntuhealth.com</span>
+                            <span class="text-gray-700">ntuhealthbooking@gmail.com</span>
                         </div>
                     </div>
 

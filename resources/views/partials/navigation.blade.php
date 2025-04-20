@@ -9,7 +9,7 @@
             </div>
             <div class="flex items-center">
                 <i class="fas fa-envelope mr-1.5"></i>
-                <span>contact@beautysalon.com</span>
+                <span>ntuhealthbooking@gmail.com</span>
             </div>
         </div>
     </div>
@@ -33,12 +33,12 @@
 
             <!-- Main Menu - Desktop -->
             <div class="hidden md:flex items-center space-x-3">
-                <a href="{{ route('home') }}" style="color: #374151 !important;" class="group relative overflow-hidden px-5 py-2.5 rounded-md bg-white shadow-sm hover:text-white transition-all duration-300 ease-out">
-                    <span class="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                <a href="{{ route('home') }}" style="color: #374151 !important;" class="group relative overflow-hidden px-5 py-2.5 rounded-md bg-black shadow-sm hover:text-black transition-all duration-300 ease-out">
+                    <span class="absolute inset-0 bg-black from-pink-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     <span class="relative flex items-center justify-center font-medium">
-                        <i class="fas fa-home mr-2 text-pink-500 group-hover:text-white transition-colors"></i> <span class="group-hover:text-white">Trang chủ</span>
-                    </span>
-                </a>
+                        <i class="fas fa-home mr-2 text-pink-500 group-hover:text-black transition-colors"></i> <span class="group-hover:text-black">Trang chủ</span>
+                    </a>
+                </span>
                 <a href="{{ route('services.index') }}" style="color: #374151 !important;" class="group relative overflow-hidden px-5 py-2.5 rounded-md bg-white shadow-sm hover:text-white transition-all duration-300 ease-out">
                     <span class="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     <span class="relative flex items-center justify-center font-medium">
@@ -145,17 +145,17 @@
 
         <!-- Mobile Menu -->
         <div class="md:hidden py-3 overflow-x-auto flex space-x-3 scrollbar-hide">
-            <a href="{{ route('home') }}" class="flex-shrink-0 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-md shadow-sm hover:shadow-md transition whitespace-nowrap text-sm font-medium flex items-center justify-center">
-                <i class="fas fa-home mr-1.5"></i> Trang chủ
+            <a href="{{ route('home') }}" class="flex-shrink-0 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-black rounded-md shadow-sm hover:shadow-md transition whitespace-nowrap text-sm font-medium flex items-center justify-center">
+                <i class="fas fa-home mr-1.5 text-pink-500 m-2"></i> Trang chủ
             </a>
             <a href="{{ route('services.index') }}" class="flex-shrink-0 px-4 py-2 bg-white text-gray-700 rounded-md shadow-sm hover:bg-pink-50 hover:text-pink-600 transition whitespace-nowrap text-sm font-medium flex items-center justify-center">
-                <i class="fas fa-spa mr-1.5 text-pink-500"></i> Dịch vụ
+                <i class="fas fa-spa mr-1.5 text-pink-500 m-2"></i> Dịch vụ
             </a>
             <a href="{{ route('about') }}" class="flex-shrink-0 px-4 py-2 bg-white text-gray-700 rounded-md shadow-sm hover:bg-pink-50 hover:text-pink-600 transition whitespace-nowrap text-sm font-medium flex items-center justify-center">
-                <i class="fas fa-info-circle mr-1.5 text-pink-500"></i> Giới thiệu
+                <i class="fas fa-info-circle mr-1.5 text-pink-500 m-2"></i> Giới thiệu
             </a>
             <a href="{{ route('contact') }}" class="flex-shrink-0 px-4 py-2 bg-white text-gray-700 rounded-md shadow-sm hover:bg-pink-50 hover:text-pink-600 transition whitespace-nowrap text-sm font-medium flex items-center justify-center">
-                <i class="fas fa-envelope mr-1.5 text-pink-500"></i> Liên hệ
+                <i class="fas fa-envelope mr-1.5 text-pink-500 m-2"></i> Liên hệ
             </a>
         </div>
 

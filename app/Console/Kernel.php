@@ -14,6 +14,9 @@ class Kernel extends ConsoleKernel
     {
         // Send appointment reminders every day at 8:00 AM
         $schedule->command('app:send-appointment-reminders')->dailyAt('08:00');
+
+        // Send pending emails every 10 minutes
+        $schedule->command('emails:send-pending')->everyTenMinutes();
     }
 
     /**

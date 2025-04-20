@@ -150,6 +150,32 @@
         </div>
 
         <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">Thay đổi mật khẩu</h3>
+            <p class="text-sm text-gray-500 mb-4">Bỏ trống nếu không muốn thay đổi mật khẩu</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Mật khẩu mới</label>
+                    <input type="password" name="password" id="password"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p class="text-sm text-gray-500 mt-1">Tối thiểu 8 ký tự</p>
+                    @error('password')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Xác nhận mật khẩu mới</label>
+                    <input type="password" name="password_confirmation" id="password_confirmation"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    @error('password_confirmation')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-6">
             <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Địa chỉ</label>
             <textarea name="address" id="address" rows="3"
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('address', $employee->address) }}</textarea>

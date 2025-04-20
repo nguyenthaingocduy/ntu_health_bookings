@@ -26,6 +26,7 @@ Route::get('/services', [HomeController::class, 'index2'])->name('services.index
 Route::get('/services/{id}', [HomeController::class, 'show'])->name('services.show');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
+Route::post('/contact', [HomeController::class, 'submitContact'])->name('contact.submit');
 Route::get('/login-status', function() {
     return view('auth.login-status');
 })->name('login.status');
@@ -171,6 +172,13 @@ Route::get('/api/check-available-slots', [\App\Http\Controllers\Api\TimeSlotCont
 // Debug route để kiểm tra roles
 Route::get('check-roles', function() {
     dd(App\Models\Role::all()->toArray());
+});
+
+// Test email routes
+Route::middleware(['auth'])->prefix('test-email')->group(function () {
+    Route::get('/registration', [\App\Http\Controllers\TestEmailController::class, 'testRegistrationEmail'])->name('test.email.registration');
+    Route::get('/booking', [\App\Http\Controllers\TestEmailController::class, 'testBookingEmail'])->name('test.email.booking');
+    Route::get('/reminder', [\App\Http\Controllers\TestEmailController::class, 'testReminderEmail'])->name('test.email.reminder');
 });
 
 // Routes kiểm tra email
