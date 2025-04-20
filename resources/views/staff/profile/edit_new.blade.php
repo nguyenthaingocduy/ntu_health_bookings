@@ -11,7 +11,7 @@
             <div class="flex flex-col sm:flex-row items-center justify-between">
                 <div class="flex items-center mb-4 sm:mb-0">
                     <div class="w-14 h-14 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center mr-4 shadow-lg">
-                        <i class="fas fa-user-edit text-white text-xl"></i>
+                        <i class="fas fa-user-edit text-black w-5 h-5 text-xl"></i>
                     </div>
                     <div>
                         <h2 class="text-2xl font-bold text-gray-800">Chỉnh sửa thông tin cá nhân</h2>
@@ -19,7 +19,7 @@
                     </div>
                 </div>
                 <div class="flex space-x-3">
-                    <a href="{{ route('staff.profile.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition shadow-sm">
+                    <a href="{{ route('staff.profile.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition shadow-sm">
                         <i class="fas fa-arrow-left mr-2"></i>
                         Quay lại
                     </a>
@@ -115,7 +115,7 @@
                         </div>
 
                         <div class="mt-8">
-                            <button type="submit" class="w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium rounded-lg hover:from-pink-600 hover:to-purple-700 transition shadow-md">
+                            <button type="submit" class="w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-black font-medium rounded-lg hover:from-pink-600 hover:to-purple-700 transition shadow-md">
                                 <i class="fas fa-save mr-2"></i> Lưu thay đổi
                             </button>
                         </div>
