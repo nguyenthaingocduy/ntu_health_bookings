@@ -628,7 +628,10 @@
                                 <form action="{{ route('logout') }}" method="POST" class="block">
                                     @csrf
                                     <button type="submit" class=" flex items-center text-left px-4 py-2.5 text-red-600 hover:bg-red-50 transition">
-                                        <i class="fas fa-sign-out-alt w-6 mr-4"></i>
+                                        <div class="w-8 h-8 rounded-lg bg-pink-100 flex items-center justify-center mr-4">
+                                      
+                                            <i class="fas fa-sign-out-alt w-6"></i>
+                                        </div>
                                         <span>Đăng xuất</span>
                                     </button>
                                 </form>

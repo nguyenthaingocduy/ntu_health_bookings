@@ -57,7 +57,7 @@
                 <div class="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-blue-100 opacity-40"></div>
                 <div class="flex items-center justify-between relative">
                     <div>
-                        <div class="text-4xl font-extrabold text-gray-800 mb-1">
+                        <div class="text-4xl font-extrabold text-gray-800 mb-0">
                             {{ $stats['total_appointments'] ?? 0 }}
                         </div>
                         <div class="text-gray-600 font-medium text-lg">Tổng số lịch hẹn</div>
