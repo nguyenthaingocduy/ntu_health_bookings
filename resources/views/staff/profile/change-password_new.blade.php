@@ -11,7 +11,7 @@
             <div class="flex flex-col sm:flex-row items-center justify-between">
                 <div class="flex items-center mb-4 sm:mb-0">
                     <div class="w-14 h-14 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center mr-4 shadow-lg">
-                        <i class="fas fa-key text-white text-xl"></i>
+                        <i class="fas fa-key text-black text-xl"></i>
                     </div>
                     <div>
                         <h2 class="text-2xl font-bold text-gray-800">Đổi mật khẩu</h2>
@@ -70,7 +70,7 @@
                         </div>
                         
                         <div class="mt-8">
-                            <button type="submit" class="w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium rounded-lg hover:from-pink-600 hover:to-purple-700 transition shadow-md">
+                            <button type="submit" class="w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-black font-medium rounded-lg hover:from-pink-600 hover:to-purple-700 transition shadow-md">
                                 <i class="fas fa-key mr-2"></i> Cập nhật mật khẩu
                             </button>
                         </div>

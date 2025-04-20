@@ -11,7 +11,7 @@
             <div class="flex flex-col sm:flex-row items-center justify-between">
                 <div class="flex items-center mb-4 sm:mb-0">
                     <div class="w-14 h-14 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center mr-4 shadow-lg">
-                        <i class="fas fa-user text-white text-xl"></i>
+                        <i class="fas fa-user text-black text-xl"></i>
                     </div>
                     <div>
                         <h2 class="text-2xl font-bold text-gray-800">Hồ sơ cá nhân</h2>
@@ -19,7 +19,7 @@
                     </div>
                 </div>
                 <div class="flex space-x-3">
-                    <a href="{{ route('staff.profile.edit') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium rounded-lg hover:from-pink-600 hover:to-purple-700 transition shadow-sm">
+                    <a href="{{ route('staff.profile.edit') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-black font-medium rounded-lg hover:from-pink-600 hover:to-purple-700 transition shadow-sm">
                         <i class="fas fa-user-edit mr-2"></i>
                         Chỉnh sửa hồ sơ
                     </a>
@@ -231,17 +231,17 @@
 
                     <div class="space-y-3">
                         <a href="{{ route('staff.appointments.create') }}" class="flex items-center p-3 bg-pink-50 text-pink-700 rounded-lg hover:bg-pink-100 transition">
-                            <i class="fas fa-calendar-plus mr-3 text-pink-500"></i>
+                            <i class="fas fa-calendar-plus mr-4 text-pink-500"></i>
                             <span>Tạo lịch hẹn mới</span>
                         </a>
 
                         <a href="{{ route('staff.work-schedule') }}" class="flex items-center p-3 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition">
-                            <i class="fas fa-calendar-week mr-3 text-purple-500"></i>
+                            <i class="fas fa-calendar-week mr-4 text-purple-500"></i>
                             <span>Xem lịch làm việc</span>
                         </a>
 
                         <a href="{{ route('staff.profile.change-password') }}" class="flex items-center p-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition">
-                            <i class="fas fa-key mr-3 text-blue-500"></i>
+                            <i class="fas fa-key mr-4 text-blue-500"></i>
                             <span>Đổi mật khẩu</span>
                         </a>
                     </div>

@@ -49,10 +49,10 @@
                             <p class="text-gray-600">{{ Auth::user()->email }}</p>
                             <div class="flex items-center mt-1">
                                 <span class="flex items-center text-yellow-600 font-medium text-sm mr-4">
-                                    <i class="fas fa-star mr-1"></i> {{ Auth::user()->type->type_name ?? 'Regular' }}
+                                    <i class="fas fa-star mr-2"></i> {{ Auth::user()->type->type_name ?? 'Regular' }}
                                 </span>
                                 <span class="flex items-center text-gray-600 text-sm">
-                                    <i class="fas fa-map-marker-alt mr-1"></i> {{ Auth::user()->address ?? 'Chưa cập nhật' }}
+                                    <i class="fas fa-map-marker-alt mr-2"></i> {{ Auth::user()->address ?? 'Chưa cập nhật' }}
                                 </span>
                             </div>
                         </div>
@@ -70,7 +70,7 @@
         </div>
 
         <!-- Stats Section -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <!-- Appointments Stats -->
             <div class="bg-white overflow-hidden shadow-xl rounded-2xl transform transition duration-300 hover:scale-105 border border-gray-100">
                 <div class="p-6 relative overflow-hidden">
@@ -145,7 +145,7 @@
         </div>
 
         <!-- Recent Appointments & Tips Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             <!-- Recent Appointments - 2/3 width on larger screens -->
             <div class="lg:col-span-2 bg-white overflow-hidden shadow-xl rounded-2xl border border-gray-100">
                 <div class="p-6 sm:p-8">
@@ -288,7 +288,7 @@
         </div>
 
         <!-- Quick Actions -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div class="bg-gradient-to-br from-pink-50 to-pink-100 overflow-hidden shadow-lg rounded-2xl transform transition duration-300 hover:shadow-xl border border-pink-100 relative">
                 <div class="absolute top-0 right-0 w-40 h-40 bg-pink-200 rounded-full opacity-20 transform translate-x-10 -translate-y-20"></div>
                 <div class="absolute bottom-0 left-0 w-32 h-32 bg-pink-200 rounded-full opacity-20 transform -translate-x-10 translate-y-10"></div>

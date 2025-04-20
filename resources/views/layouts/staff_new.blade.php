@@ -601,30 +601,34 @@
                             <!-- Dropdown menu -->
                             <div x-show="open"
                                  x-transition:enter="transition ease-out duration-200"
-                                 x-transition:enter-start="opacity-51 transform scale-95"
+                                 x-transition:enter-start="opacity-0 transform scale-95"
                                  x-transition:enter-end="opacity-100 transform scale-100"
                                  x-transition:leave="transition ease-in duration-150"
                                  x-transition:leave-start="opacity-100 transform scale-100"
                                  x-transition:leave-end="opacity-0 transform scale-95"
-                                 class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg py-2 z-50 border border-gray-100"
+                                 class="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-lg py-2 z-50 border border-gray-100"
                                  style="display: none;">
                                 <div class="px-4 py-2 border-b border-gray-100">
                                     <p class="text-sm text-gray-500">Xin chào</p>
                                     <p class="font-bold text-gray-800">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</p>
                                 </div>
                                 <a href="{{ route('staff.profile.index') }}" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
-                                    <i class="fas fa-user w-6 text-pink-500"></i>
+                                    <div class="w-8 h-8 rounded-lg bg-pink-100 flex items-center justify-center mr-4">
+                                        <i class="fas fa-user w-3 text-pink-500"></i>
+                                    </div>
                                     <span>Hồ sơ cá nhân</span>
                                 </a>
                                 <a href="{{ route('staff.profile.change-password') }}" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
-                                    <i class="fas fa-key w-6 text-pink-500"></i>
+                                    <div class="w-8 h-8 rounded-lg bg-pink-100 flex items-center justify-center mr-4">
+                                        <i class="fas fa-key w-3 text-pink-500"></i>
+                                    </div>
                                     <span>Đổi mật khẩu</span>
                                 </a>
                                 <hr class="my-1 border-gray-100">
                                 <form action="{{ route('logout') }}" method="POST" class="block">
                                     @csrf
-                                    <button type="submit" class="w-full flex items-center text-left px-4 py-2.5 text-red-600 hover:bg-red-50 transition">
-                                        <i class="fas fa-sign-out-alt w-6"></i>
+                                    <button type="submit" class=" flex items-center text-left px-4 py-2.5 text-red-600 hover:bg-red-50 transition">
+                                        <i class="fas fa-sign-out-alt w-6 mr-4"></i>
                                         <span>Đăng xuất</span>
                                     </button>
                                 </form>
