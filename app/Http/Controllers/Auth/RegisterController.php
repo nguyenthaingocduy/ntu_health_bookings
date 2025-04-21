@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use App\Rules\MinimumAge;
 use App\Services\EmailNotificationService;
+use App\Services\EmailService;
 
 class RegisterController extends Controller
 {
@@ -133,23 +134,38 @@ class RegisterController extends Controller
         try {
             Log::info('Bắt đầu gửi email xác nhận đăng ký cho: ' . $user->email);
 
-            // Gửi email bằng cả hai phương thức để đảm bảo thành công
+            // Gửi email bằng cả ba phương thức để đảm bảo thành công
             $emailSent = false;
 
-            // Phương thức 1: Sử dụng EmailNotificationService
+            // Phương thức 1: Sử dụng EmailService mới
             try {
-                $emailService = new EmailNotificationService();
-                $notification = $emailService->sendRegistrationConfirmation($user);
+                $emailService = new EmailService();
+                $result = $emailService->sendRegistrationConfirmation($user);
 
-                if ($notification && $notification->status === 'sent') {
-                    Log::info('Đã gửi email xác nhận đăng ký thành công (service) cho: ' . $user->email);
+                if ($result) {
+                    Log::info('Đã gửi email xác nhận đăng ký thành công (new service) cho: ' . $user->email);
                     $emailSent = true;
                 }
-            } catch (\Exception $serviceError) {
-                Log::warning('Không thể gửi email qua service: ' . $serviceError->getMessage());
+            } catch (\Exception $newServiceError) {
+                Log::warning('Không thể gửi email qua service mới: ' . $newServiceError->getMessage());
             }
 
-            // Phương thức 2: Sử dụng Mail facade trực tiếp (nếu phương thức 1 thất bại)
+            // Phương thức 2: Sử dụng EmailNotificationService cũ (nếu phương thức 1 thất bại)
+            if (!$emailSent) {
+                try {
+                    $legacyEmailService = new EmailNotificationService();
+                    $notification = $legacyEmailService->sendRegistrationConfirmation($user);
+
+                    if ($notification && $notification->status === 'sent') {
+                        Log::info('Đã gửi email xác nhận đăng ký thành công (legacy service) cho: ' . $user->email);
+                        $emailSent = true;
+                    }
+                } catch (\Exception $legacyServiceError) {
+                    Log::warning('Không thể gửi email qua service cũ: ' . $legacyServiceError->getMessage());
+                }
+            }
+
+            // Phương thức 3: Sử dụng Mail facade trực tiếp (nếu cả hai phương thức trước đều thất bại)
             if (!$emailSent) {
                 try {
                     Mail::to($user->email)->send(new \App\Mail\UserRegistrationMail($user));
@@ -162,7 +178,7 @@ class RegisterController extends Controller
 
             // Ghi log kết quả cuối cùng
             if (!$emailSent) {
-                Log::error('Không thể gửi email xác nhận đăng ký cho: ' . $user->email . ' bằng cả hai phương thức');
+                Log::error('Không thể gửi email xác nhận đăng ký cho: ' . $user->email . ' bằng cả ba phương thức');
             }
         } catch (\Exception $e) {
             // Ghi log lỗi nhưng không ngăn chặn đăng ký thành công

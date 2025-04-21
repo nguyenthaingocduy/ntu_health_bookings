@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use App\Services\EmailNotificationService;
+use App\Services\EmailService;
 
 class AppointmentController extends Controller
 {
@@ -106,24 +107,39 @@ class AppointmentController extends Controller
                 $appointmentWithRelations = Appointment::with(['service', 'customer', 'timeAppointment'])
                     ->findOrFail($appointment->id);
 
-                // Gửi email bằng cả hai phương thức để đảm bảo thành công
+                // Gửi email bằng cả ba phương thức để đảm bảo thành công
                 $emailSent = false;
                 $userEmail = Auth::user()->email;
 
-                // Phương thức 1: Sử dụng EmailNotificationService
+                // Phương thức 1: Sử dụng EmailService mới
                 try {
-                    $emailService = new EmailNotificationService();
-                    $notification = $emailService->sendBookingConfirmation($appointmentWithRelations);
+                    $emailService = new EmailService();
+                    $result = $emailService->sendAppointmentConfirmation($appointmentWithRelations);
 
-                    if ($notification && $notification->status === 'sent') {
-                        Log::info('Đã gửi email xác nhận đặt lịch thành công (service) cho: ' . $userEmail);
+                    if ($result) {
+                        Log::info('Đã gửi email xác nhận đặt lịch thành công (new service) cho: ' . $userEmail);
                         $emailSent = true;
                     }
-                } catch (\Exception $serviceError) {
-                    Log::warning('Không thể gửi email qua service: ' . $serviceError->getMessage());
+                } catch (\Exception $newServiceError) {
+                    Log::warning('Không thể gửi email qua service mới: ' . $newServiceError->getMessage());
                 }
 
-                // Phương thức 2: Sử dụng Mail facade trực tiếp (nếu phương thức 1 thất bại)
+                // Phương thức 2: Sử dụng EmailNotificationService cũ (nếu phương thức 1 thất bại)
+                if (!$emailSent) {
+                    try {
+                        $legacyEmailService = new EmailNotificationService();
+                        $notification = $legacyEmailService->sendBookingConfirmation($appointmentWithRelations);
+
+                        if ($notification && $notification->status === 'sent') {
+                            Log::info('Đã gửi email xác nhận đặt lịch thành công (legacy service) cho: ' . $userEmail);
+                            $emailSent = true;
+                        }
+                    } catch (\Exception $legacyServiceError) {
+                        Log::warning('Không thể gửi email qua service cũ: ' . $legacyServiceError->getMessage());
+                    }
+                }
+
+                // Phương thức 3: Sử dụng Mail facade trực tiếp (nếu cả hai phương thức trước đều thất bại)
                 if (!$emailSent) {
                     try {
                         Mail::to($userEmail)
@@ -137,7 +153,7 @@ class AppointmentController extends Controller
 
                 // Ghi log kết quả cuối cùng
                 if (!$emailSent) {
-                    Log::error('Không thể gửi email xác nhận đặt lịch cho: ' . $userEmail . ' bằng cả hai phương thức');
+                    Log::error('Không thể gửi email xác nhận đặt lịch cho: ' . $userEmail . ' bằng cả ba phương thức');
                 }
             } catch (\Exception $e) {
                 Log::error('Không thể gửi email xác nhận đặt lịch: ' . $e->getMessage());

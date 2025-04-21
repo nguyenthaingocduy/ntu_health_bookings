@@ -192,7 +192,16 @@ Route::middleware(['auth'])->prefix('test-email')->group(function () {
 Route::get('/mail-test', [MailTestController::class, 'index'])->name('mail.test');
 Route::post('/mail-test', [MailTestController::class, 'sendTestMail'])->name('mail.test.send');
 
-// Simple email test route
+// Email testing routes
+Route::prefix('email-test')->name('email.test.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\EmailTestController::class, 'index'])->name('index');
+    Route::post('/send', [\App\Http\Controllers\EmailTestController::class, 'sendTestEmail'])->name('send');
+    Route::post('/registration', [\App\Http\Controllers\EmailTestController::class, 'sendRegistrationEmail'])->name('registration');
+    Route::post('/appointment', [\App\Http\Controllers\EmailTestController::class, 'sendAppointmentEmail'])->name('appointment');
+    Route::post('/reminder', [\App\Http\Controllers\EmailTestController::class, 'sendReminderEmail'])->name('reminder');
+});
+
+// Simple email test route (legacy)
 Route::get('/test-email-config', function() {
     try {
         $email = request('email', 'ntuhealthbooking@gmail.com');

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Appointment;
 use App\Notifications\HealthCheckupAppointmentNotification;
 use App\Services\EmailNotificationService;
+use App\Services\EmailService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -47,8 +48,9 @@ class SendAppointmentReminders extends Command
             return 0;
         }
 
-        // Initialize email service
-        $emailService = new EmailNotificationService();
+        // Initialize email services
+        $emailService = new EmailService();
+        $legacyEmailService = new EmailNotificationService();
         $successCount = 0;
 
         foreach ($appointments as $appointment) {
@@ -60,22 +62,31 @@ class SendAppointmentReminders extends Command
                 }
 
                 // Try to send using the new email service
-                $notification = $emailService->sendAppointmentReminder($appointment);
+                $result = $emailService->sendAppointmentReminder($appointment);
 
-                if ($notification && $notification->status === 'sent') {
+                if ($result) {
                     $successCount++;
                     $this->info("Reminder sent to {$appointment->customer->email} for appointment on {$tomorrow}");
                 } else {
-                    // Fallback to the old notification method
-                    $this->warn("Using fallback notification method for appointment {$appointment->id}");
+                    // Fallback to the legacy email service
+                    $this->warn("Using legacy email service for appointment {$appointment->id}");
+                    $notification = $legacyEmailService->sendAppointmentReminder($appointment);
 
-                    // Only use the old method if the user property exists
-                    if ($appointment->user) {
-                        $appointment->user->notify(new HealthCheckupAppointmentNotification($appointment, 'reminder'));
+                    if ($notification && $notification->status === 'sent') {
                         $successCount++;
-                        $this->info("Reminder sent (fallback) to {$appointment->user->email}");
+                        $this->info("Reminder sent (legacy) to {$appointment->customer->email}");
                     } else {
-                        $this->warn("User not found for fallback notification. Skipping...");
+                        // Fallback to the old notification method as a last resort
+                        $this->warn("Using fallback notification method for appointment {$appointment->id}");
+
+                        // Only use the old method if the user property exists
+                        if ($appointment->user) {
+                            $appointment->user->notify(new HealthCheckupAppointmentNotification($appointment, 'reminder'));
+                            $successCount++;
+                            $this->info("Reminder sent (fallback) to {$appointment->user->email}");
+                        } else {
+                            $this->warn("User not found for fallback notification. Skipping...");
+                        }
                     }
                 }
             } catch (\Exception $e) {
