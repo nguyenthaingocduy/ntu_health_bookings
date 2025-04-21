@@ -107,53 +107,71 @@ class AppointmentController extends Controller
                 $appointmentWithRelations = Appointment::with(['service', 'customer', 'timeAppointment'])
                     ->findOrFail($appointment->id);
 
-                // Gửi email bằng cả ba phương thức để đảm bảo thành công
-                $emailSent = false;
                 $userEmail = Auth::user()->email;
 
-                // Phương thức 1: Sử dụng EmailService mới
+                // Kiểm tra cấu hình email
+                Log::info('Cấu hình email:', [
+                    'driver' => config('mail.default'),
+                    'host' => config('mail.mailers.smtp.host'),
+                    'port' => config('mail.mailers.smtp.port'),
+                    'username' => config('mail.mailers.smtp.username'),
+                    'encryption' => config('mail.mailers.smtp.encryption'),
+                    'from_address' => config('mail.from.address'),
+                    'from_name' => config('mail.from.name'),
+                ]);
+
+                // Phương thức 1: Sử dụng Mail facade trực tiếp với log driver
                 try {
-                    $emailService = new EmailService();
-                    $result = $emailService->sendAppointmentConfirmation($appointmentWithRelations);
+                    // Tạo nội dung email
+                    $emailData = [
+                        'appointment' => $appointmentWithRelations,
+                        'user_name' => $appointmentWithRelations->customer->first_name . ' ' . $appointmentWithRelations->customer->last_name,
+                        'service_name' => $appointmentWithRelations->service->name,
+                        'appointment_date' => $appointmentWithRelations->date_appointments,
+                        'appointment_time' => $appointmentWithRelations->timeAppointment->time,
+                        'appointment_url' => route('customer.appointments.show', $appointmentWithRelations->id),
+                        'app_name' => config('app.name'),
+                        'current_year' => date('Y'),
+                    ];
 
-                    if ($result) {
-                        Log::info('Đã gửi email xác nhận đặt lịch thành công (new service) cho: ' . $userEmail);
-                        $emailSent = true;
-                    }
-                } catch (\Exception $newServiceError) {
-                    Log::warning('Không thể gửi email qua service mới: ' . $newServiceError->getMessage());
-                }
+                    Mail::send('emails.appointment-confirmation', $emailData, function ($message) use ($userEmail) {
+                        $message->to($userEmail)
+                            ->subject('Xác nhận đặt lịch - Beauty Spa Booking');
+                    });
 
-                // Phương thức 2: Sử dụng EmailNotificationService cũ (nếu phương thức 1 thất bại)
-                if (!$emailSent) {
+                    Log::info('Đã gửi email xác nhận đặt lịch thành công cho: ' . $userEmail);
+
+                    // Lưu thông tin email vào bảng email_logs
                     try {
-                        $legacyEmailService = new EmailNotificationService();
-                        $notification = $legacyEmailService->sendBookingConfirmation($appointmentWithRelations);
+                        \App\Models\EmailLog::create([
+                            'to' => $userEmail,
+                            'subject' => 'Xác nhận đặt lịch - Beauty Spa Booking',
+                            'template' => 'emails.appointment-confirmation',
+                            'data' => json_encode($emailData),
+                            'status' => 'sent',
+                            'attempts' => 1,
+                            'sent_at' => now(),
+                        ]);
+                    } catch (\Exception $logError) {
+                        Log::warning('Không thể lưu log email: ' . $logError->getMessage());
+                    }
 
-                        if ($notification && $notification->status === 'sent') {
-                            Log::info('Đã gửi email xác nhận đặt lịch thành công (legacy service) cho: ' . $userEmail);
-                            $emailSent = true;
+                } catch (\Exception $mailError) {
+                    Log::error('Không thể gửi email: ' . $mailError->getMessage());
+
+                    // Phương thức 2: Sử dụng EmailService nếu phương thức 1 thất bại
+                    try {
+                        $emailService = new EmailService();
+                        $result = $emailService->sendAppointmentConfirmation($appointmentWithRelations);
+
+                        if ($result) {
+                            Log::info('Đã gửi email xác nhận đặt lịch thành công (fallback) cho: ' . $userEmail);
+                        } else {
+                            Log::error('Không thể gửi email xác nhận đặt lịch (fallback): ' . $userEmail);
                         }
-                    } catch (\Exception $legacyServiceError) {
-                        Log::warning('Không thể gửi email qua service cũ: ' . $legacyServiceError->getMessage());
+                    } catch (\Exception $serviceError) {
+                        Log::error('Không thể gửi email qua service: ' . $serviceError->getMessage());
                     }
-                }
-
-                // Phương thức 3: Sử dụng Mail facade trực tiếp (nếu cả hai phương thức trước đều thất bại)
-                if (!$emailSent) {
-                    try {
-                        Mail::to($userEmail)
-                            ->send(new \App\Mail\AppointmentConfirmationMail($appointmentWithRelations));
-                        Log::info('Đã gửi email xác nhận đặt lịch thành công (direct) cho: ' . $userEmail);
-                        $emailSent = true;
-                    } catch (\Exception $directMailError) {
-                        Log::error('Không thể gửi email trực tiếp: ' . $directMailError->getMessage());
-                    }
-                }
-
-                // Ghi log kết quả cuối cùng
-                if (!$emailSent) {
-                    Log::error('Không thể gửi email xác nhận đặt lịch cho: ' . $userEmail . ' bằng cả ba phương thức');
                 }
             } catch (\Exception $e) {
                 Log::error('Không thể gửi email xác nhận đặt lịch: ' . $e->getMessage());

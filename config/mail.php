@@ -109,7 +109,7 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'duynguyen.11032003@gmail.com'),
+        'address' => env('MAIL_FROM_ADDRESS', 'ntuhealthbooking@gmail.com'),
         'name' => env('MAIL_FROM_NAME', 'Beauty Spa Booking'),
     ],
 
