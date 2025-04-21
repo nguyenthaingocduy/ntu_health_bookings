@@ -8,6 +8,7 @@ use App\Models\Employee;
 use App\Models\Service;
 use App\Models\Time;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class AppointmentController extends Controller
@@ -77,15 +78,37 @@ class AppointmentController extends Controller
             return back()->with('error', 'Nhân viên đã có lịch hẹn khác trong thời gian này.');
         }
 
-        $appointment->update([
-            'status' => $request->status,
-            'date_appointments' => $request->date_appointments,
-            'time_appointments_id' => $request->time_appointments_id,
-            'employee_id' => $request->employee_id,
-        ]);
+        // Bắt đầu transaction
+        \Illuminate\Support\Facades\DB::beginTransaction();
 
-        return redirect()->route('admin.appointments.index')
-            ->with('success', 'Lịch hẹn đã được cập nhật thành công.');
+        try {
+            // Kiểm tra nếu trạng thái được thay đổi thành 'cancelled'
+            $originalStatus = $appointment->status;
+            $newStatus = $request->status;
+
+            // Nếu trạng thái được thay đổi thành 'cancelled', giảm số lượng đặt chỗ
+            if ($newStatus === 'cancelled' && in_array($originalStatus, ['pending', 'confirmed'])) {
+                $timeSlot = Time::findOrFail($appointment->time_appointments_id);
+                if ($timeSlot->booked_count > 0) {
+                    $timeSlot->decrement('booked_count');
+                }
+            }
+
+            $appointment->update([
+                'status' => $request->status,
+                'date_appointments' => $request->date_appointments,
+                'time_appointments_id' => $request->time_appointments_id,
+                'employee_id' => $request->employee_id,
+            ]);
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            return redirect()->route('admin.appointments.index')
+                ->with('success', 'Lịch hẹn đã được cập nhật thành công.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return back()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
+        }
     }
 
     public function destroy($id)
@@ -108,9 +131,31 @@ class AppointmentController extends Controller
     public function cancel($id)
     {
         $appointment = Appointment::findOrFail($id);
-        $appointment->update(['status' => 'cancelled']);
 
-        return redirect()->back()->with('success', 'Lịch hẹn đã được hủy thành công.');
+        // Kiểm tra trạng thái hiện tại của lịch hẹn
+        if (!in_array($appointment->status, ['pending', 'confirmed'])) {
+            return back()->with('error', 'Chỉ có thể hủy lịch hẹn đang chờ xác nhận hoặc đã xác nhận.');
+        }
+
+        // Bắt đầu transaction
+        \Illuminate\Support\Facades\DB::beginTransaction();
+
+        try {
+            // Giảm số lượng đặt chỗ cho khung giờ này
+            $timeSlot = Time::findOrFail($appointment->time_appointments_id);
+            if ($timeSlot->booked_count > 0) {
+                $timeSlot->decrement('booked_count');
+            }
+
+            $appointment->update(['status' => 'cancelled']);
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            return redirect()->back()->with('success', 'Lịch hẹn đã được hủy thành công.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return back()->with('error', 'Đã xảy ra lỗi khi hủy lịch hẹn: ' . $e->getMessage());
+        }
     }
 
     public function complete($id)

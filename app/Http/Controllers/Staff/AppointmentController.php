@@ -215,7 +215,22 @@ class AppointmentController extends Controller
             }
         }
 
+        // Bắt đầu transaction
+        DB::beginTransaction();
+
         try {
+            // Kiểm tra nếu trạng thái được thay đổi thành 'cancelled'
+            $originalStatus = $appointment->status;
+            $newStatus = $request->status;
+
+            // Nếu trạng thái được thay đổi thành 'cancelled', giảm số lượng đặt chỗ
+            if ($newStatus === 'cancelled' && in_array($originalStatus, ['pending', 'confirmed'])) {
+                $timeSlot = Time::findOrFail($appointment->time_appointments_id);
+                if ($timeSlot->booked_count > 0) {
+                    $timeSlot->decrement('booked_count');
+                }
+            }
+
             // Update the appointment
             $appointment->update([
                 'service_id' => $request->service_id,
@@ -225,11 +240,13 @@ class AppointmentController extends Controller
                 'status' => $request->status,
             ]);
 
+            DB::commit();
+
             // Send notification if status changed
             if ($appointment->customer->email_notifications_enabled) {
-                if ($request->status !== $appointment->getOriginal('status')) {
+                if ($newStatus !== $originalStatus) {
                     try {
-                        $appointment->customer->notify(new AppointmentNotification($appointment, $request->status));
+                        $appointment->customer->notify(new AppointmentNotification($appointment, $newStatus));
                     } catch (\Exception $e) {
                         // Log notification error but continue
                         \Illuminate\Support\Facades\Log::error('Failed to send appointment notification: ' . $e->getMessage());
@@ -240,6 +257,7 @@ class AppointmentController extends Controller
             return redirect()->route('staff.appointments.show', $appointment->id)
                 ->with('success', 'Lịch hẹn đã được cập nhật thành công.');
         } catch (\Exception $e) {
+            DB::rollBack();
             return back()->withInput()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
         }
     }
@@ -262,22 +280,38 @@ class AppointmentController extends Controller
             'cancellation_reason' => 'nullable|string|max:500',
         ]);
 
-        $appointment->status = 'cancelled';
-        $appointment->cancellation_reason = $request->cancellation_reason;
-        $appointment->save();
+        // Bắt đầu transaction
+        DB::beginTransaction();
 
-        // Send cancellation notification to the customer
-        if ($appointment->customer && $appointment->customer->email_notifications_enabled &&
-            $appointment->customer->notify_appointment_cancellation) {
-            try {
-                $appointment->customer->notify(new AppointmentNotification($appointment, 'cancelled'));
-            } catch (\Exception $e) {
-                // Log notification error but continue
-                \Illuminate\Support\Facades\Log::error('Failed to send cancellation notification: ' . $e->getMessage());
+        try {
+            // Giảm số lượng đặt chỗ cho khung giờ này
+            $timeSlot = Time::findOrFail($appointment->time_appointments_id);
+            if ($timeSlot->booked_count > 0) {
+                $timeSlot->decrement('booked_count');
             }
-        }
 
-        return redirect()->route('staff.appointments.index')
-            ->with('success', 'Lịch hẹn đã được hủy thành công.');
+            $appointment->status = 'cancelled';
+            $appointment->cancellation_reason = $request->cancellation_reason;
+            $appointment->save();
+
+            DB::commit();
+
+            // Send cancellation notification to the customer
+            if ($appointment->customer && $appointment->customer->email_notifications_enabled &&
+                $appointment->customer->notify_appointment_cancellation) {
+                try {
+                    $appointment->customer->notify(new AppointmentNotification($appointment, 'cancelled'));
+                } catch (\Exception $e) {
+                    // Log notification error but continue
+                    \Illuminate\Support\Facades\Log::error('Failed to send cancellation notification: ' . $e->getMessage());
+                }
+            }
+
+            return redirect()->route('staff.appointments.index')
+                ->with('success', 'Lịch hẹn đã được hủy thành công.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Đã xảy ra lỗi khi hủy lịch hẹn: ' . $e->getMessage());
+        }
     }
 }

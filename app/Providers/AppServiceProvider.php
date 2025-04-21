@@ -13,7 +13,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Load production-specific email configuration in production environment
+        if ($this->app->environment('production')) {
+            $productionConfig = require config_path('mail.production.php');
+            config(['mail' => $productionConfig]);
+        }
     }
 
     /**

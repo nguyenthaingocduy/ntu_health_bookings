@@ -98,7 +98,7 @@
                         <div class="space-y-4">
                             <div>
                                 <p class="text-gray-600">Ngày đặt lịch</p>
-                                <p class="font-semibold">{{ $appointment->created_at->format('d/m/Y H:i') }}</p>
+                                <p class="font-semibold">{{ $appointment->created_at->format('d/m/y') }}</p>
                             </div>
                             
                             <div>

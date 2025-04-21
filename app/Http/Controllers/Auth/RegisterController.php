@@ -133,16 +133,36 @@ class RegisterController extends Controller
         try {
             Log::info('Bắt đầu gửi email xác nhận đăng ký cho: ' . $user->email);
 
-            // Use the new email notification service
-            $emailService = new EmailNotificationService();
-            $notification = $emailService->sendRegistrationConfirmation($user);
+            // Gửi email bằng cả hai phương thức để đảm bảo thành công
+            $emailSent = false;
 
-            if ($notification && $notification->status === 'sent') {
-                Log::info('Đã gửi email xác nhận đăng ký thành công cho: ' . $user->email);
-            } else {
-                // Fallback to the old method if the new one fails
-                Mail::to($user->email)->send(new \App\Mail\UserRegistrationMail($user));
-                Log::info('Đã gửi email xác nhận đăng ký thành công (fallback) cho: ' . $user->email);
+            // Phương thức 1: Sử dụng EmailNotificationService
+            try {
+                $emailService = new EmailNotificationService();
+                $notification = $emailService->sendRegistrationConfirmation($user);
+
+                if ($notification && $notification->status === 'sent') {
+                    Log::info('Đã gửi email xác nhận đăng ký thành công (service) cho: ' . $user->email);
+                    $emailSent = true;
+                }
+            } catch (\Exception $serviceError) {
+                Log::warning('Không thể gửi email qua service: ' . $serviceError->getMessage());
+            }
+
+            // Phương thức 2: Sử dụng Mail facade trực tiếp (nếu phương thức 1 thất bại)
+            if (!$emailSent) {
+                try {
+                    Mail::to($user->email)->send(new \App\Mail\UserRegistrationMail($user));
+                    Log::info('Đã gửi email xác nhận đăng ký thành công (direct) cho: ' . $user->email);
+                    $emailSent = true;
+                } catch (\Exception $directMailError) {
+                    Log::error('Không thể gửi email trực tiếp: ' . $directMailError->getMessage());
+                }
+            }
+
+            // Ghi log kết quả cuối cùng
+            if (!$emailSent) {
+                Log::error('Không thể gửi email xác nhận đăng ký cho: ' . $user->email . ' bằng cả hai phương thức');
             }
         } catch (\Exception $e) {
             // Ghi log lỗi nhưng không ngăn chặn đăng ký thành công

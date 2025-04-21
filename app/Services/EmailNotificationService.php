@@ -124,24 +124,55 @@ class EmailNotificationService
             // Create the notification record
             $notification = EmailNotification::create($data);
 
-            // Log mail configuration
+            // Log mail configuration with more details
             Log::info('Mail configuration', [
-                'driver' => config('mail.mailer'),
-                'host' => config('mail.host'),
-                'port' => config('mail.port'),
+                'driver' => config('mail.default'),
+                'host' => config('mail.mailers.smtp.host'),
+                'port' => config('mail.mailers.smtp.port'),
+                'username' => config('mail.mailers.smtp.username'),
+                'password_set' => !empty(config('mail.mailers.smtp.password')),
+                'password_length' => !empty(config('mail.mailers.smtp.password')) ? strlen(config('mail.mailers.smtp.password')) : 0,
                 'from_address' => config('mail.from.address'),
                 'from_name' => config('mail.from.name'),
-                'encryption' => config('mail.encryption'),
+                'encryption' => config('mail.mailers.smtp.encryption'),
+                'to_email' => $data['email'],
+                'subject' => $data['subject'],
             ]);
 
             // Send the email
-            Mail::send([], [], function ($message) use ($notification) {
-                $message->to($notification->email)
-                    ->subject($notification->subject)
-                    ->setBody($notification->message, 'text/html');
+            try {
+                // Add a retry mechanism for better reliability
+                $maxRetries = 3;
+                $retryCount = 0;
 
-                $message->from(config('mail.from.address'), config('mail.from.name'));
-            });
+                while ($retryCount < $maxRetries) {
+                    try {
+                        Mail::html($notification->message, function ($message) use ($notification) {
+                            $message->to($notification->email)
+                                ->subject($notification->subject);
+
+                            $message->from(config('mail.from.address'), config('mail.from.name'));
+                        });
+
+                        // If we get here, the email was sent successfully
+                        Log::info('Email sent successfully on attempt ' . ($retryCount + 1));
+                        break;
+                    } catch (\Exception $e) {
+                        $retryCount++;
+
+                        if ($retryCount < $maxRetries) {
+                            Log::warning('Email sending failed on attempt ' . $retryCount . ', retrying... Error: ' . $e->getMessage());
+                            sleep(2); // Wait 2 seconds before retrying
+                        } else {
+                            Log::error('Email sending failed after ' . $maxRetries . ' attempts. Error: ' . $e->getMessage());
+                            throw $e;
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error('Mail sending error: ' . $e->getMessage());
+                throw $e;
+            }
 
             // Update the notification status
             $notification->update([

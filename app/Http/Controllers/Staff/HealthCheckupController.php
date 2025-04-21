@@ -160,16 +160,34 @@ class HealthCheckupController extends Controller
             return back()->with('error', 'Không thể hủy lịch hẹn này.');
         }
 
-        $appointment->status = 'cancelled';
-        $appointment->cancellation_reason = $request->cancellation_reason;
-        $appointment->save();
+        // Bắt đầu transaction
+        \Illuminate\Support\Facades\DB::beginTransaction();
 
-        // Send notification
-        $user = Auth::user();
-        $user->notify(new HealthCheckupAppointmentNotification($appointment, 'cancelled'));
+        try {
+            // Nếu lịch hẹn sử dụng time_appointments_id, giảm số lượng đặt chỗ
+            if ($appointment->time_appointments_id) {
+                $timeSlot = \App\Models\Time::findOrFail($appointment->time_appointments_id);
+                if ($timeSlot->booked_count > 0) {
+                    $timeSlot->decrement('booked_count');
+                }
+            }
 
-        return redirect()->route('staff.health-checkups.index')
-            ->with('success', 'Lịch hẹn đã được hủy thành công.');
+            $appointment->status = 'cancelled';
+            $appointment->cancellation_reason = $request->cancellation_reason;
+            $appointment->save();
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            // Send notification
+            $user = Auth::user();
+            $user->notify(new HealthCheckupAppointmentNotification($appointment, 'cancelled'));
+
+            return redirect()->route('staff.health-checkups.index')
+                ->with('success', 'Lịch hẹn đã được hủy thành công.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return back()->with('error', 'Đã xảy ra lỗi khi hủy lịch hẹn: ' . $e->getMessage());
+        }
     }
 
     /**

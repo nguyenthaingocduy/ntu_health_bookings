@@ -106,17 +106,38 @@ class AppointmentController extends Controller
                 $appointmentWithRelations = Appointment::with(['service', 'customer', 'timeAppointment'])
                     ->findOrFail($appointment->id);
 
-                // Use the new email notification service
-                $emailService = new EmailNotificationService();
-                $notification = $emailService->sendBookingConfirmation($appointmentWithRelations);
+                // Gửi email bằng cả hai phương thức để đảm bảo thành công
+                $emailSent = false;
+                $userEmail = Auth::user()->email;
 
-                if ($notification && $notification->status === 'sent') {
-                    Log::info('Đã gửi email xác nhận đặt lịch thành công cho: ' . Auth::user()->email);
-                } else {
-                    // Fallback to the old method if the new one fails
-                    Mail::to(Auth::user()->email)
-                        ->send(new \App\Mail\AppointmentConfirmationMail($appointmentWithRelations));
-                    Log::info('Đã gửi email xác nhận đặt lịch thành công (fallback) cho: ' . Auth::user()->email);
+                // Phương thức 1: Sử dụng EmailNotificationService
+                try {
+                    $emailService = new EmailNotificationService();
+                    $notification = $emailService->sendBookingConfirmation($appointmentWithRelations);
+
+                    if ($notification && $notification->status === 'sent') {
+                        Log::info('Đã gửi email xác nhận đặt lịch thành công (service) cho: ' . $userEmail);
+                        $emailSent = true;
+                    }
+                } catch (\Exception $serviceError) {
+                    Log::warning('Không thể gửi email qua service: ' . $serviceError->getMessage());
+                }
+
+                // Phương thức 2: Sử dụng Mail facade trực tiếp (nếu phương thức 1 thất bại)
+                if (!$emailSent) {
+                    try {
+                        Mail::to($userEmail)
+                            ->send(new \App\Mail\AppointmentConfirmationMail($appointmentWithRelations));
+                        Log::info('Đã gửi email xác nhận đặt lịch thành công (direct) cho: ' . $userEmail);
+                        $emailSent = true;
+                    } catch (\Exception $directMailError) {
+                        Log::error('Không thể gửi email trực tiếp: ' . $directMailError->getMessage());
+                    }
+                }
+
+                // Ghi log kết quả cuối cùng
+                if (!$emailSent) {
+                    Log::error('Không thể gửi email xác nhận đặt lịch cho: ' . $userEmail . ' bằng cả hai phương thức');
                 }
             } catch (\Exception $e) {
                 Log::error('Không thể gửi email xác nhận đặt lịch: ' . $e->getMessage());

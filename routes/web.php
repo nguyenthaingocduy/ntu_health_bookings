@@ -191,3 +191,17 @@ Route::middleware(['auth'])->prefix('test-email')->group(function () {
 // Routes kiểm tra email
 Route::get('/mail-test', [MailTestController::class, 'index'])->name('mail.test');
 Route::post('/mail-test', [MailTestController::class, 'sendTestMail'])->name('mail.test.send');
+
+// Simple email test route
+Route::get('/test-email-config', function() {
+    try {
+        $email = request('email', 'ntuhealthbooking@gmail.com');
+        \Illuminate\Support\Facades\Mail::raw('This is a test email from Beauty Salon at ' . now(), function($message) use ($email) {
+            $message->to($email)
+                ->subject('Test Email from Beauty Salon');
+        });
+        return 'Email sent successfully to ' . $email . '. Please check your inbox.';
+    } catch (\Exception $e) {
+        return 'Error sending email: ' . $e->getMessage();
+    }
+});
