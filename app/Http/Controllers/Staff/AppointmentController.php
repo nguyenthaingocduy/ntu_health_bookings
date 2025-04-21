@@ -68,6 +68,28 @@ class AppointmentController extends Controller
     }
 
     /**
+     * Show the customer-style form for creating a new appointment.
+     *
+     * @param int|null $serviceId
+     * @return \Illuminate\View\View
+     */
+    public function createCustomerStyle($serviceId = null)
+    {
+        $service = null;
+        if ($serviceId) {
+            $service = Service::findOrFail($serviceId);
+        }
+
+        // Get all active services
+        $services = Service::where('status', 'active')->get();
+
+        // Get all time slots
+        $times = Time::orderBy('started_time')->get();
+
+        return view('staff.appointments.create_customer_style', compact('services', 'times', 'service'));
+    }
+
+    /**
      * Store a newly created appointment in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -75,68 +97,157 @@ class AppointmentController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate the basic required fields
         $request->validate([
             'customer_id' => 'required|exists:users,id',
             'service_id' => 'required|exists:services,id',
-            'date_appointments' => 'required|date|after_or_equal:today',
             'time_appointments_id' => 'required|exists:times,id',
             'notes' => 'nullable|string|max:500',
             'status' => 'required|in:pending,confirmed',
+            'booking_types' => 'required|array|min:1',
+            'booking_types.*' => 'in:day,month,year',
         ]);
 
-        // Check if the time slot is already booked
-        $existingAppointment = Appointment::where('date_appointments', $request->date_appointments)
-            ->where('time_appointments_id', $request->time_appointments_id)
-            ->whereIn('status', ['pending', 'confirmed'])
-            ->first();
+        // Process each booking type
+        $bookingDates = [];
 
-        if ($existingAppointment) {
-            return back()->withInput()->with('error', 'Thời gian này đã có người đặt. Vui lòng chọn thời gian khác.');
+        // Process day booking if selected
+        if (in_array('day', $request->booking_types) && $request->day_date) {
+            $dayDate = $request->day_date;
+            // Validate the date format
+            if (\Carbon\Carbon::hasFormat($dayDate, 'Y-m-d')) {
+                $bookingDates[] = [
+                    'type' => 'day',
+                    'date' => $dayDate,
+                ];
+            }
+        }
+
+        // Process month booking if selected
+        if (in_array('month', $request->booking_types) && $request->month_date) {
+            $monthDate = $request->month_date;
+            // Check if the date is in MM/YYYY format
+            if (preg_match('/^\d{1,2}\/\d{4}$/', $monthDate)) {
+                // Convert MM/YYYY to a valid date (first day of the month)
+                list($month, $year) = explode('/', $monthDate);
+                $firstDayOfMonth = $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT) . '-01';
+
+                $bookingDates[] = [
+                    'type' => 'month',
+                    'date' => $firstDayOfMonth,
+                    'display' => $monthDate,
+                ];
+            }
+        }
+
+        // Process year booking if selected
+        if (in_array('year', $request->booking_types) && $request->year_date) {
+            $yearDate = $request->year_date;
+            // Check if the date is just a year
+            if (preg_match('/^\d{4}$/', $yearDate)) {
+                // Convert YYYY to a valid date (first day of the year)
+                $firstDayOfYear = $yearDate . '-01-01';
+
+                $bookingDates[] = [
+                    'type' => 'year',
+                    'date' => $firstDayOfYear,
+                    'display' => $yearDate,
+                ];
+            }
+        }
+
+        // If no valid dates were found, return an error
+        if (empty($bookingDates)) {
+            return back()->withInput()->with('error', 'Vui lòng chọn ít nhất một ngày/tháng/năm hợp lệ.');
         }
 
         try {
-            // Find the service
-            $service = Service::findOrFail($request->service_id);
+            // Process all booking dates
+            $totalSuccessCount = 0;
+            $totalFailCount = 0;
+            $periodDescriptions = [];
 
-            // Find the customer
-            $customer = User::findOrFail($request->customer_id);
+            foreach ($bookingDates as $booking) {
+                $type = $booking['type'];
+                $date = $booking['date'];
+                $display = $booking['display'] ?? $date;
 
-            // Get an employee who works at the clinic that offers this service
-            $employee = Employee::whereHas('clinic', function($query) use ($service) {
-                $query->where('id', $service->clinic_id);
-            })->first();
+                // Get the start and end dates based on booking type
+                $startDate = \Carbon\Carbon::parse($date);
 
-            // If no employee is found, assign the current staff member
-            $employeeId = $employee ? $employee->id : Auth::id();
+                if ($type === 'day') {
+                    // For day booking, start and end are the same
+                    $endDate = $startDate->copy();
+                    $periodName = "ngày " . $startDate->format('d/m/Y');
+                } else if ($type === 'month') {
+                    // For month booking, end is the last day of the month
+                    $endDate = $startDate->copy()->endOfMonth();
+                    $periodName = "tháng " . $display;
+                } else { // year booking
+                    // For year booking, end is the last day of the year
+                    $endDate = $startDate->copy()->endOfYear();
+                    $periodName = "năm " . $display;
+                }
 
-            // Create UUID for id
-            $uuid = Str::uuid()->toString();
+                // Create appointments for each day in the period
+                $currentDay = $startDate->copy();
+                $successCount = 0;
+                $failCount = 0;
 
-            // Create the appointment
-            $appointment = Appointment::create([
-                'id' => $uuid,
-                'customer_id' => $request->customer_id,
-                'service_id' => $request->service_id,
-                'date_register' => now(),
-                'status' => $request->status,
-                'date_appointments' => $request->date_appointments,
-                'time_appointments_id' => $request->time_appointments_id,
-                'employee_id' => $employeeId,
-                'notes' => $request->notes,
-            ]);
+                while ($currentDay <= $endDate) {
+                    // Skip weekends
+                    if ($currentDay->isWeekend()) {
+                        $currentDay->addDay();
+                        continue;
+                    }
 
-            // Send notification to the customer if enabled
-            if ($customer->email_notifications_enabled) {
-                try {
-                    $customer->notify(new AppointmentNotification($appointment, $request->status === 'confirmed' ? 'confirmed' : 'created'));
-                } catch (\Exception $e) {
-                    // Log notification error but continue
-                    \Illuminate\Support\Facades\Log::error('Failed to send appointment notification: ' . $e->getMessage());
+                    // Check if the time slot is already booked for this day
+                    $existingAppointment = Appointment::where('date_appointments', $currentDay->format('Y-m-d'))
+                        ->where('time_appointments_id', $request->time_appointments_id)
+                        ->whereIn('status', ['pending', 'confirmed'])
+                        ->first();
+
+                    if (!$existingAppointment) {
+                        // Create an appointment for this day
+                        $this->createAppointment(
+                            $request->customer_id,
+                            $request->service_id,
+                            $currentDay->format('Y-m-d'),
+                            $request->time_appointments_id,
+                            $request->notes,
+                            $request->status
+                        );
+
+                        $successCount++;
+                    } else {
+                        $failCount++;
+                    }
+
+                    $currentDay->addDay();
+                }
+
+                // Add to total counts
+                $totalSuccessCount += $successCount;
+                $totalFailCount += $failCount;
+
+                // Add period description
+                if ($successCount > 0) {
+                    $periodDescriptions[] = "$successCount lịch hẹn cho $periodName";
                 }
             }
 
-            return redirect()->route('staff.appointments.index')
-                ->with('success', 'Lịch hẹn đã được tạo thành công cho khách hàng ' . $customer->first_name . ' ' . $customer->last_name);
+            // Create success message
+            if ($totalSuccessCount > 0) {
+                $message = "Đã tạo thành công " . implode(", ", $periodDescriptions);
+                if ($totalFailCount > 0) {
+                    $message .= ". $totalFailCount ngày đã có người đặt trước.";
+                }
+
+                return redirect()->route('staff.appointments.index')
+                    ->with('success', $message);
+            } else {
+                return back()->withInput()->with('error', 'Không thể tạo lịch hẹn. Tất cả các khung giờ đã được đặt trước đó.');
+            }
         } catch (\Exception $e) {
             return back()->withInput()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
         }
@@ -263,6 +374,52 @@ class AppointmentController extends Controller
     }
 
     /**
+     * Show form for editing customer information for an appointment.
+     *
+     * @param  string  $id
+     * @return \Illuminate\View\View
+     */
+    public function editCustomer($id)
+    {
+        $appointment = Appointment::with('customer')->findOrFail($id);
+        return view('staff.appointments.edit_customer', compact('appointment'));
+    }
+
+    /**
+     * Update customer information for an appointment.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function updateCustomer(Request $request, $id)
+    {
+        $appointment = Appointment::with('customer')->findOrFail($id);
+        $customer = $appointment->customer;
+
+        $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string|max:255',
+            'gender' => 'required|in:male,female,other',
+            'birthday' => 'nullable|date',
+        ]);
+
+        $customer->update([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'phone' => $request->phone,
+            'address' => $request->address,
+            'gender' => $request->gender,
+            'birthday' => $request->birthday,
+        ]);
+
+        return redirect()->route('staff.appointments.show', $appointment->id)
+            ->with('success', 'Thông tin khách hàng đã được cập nhật thành công.');
+    }
+
+    /**
      * Cancel the specified appointment.
      *
      * @param  string  $id
@@ -313,5 +470,61 @@ class AppointmentController extends Controller
             DB::rollBack();
             return back()->with('error', 'Đã xảy ra lỗi khi hủy lịch hẹn: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Helper method to create an appointment
+     *
+     * @param string $customerId
+     * @param string $serviceId
+     * @param string $dateAppointments
+     * @param string $timeAppointmentsId
+     * @param string|null $notes
+     * @param string $status
+     * @return \App\Models\Appointment
+     */
+    private function createAppointment($customerId, $serviceId, $dateAppointments, $timeAppointmentsId, $notes = null, $status = 'pending')
+    {
+        // Find the service
+        $service = Service::findOrFail($serviceId);
+
+        // Find the customer
+        $customer = User::findOrFail($customerId);
+
+        // Get an employee who works at the clinic that offers this service
+        $employee = Employee::whereHas('clinic', function($query) use ($service) {
+            $query->where('id', $service->clinic_id);
+        })->first();
+
+        // If no employee is found, assign the current staff member
+        $employeeId = $employee ? $employee->id : Auth::id();
+
+        // Create UUID for id
+        $uuid = Str::uuid()->toString();
+
+        // Create the appointment
+        $appointment = Appointment::create([
+            'id' => $uuid,
+            'customer_id' => $customerId,
+            'service_id' => $serviceId,
+            'date_register' => now(),
+            'status' => $status,
+            'date_appointments' => $dateAppointments,
+            'time_appointments_id' => $timeAppointmentsId,
+            'employee_id' => $employeeId,
+            'notes' => $notes,
+        ]);
+
+        // Send notification to the customer if enabled
+        if ($customer->email_notifications_enabled) {
+            try {
+                $customer->notify(new AppointmentNotification($appointment, $status === 'confirmed' ? 'confirmed' : 'created'));
+            } catch (\Exception $e) {
+                // Log notification error but continue
+                \Illuminate\Support\Facades\Log::error('Failed to send appointment notification: ' . $e->getMessage());
+            }
+        }
+
+        return $appointment;
     }
 }

@@ -51,21 +51,21 @@
     <div class="header">
         <h1>{{ $app_name }}</h1>
     </div>
-    
+
     <div class="content">
         <h2>Xác nhận đặt lịch</h2>
-        
+
         <p>Xin chào {{ $user_name }},</p>
-        
+
         <p>Cảm ơn bạn đã đặt lịch tại {{ $app_name }}. Dưới đây là thông tin chi tiết về lịch hẹn của bạn:</p>
-        
+
         <div class="appointment-details">
             <h3>Thông tin lịch hẹn:</h3>
             <p><strong>Mã lịch hẹn:</strong> #{{ substr($appointment->id, 0, 8) }}</p>
             <p><strong>Dịch vụ:</strong> {{ $service_name }}</p>
             <p><strong>Ngày hẹn:</strong> {{ \Carbon\Carbon::parse($appointment_date)->format('d/m/Y') }}</p>
             <p><strong>Giờ hẹn:</strong> {{ $appointment_time }}</p>
-            <p><strong>Trạng thái:</strong> 
+            <p><strong>Trạng thái:</strong>
                 @if($appointment->status == 'pending')
                     Chờ xác nhận
                 @elseif($appointment->status == 'confirmed')
@@ -84,6 +84,10 @@
             <a href="{{ $appointment_url }}" class="button">Xem lịch hẹn</a>
         </div>
 
+        <p style="font-size: 12px; color: #666; margin-top: 10px; text-align: center;">
+            Nếu nút trên không hoạt động, vui lòng <a href="{{ $dashboard_url }}" style="color: #ec4899;">nhấp vào đây</a> để truy cập trang quản lý lịch hẹn của bạn.
+        </p>
+
         <p><strong>Lưu ý quan trọng:</strong></p>
         <ul>
             <li>Vui lòng đến trước giờ hẹn 15 phút để làm thủ tục.</li>
@@ -94,7 +98,7 @@
         <p>Trân trọng,<br>
         Đội ngũ {{ $app_name }}</p>
     </div>
-    
+
     <div class="footer">
         <p>&copy; {{ $current_year }} {{ $app_name }}. Tất cả các quyền được bảo lưu.</p>
         <p>Đây là email tự động, vui lòng không trả lời email này.</p>

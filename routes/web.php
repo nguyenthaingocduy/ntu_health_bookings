@@ -96,11 +96,14 @@ Route::middleware(['auth'])->prefix('staff')->name('staff.')->group(function () 
         // Quản lý lịch hẹn khám sức khỏe
         Route::get('/appointments', [\App\Http\Controllers\Staff\AppointmentController::class, 'index'])->name('appointments.index');
         Route::get('/appointments/create/{serviceId?}', [\App\Http\Controllers\Staff\AppointmentController::class, 'create'])->name('appointments.create');
+        Route::get('/appointments/create-customer-style/{serviceId?}', [\App\Http\Controllers\Staff\AppointmentController::class, 'createCustomerStyle'])->name('appointments.create-customer-style');
         Route::post('/appointments', [\App\Http\Controllers\Staff\AppointmentController::class, 'store'])->name('appointments.store');
         Route::get('/appointments/{id}', [\App\Http\Controllers\Staff\AppointmentController::class, 'show'])->name('appointments.show');
         Route::get('/appointments/{id}/edit', [\App\Http\Controllers\Staff\AppointmentController::class, 'edit'])->name('appointments.edit');
         Route::put('/appointments/{id}', [\App\Http\Controllers\Staff\AppointmentController::class, 'update'])->name('appointments.update');
         Route::post('/appointments/{id}/cancel', [\App\Http\Controllers\Staff\AppointmentController::class, 'cancel'])->name('appointments.cancel');
+        Route::get('/appointments/{id}/edit-customer', [\App\Http\Controllers\Staff\AppointmentController::class, 'editCustomer'])->name('appointments.edit-customer');
+        Route::put('/appointments/{id}/update-customer', [\App\Http\Controllers\Staff\AppointmentController::class, 'updateCustomer'])->name('appointments.update-customer');
 
         // Quản lý thông tin cá nhân
         Route::get('/profile', [\App\Http\Controllers\Staff\ProfileController::class, 'index'])->name('profile.index');

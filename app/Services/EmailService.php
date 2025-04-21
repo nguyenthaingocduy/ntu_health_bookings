@@ -8,6 +8,7 @@ use Illuminate\Mail\Message;
 use App\Models\User;
 use App\Models\Appointment;
 use App\Models\EmailLog;
+use App\Helpers\UrlHelper;
 
 class EmailService
 {
@@ -60,21 +61,21 @@ class EmailService
                 try {
                     // Increment attempt counter
                     $emailLog->increment('attempts');
-                    
+
                     // Send the email
                     Mail::send($view, $data, function (Message $message) use ($to, $subject, $options) {
                         $message->to($to)->subject($subject);
-                        
+
                         // Add CC recipients if specified
                         if (!empty($options['cc'])) {
                             $message->cc($options['cc']);
                         }
-                        
+
                         // Add BCC recipients if specified
                         if (!empty($options['bcc'])) {
                             $message->bcc($options['bcc']);
                         }
-                        
+
                         // Add attachments if specified
                         if (!empty($options['attachments'])) {
                             foreach ($options['attachments'] as $attachment) {
@@ -83,30 +84,30 @@ class EmailService
                                 }
                             }
                         }
-                        
+
                         // Set from address if specified, otherwise use default
                         if (!empty($options['from'])) {
                             $message->from($options['from']['address'], $options['from']['name'] ?? null);
                         }
                     });
-                    
+
                     // If we get here, the email was sent successfully
                     $success = true;
                     Log::info('Email sent successfully on attempt ' . ($retryCount + 1), [
                         'to' => $to,
                         'subject' => $subject
                     ]);
-                    
+
                     // Update email log
                     $emailLog->update([
                         'status' => 'sent',
                         'sent_at' => now(),
                     ]);
-                    
+
                 } catch (\Exception $e) {
                     $lastError = $e;
                     $retryCount++;
-                    
+
                     if ($retryCount < $maxRetries) {
                         Log::warning('Email sending failed on attempt ' . $retryCount . ', retrying...', [
                             'error' => $e->getMessage(),
@@ -117,7 +118,7 @@ class EmailService
                     }
                 }
             }
-            
+
             // If all retries failed, log the error and update the email log
             if (!$success) {
                 Log::error('Email sending failed after ' . $maxRetries . ' attempts', [
@@ -125,31 +126,31 @@ class EmailService
                     'to' => $to,
                     'subject' => $subject
                 ]);
-                
+
                 // Update email log
                 $emailLog->update([
                     'status' => 'failed',
                     'error' => $lastError ? $lastError->getMessage() : 'Unknown error',
                 ]);
-                
+
                 return false;
             }
-            
+
             return true;
-            
+
         } catch (\Exception $e) {
             Log::error('Email sending error', [
                 'error' => $e->getMessage(),
                 'to' => $to,
                 'subject' => $subject
             ]);
-            
+
             // Update email log
             $emailLog->update([
                 'status' => 'failed',
                 'error' => $e->getMessage(),
             ]);
-            
+
             return false;
         }
     }
@@ -163,14 +164,14 @@ class EmailService
     public function sendRegistrationConfirmation(User $user): bool
     {
         $subject = 'Chào mừng bạn đến với Beauty Spa Booking';
-        
+
         $data = [
             'user' => $user,
             'login_url' => route('login'),
             'app_name' => config('app.name'),
             'current_year' => date('Y'),
         ];
-        
+
         return $this->send($user->email, $subject, 'emails.registration', $data);
     }
 
@@ -184,20 +185,21 @@ class EmailService
     {
         // Load the appointment with its relationships
         $appointment->load(['service', 'customer', 'timeAppointment']);
-        
+
         $subject = 'Xác nhận đặt lịch - Beauty Spa Booking';
-        
+
         $data = [
             'appointment' => $appointment,
             'user_name' => $appointment->customer->first_name . ' ' . $appointment->customer->last_name,
             'service_name' => $appointment->service->name,
             'appointment_date' => $appointment->date_appointments,
             'appointment_time' => $appointment->timeAppointment->time,
-            'appointment_url' => route('customer.appointments.show', $appointment->id),
+            'appointment_url' => UrlHelper::emailUrl('customer.appointments.show', $appointment->id),
+            'dashboard_url' => UrlHelper::customerDashboardUrl(),
             'app_name' => config('app.name'),
             'current_year' => date('Y'),
         ];
-        
+
         return $this->send($appointment->customer->email, $subject, 'emails.appointment-confirmation', $data);
     }
 
@@ -211,20 +213,21 @@ class EmailService
     {
         // Load the appointment with its relationships
         $appointment->load(['service', 'customer', 'timeAppointment']);
-        
+
         $subject = 'Nhắc nhở lịch hẹn - Beauty Spa Booking';
-        
+
         $data = [
             'appointment' => $appointment,
             'user_name' => $appointment->customer->first_name . ' ' . $appointment->customer->last_name,
             'service_name' => $appointment->service->name,
             'appointment_date' => $appointment->date_appointments,
             'appointment_time' => $appointment->timeAppointment->time,
-            'appointment_url' => route('customer.appointments.show', $appointment->id),
+            'appointment_url' => UrlHelper::emailUrl('customer.appointments.show', $appointment->id),
+            'dashboard_url' => UrlHelper::customerDashboardUrl(),
             'app_name' => config('app.name'),
             'current_year' => date('Y'),
         ];
-        
+
         return $this->send($appointment->customer->email, $subject, 'emails.appointment-reminder', $data);
     }
 
@@ -237,13 +240,13 @@ class EmailService
     public function sendTestEmail(string $to): bool
     {
         $subject = 'Test Email from Beauty Spa Booking';
-        
+
         $data = [
             'app_name' => config('app.name'),
             'current_year' => date('Y'),
             'timestamp' => now()->format('Y-m-d H:i:s'),
         ];
-        
+
         return $this->send($to, $subject, 'emails.test', $data);
     }
 }

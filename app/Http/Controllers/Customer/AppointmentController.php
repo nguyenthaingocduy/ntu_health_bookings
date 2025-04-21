@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use App\Services\EmailNotificationService;
 use App\Services\EmailService;
+use App\Helpers\UrlHelper;
 
 class AppointmentController extends Controller
 {
@@ -129,7 +130,8 @@ class AppointmentController extends Controller
                         'service_name' => $appointmentWithRelations->service->name,
                         'appointment_date' => $appointmentWithRelations->date_appointments,
                         'appointment_time' => $appointmentWithRelations->timeAppointment->time,
-                        'appointment_url' => route('customer.appointments.show', $appointmentWithRelations->id),
+                        'appointment_url' => UrlHelper::emailUrl('customer.appointments.show', $appointmentWithRelations->id),
+                        'dashboard_url' => UrlHelper::customerDashboardUrl(),
                         'app_name' => config('app.name'),
                         'current_year' => date('Y'),
                     ];

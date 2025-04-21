@@ -42,6 +42,18 @@ class TimeSlotController extends Controller
     }
 
     /**
+     * Get all time slots.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAllTimeSlots()
+    {
+        $timeSlots = Time::orderBy('started_time')->get();
+
+        return response()->json($timeSlots);
+    }
+
+    /**
      * Kiểm tra và trả về các khung giờ khả dụng cho ngày và dịch vụ được chọn
      */
     public function checkAvailableSlots(Request $request)

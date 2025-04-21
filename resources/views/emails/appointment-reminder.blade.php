@@ -57,16 +57,16 @@
     <div class="header">
         <h1>{{ $app_name }}</h1>
     </div>
-    
+
     <div class="content">
         <h2>Nhắc nhở lịch hẹn</h2>
-        
+
         <p>Xin chào {{ $user_name }},</p>
-        
+
         <div class="reminder-box">
             <p><strong>Đây là lời nhắc nhở về lịch hẹn sắp tới của bạn tại {{ $app_name }}.</strong></p>
         </div>
-        
+
         <div class="appointment-details">
             <h3>Thông tin lịch hẹn:</h3>
             <p><strong>Mã lịch hẹn:</strong> #{{ substr($appointment->id, 0, 8) }}</p>
@@ -81,6 +81,10 @@
             <a href="{{ $appointment_url }}" class="button">Xem lịch hẹn</a>
         </div>
 
+        <p style="font-size: 12px; color: #666; margin-top: 10px; text-align: center;">
+            Nếu nút trên không hoạt động, vui lòng <a href="{{ $dashboard_url }}" style="color: #ec4899;">nhấp vào đây</a> để truy cập trang quản lý lịch hẹn của bạn.
+        </p>
+
         <p><strong>Lưu ý quan trọng:</strong></p>
         <ul>
             <li>Vui lòng đến trước giờ hẹn 15 phút để làm thủ tục.</li>
@@ -93,7 +97,7 @@
         <p>Trân trọng,<br>
         Đội ngũ {{ $app_name }}</p>
     </div>
-    
+
     <div class="footer">
         <p>&copy; {{ $current_year }} {{ $app_name }}. Tất cả các quyền được bảo lưu.</p>
         <p>Đây là email tự động, vui lòng không trả lời email này.</p>

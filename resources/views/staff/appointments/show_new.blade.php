@@ -86,7 +86,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Appointment Details -->
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -119,51 +119,105 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Thông tin khách hàng</h4>
-                            <div class="flex items-center mb-4">
-                                <div class="relative hidden w-10 h-10 mr-3 rounded-full md:block">
-                                    <img class="object-cover w-full h-full rounded-full" src="https://ui-avatars.com/api/?name={{ $appointment->customer->first_name }}+{{ $appointment->customer->last_name }}&background=random" alt="" loading="lazy" />
-                                    <div class="absolute inset-0 rounded-full shadow-inner" aria-hidden="true"></div>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-gray-700">{{ $appointment->customer->first_name }} {{ $appointment->customer->last_name }}</p>
-                                    <p class="text-xs text-gray-500">{{ $appointment->customer->email }}</p>
-                                </div>
+
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-md overflow-hidden">
+                            <div class="bg-gradient-to-r from-pink-50 to-pink-100 border-b border-gray-200 px-5 py-4 flex justify-between items-center">
+                                <h4 class="text-sm font-medium text-gray-700 uppercase flex items-center">
+                                    <svg class="w-5 h-5 mr-2.5 text-pink-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Thông tin khách hàng
+                                </h4>
+                                <a href="{{ route('staff.appointments.edit-customer', $appointment->id) }}" class="px-3.5 py-2 bg-pink-500 text-white text-xs rounded-lg hover:bg-pink-600 transition-colors duration-150 flex items-center shadow-sm">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                    Sửa thông tin
+                                </a>
                             </div>
-                            <div class="space-y-3">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Số điện thoại:</span>
-                                    <span class="font-medium">{{ $appointment->customer->phone }}</span>
+
+                            <div class="p-6">
+                                <!-- Customer Profile Header -->
+                                <div class="flex items-center mb-6 pb-5 border-b border-gray-100">
+                                    <div class="relative w-20 h-20 mr-5 rounded-full bg-pink-100 border-2 border-pink-200 shadow-sm overflow-hidden flex-shrink-0">
+                                        <img class="object-cover w-full h-full rounded-full" src="https://ui-avatars.com/api/?name={{ $appointment->customer->first_name }}+{{ $appointment->customer->last_name }}&background=f9a8d4&color=ffffff&size=80" alt="{{ $appointment->customer->first_name }} {{ $appointment->customer->last_name }}" loading="lazy" />
+                                        <div class="absolute inset-0 rounded-full shadow-inner" aria-hidden="true"></div>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-800 text-xl mb-1">{{ $appointment->customer->first_name }} {{ $appointment->customer->last_name }}</p>
+                                        <p class="text-sm text-gray-500 flex items-center">
+                                            <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                                            </svg>
+                                            {{ $appointment->customer->email }}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Địa chỉ:</span>
-                                    <span class="font-medium">{{ $appointment->customer->address }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Giới tính:</span>
-                                    <span class="font-medium">
-                                        @if($appointment->customer->gender == 'male')
-                                            Nam
-                                        @elseif($appointment->customer->gender == 'female')
-                                            Nữ
-                                        @else
-                                            Khác
-                                        @endif
-                                    </span>
+
+                                <!-- Customer Details -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="bg-gray-50 rounded-xl p-4 flex items-start hover:bg-gray-100 transition-colors duration-150">
+                                        <div class="bg-pink-100 p-2.5 rounded-lg mr-4 shadow-sm">
+                                            <svg class="w-5 h-5 text-pink-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Số điện thoại</p>
+                                            <p class="font-medium text-gray-800 text-base">{{ $appointment->customer->phone }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-gray-50 rounded-xl p-4 flex items-start hover:bg-gray-100 transition-colors duration-150">
+                                        <div class="bg-pink-100 p-2.5 rounded-lg mr-4 shadow-sm">
+                                            <svg class="w-5 h-5 text-pink-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                @if($appointment->customer->gender == 'male')
+                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                                @elseif($appointment->customer->gender == 'female')
+                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9c0-.46.074-.893.208-1.303.199-.61.77-1.297 1.666-1.797.197-.1.42-.193.665-.275A7 7 0 0110 6a7 7 0 017 7 1 1 0 11-2 0 5 5 0 00-5-5 5 5 0 00-5 5a1 1 0 01-2 0z" clip-rule="evenodd"></path>
+                                                @else
+                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                                @endif
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Giới tính</p>
+                                            <p class="font-medium text-gray-800 text-base">
+                                                @if($appointment->customer->gender == 'male')
+                                                    Nam
+                                                @elseif($appointment->customer->gender == 'female')
+                                                    Nữ
+                                                @else
+                                                    Khác
+                                                @endif
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-gray-50 rounded-xl p-4 flex items-start col-span-1 md:col-span-2 hover:bg-gray-100 transition-colors duration-150">
+                                        <div class="bg-pink-100 p-2.5 rounded-lg mr-4 shadow-sm">
+                                            <svg class="w-5 h-5 text-pink-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Địa chỉ</p>
+                                            <p class="font-medium text-gray-800 text-base">{{ $appointment->customer->address ?: 'Chưa cập nhật' }}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
+
                     @if($appointment->notes)
                     <div class="mt-6 p-4 bg-gray-50 rounded-lg">
                         <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Ghi chú</h4>
                         <p class="text-gray-700">{{ $appointment->notes }}</p>
                     </div>
                     @endif
-                    
+
                     @if($appointment->cancellation_reason)
                     <div class="mt-6 p-4 bg-red-50 rounded-lg">
                         <h4 class="text-sm font-medium text-red-500 uppercase tracking-wider mb-2">Lý do hủy</h4>
@@ -172,7 +226,7 @@
                     @endif
                 </div>
             </div>
-            
+
             <!-- Action Buttons -->
             <div class="mt-6 flex flex-wrap gap-3">
                 @if($appointment->status == 'pending')
@@ -192,7 +246,7 @@
                     </button>
                 </form>
                 @endif
-                
+
                 @if($appointment->status == 'confirmed')
                 <form action="{{ route('staff.appointments.update', $appointment->id) }}" method="POST" class="inline-block">
                     @csrf
@@ -210,16 +264,23 @@
                     </button>
                 </form>
                 @endif
-                
+
                 <a href="{{ route('staff.appointments.edit', $appointment->id) }}" class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-150 flex items-center">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
-                    Chỉnh sửa
+                    Chỉnh sửa lịch hẹn
+                </a>
+
+                <a href="{{ route('staff.appointments.edit-customer', $appointment->id) }}" class="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors duration-150 flex items-center shadow-sm">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Chỉnh sửa khách hàng
                 </a>
             </div>
         </div>
-        
+
         <!-- Sidebar -->
         <div class="col-span-1">
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -234,7 +295,7 @@
                     <p class="text-pink-600 hover:text-pink-700 cursor-pointer">Xem chi tiết dịch vụ</p>
                 </div>
             </div>
-            
+
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h4 class="font-semibold text-gray-800 mb-4">Hướng dẫn</h4>
                 <div class="mb-4">
@@ -252,7 +313,7 @@
                         <li>Nhận kết quả và thanh toán</li>
                     </ol>
                 </div>
-                
+
                 <div>
                     <h5 class="flex items-center text-sm font-medium text-gray-700 mb-2">
                         <svg class="w-4 h-4 mr-2 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -323,7 +384,7 @@
     function openCancelModal() {
         document.getElementById('cancelModal').classList.remove('hidden');
     }
-    
+
     function closeCancelModal() {
         document.getElementById('cancelModal').classList.add('hidden');
     }

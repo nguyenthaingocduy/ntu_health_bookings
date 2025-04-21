@@ -26,6 +26,12 @@ Route::get('/timeslots/available', [TimeSlotController::class, 'checkAvailableSl
 // Route API sử dụng controller - đường dẫn cũ để tương thích
 Route::get('/check-available-slots', [TimeSlotController::class, 'checkAvailableSlots']);
 
+// Route to get all time slots
+Route::get('/time-slots', [TimeSlotController::class, 'getAllTimeSlots']);
+
+// Customer search for staff appointment booking
+Route::get('/customers/search', [\App\Http\Controllers\Api\CustomerController::class, 'search']);
+
 // Service promotion popup routes
 Route::get('/random-featured-service', function() {
     // Get a random active service with promotion
