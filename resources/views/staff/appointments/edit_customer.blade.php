@@ -40,14 +40,15 @@
         <!-- Customer Form -->
         <div class="col-span-2">
             <div class="bg-white rounded-xl border border-gray-200 shadow-md overflow-hidden">
-                <div class="bg-gradient-to-r from-pink-50 to-pink-100 border-b border-gray-200 px-5 py-4">
-                    <h4 class="font-semibold text-gray-700 flex items-center">
+                <div class="bg-gradient-to-r from-pink-100 to-pink-200 px-5 py-4 border-b border-gray-200 rounded-t-xl">
+                    <h4 class="font-semibold text-gray-700 flex items-center gap-2">
                         <svg class="w-5 h-5 mr-2.5 text-pink-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                         </svg>
                         Thông tin khách hàng
                     </h4>
                 </div>
+                
                 <div class="p-6">
                     <form action="{{ route('staff.appointments.update-customer', $appointment->id) }}" method="POST">
                         @csrf
@@ -155,12 +156,18 @@
                             @enderror
                         </div>
 
-                        <div class="flex justify-end">
-                            <button type="submit" class="px-6 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors duration-150 flex items-center shadow-md">
+                        <div class="flex justify-end space-x-4">
+                            <button type="button" onclick="window.location.href='{{ route('staff.appointments.show', $appointment->id) }}'" class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-150 flex items-center shadow-sm border border-gray-200">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Hủy
+                            </button>
+                            <button type="submit" class="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all duration-150 flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
-                                Cập nhật thông tin khách hàng
+                                Cập nhật thông tin
                             </button>
                         </div>
                     </form>
@@ -171,9 +178,9 @@
         <!-- Appointment Info -->
         <div class="col-span-1">
             <div class="bg-white rounded-xl border border-gray-200 shadow-md overflow-hidden">
-                <div class="bg-gradient-to-r from-pink-50 to-pink-100 border-b border-gray-200 px-5 py-4">
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 px-5 py-4">
                     <h4 class="font-semibold text-gray-700 flex items-center">
-                        <svg class="w-5 h-5 mr-2.5 text-pink-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="w-5 h-5 mr-2.5 text-blue-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
                         </svg>
                         Thông tin lịch hẹn
@@ -182,8 +189,8 @@
                 <div class="p-6">
                     <div class="space-y-5">
                         <div class="flex items-start">
-                            <div class="bg-pink-100 p-2.5 rounded-lg mr-4 shadow-sm">
-                                <svg class="w-4 h-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <div class="bg-blue-100 p-2.5 rounded-lg mr-4 shadow-sm">
+                                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>
@@ -194,8 +201,8 @@
                         </div>
 
                         <div class="flex items-start">
-                            <div class="bg-pink-100 p-2.5 rounded-lg mr-4 shadow-sm">
-                                <svg class="w-4 h-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <div class="bg-blue-100 p-2.5 rounded-lg mr-4 shadow-sm">
+                                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" d="M7 2a1 1 0 00-.707 1.707L7 4.414v3.758a1 1 0 01-.293.707l-4 4C.817 14.769 2.156 18 4.828 18h10.343c2.673 0 4.012-3.231 2.122-5.121l-4-4A1 1 0 0113 8.172V4.414l.707-.707A1 1 0 0013 2H7zm2 6.172V4h2v4.172a3 3 0 00.879 2.12l1.168 1.168a4 4 0 01-2.929 6.54h-2.118a4 4 0 01-2.227-.616c-.569-.354-1.073-.862-1.427-1.427a4.02 4.02 0 01-.616-2.227c0-1.11.45-2.118 1.17-2.83l1.168-1.168A3 3 0 009 8.172z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>
@@ -206,8 +213,8 @@
                         </div>
 
                         <div class="flex items-start">
-                            <div class="bg-pink-100 p-2.5 rounded-lg mr-4 shadow-sm">
-                                <svg class="w-4 h-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <div class="bg-blue-100 p-2.5 rounded-lg mr-4 shadow-sm">
+                                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>
@@ -218,8 +225,8 @@
                         </div>
 
                         <div class="flex items-start">
-                            <div class="bg-pink-100 p-2.5 rounded-lg mr-4 shadow-sm">
-                                <svg class="w-4 h-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <div class="bg-blue-100 p-2.5 rounded-lg mr-4 shadow-sm">
+                                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>
@@ -230,8 +237,8 @@
                         </div>
 
                         <div class="flex items-start">
-                            <div class="bg-pink-100 p-2.5 rounded-lg mr-4 shadow-sm">
-                                <svg class="w-4 h-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <div class="bg-blue-100 p-2.5 rounded-lg mr-4 shadow-sm">
+                                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>
@@ -261,7 +268,7 @@
                     </div>
 
                     <div class="mt-6">
-                        <a href="{{ route('staff.appointments.edit', $appointment->id) }}" class="block w-full px-5 py-3 bg-pink-500 text-white text-center rounded-lg hover:bg-pink-600 transition-colors duration-150 flex items-center justify-center shadow-md mt-2">
+                        <a href="{{ route('staff.appointments.edit', $appointment->id) }}" class="block w-full px-5 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-center rounded-lg hover:shadow-lg transition-all duration-150 flex items-center justify-center mt-2">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
@@ -280,12 +287,22 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize date picker for birthday
+        // Initialize date picker for birthday with better formatting
         flatpickr("#birthday", {
             dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
             maxDate: "today",
             locale: "vn",
-            disableMobile: "true"
+            disableMobile: "true",
+            allowInput: true,
+            onReady: function() {
+                // Fix for date display on page load
+                const dateValue = "{{ $appointment->customer->birthday }}";
+                if (dateValue) {
+                    this.setDate(dateValue, false);
+                }
+            }
         });
     });
 </script>

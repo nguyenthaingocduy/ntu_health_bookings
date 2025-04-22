@@ -67,12 +67,7 @@
             <p class="text-base text-gray-500">Quản lý tất cả các lịch hẹn trong hệ thống</p>
         </div>
         <div class="flex space-x-4">
-            <a href="{{ route('staff.appointments.create-customer-style') }}" class="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-150 flex items-center shadow-md">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                Đặt lịch kiểu khách hàng
-            </a>
+
             <a href="{{ route('staff.appointments.create') }}" class="px-6 py-3 bg-pink-600 text-white rounded-xl hover:bg-pink-700 transition-colors duration-150 flex items-center shadow-md">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>

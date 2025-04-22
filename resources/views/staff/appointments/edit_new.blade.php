@@ -64,11 +64,16 @@
     <div class="grid gap-6 mb-8 md:grid-cols-3">
         <!-- Appointment Form -->
         <div class="col-span-2">
-            <div class="staff-card">
-                <div class="staff-card-header">
-                    <h4 class="font-semibold text-gray-800">Chỉnh sửa thông tin lịch hẹn</h4>
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-pink-50 to-purple-50 px-6 py-4 border-b border-gray-200">
+                    <h4 class="font-semibold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-pink-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                        </svg>
+                        Chỉnh sửa thông tin lịch hẹn
+                    </h4>
                 </div>
-                <div class="staff-card-body">
+                <div class="p-6">
                     <form action="{{ route('staff.appointments.update', $appointment->id) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -91,14 +96,16 @@
 
                         <div class="mb-6">
                             <label for="service_id" class="block text-sm font-medium text-gray-700 mb-1">Dịch vụ <span class="text-red-500">*</span></label>
-                            <select name="service_id" id="service_id" class="service-select w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-500 focus:ring-opacity-50 @error('service_id') border-red-500 @enderror" required>
-                                <option value="">-- Chọn dịch vụ --</option>
-                                @foreach($services as $serviceItem)
-                                    <option value="{{ $serviceItem->id }}" {{ (old('service_id', $appointment->service_id) == $serviceItem->id) ? 'selected' : '' }}>
-                                        {{ $serviceItem->name }} - {{ number_format($serviceItem->price, 0, ',', '.') }} VNĐ
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="relative">
+                                <select name="service_id" id="service_id" class="service-select w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-500 focus:ring-opacity-50 @error('service_id') border-red-500 @enderror" required>
+                                    <option value="">-- Chọn dịch vụ --</option>
+                                    @foreach($services as $serviceItem)
+                                        <option value="{{ $serviceItem->id }}" {{ (old('service_id', $appointment->service_id) == $serviceItem->id) ? 'selected' : '' }}>
+                                            {{ $serviceItem->name }} - {{ number_format($serviceItem->price, 0, ',', '.') }} VNĐ
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                             @error('service_id')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -106,7 +113,14 @@
 
                         <div class="mb-6">
                             <label for="date_appointments" class="block text-sm font-medium text-gray-700 mb-1">Ngày hẹn <span class="text-red-500">*</span></label>
-                            <input type="text" name="date_appointments" id="date_appointments" class="w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-500 focus:ring-opacity-50 @error('date_appointments') border-red-500 @enderror" placeholder="Chọn ngày" value="{{ old('date_appointments', $appointment->date_appointments) }}" required>
+                            <div class="relative">
+                                <input type="text" name="date_appointments" id="date_appointments" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-500 focus:ring-opacity-50 @error('date_appointments') border-red-500 @enderror" placeholder="Chọn ngày" value="{{ old('date_appointments', $appointment->date_appointments) }}" required>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            </div>
                             @error('date_appointments')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -114,14 +128,21 @@
 
                         <div class="mb-6">
                             <label for="time_appointments_id" class="block text-sm font-medium text-gray-700 mb-1">Giờ hẹn <span class="text-red-500">*</span></label>
-                            <select name="time_appointments_id" id="time_appointments_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-500 focus:ring-opacity-50 @error('time_appointments_id') border-red-500 @enderror" required>
-                                <option value="">-- Chọn giờ hẹn --</option>
-                                @foreach($times as $time)
-                                    <option value="{{ $time->id }}" {{ old('time_appointments_id', $appointment->time_appointments_id) == $time->id ? 'selected' : '' }}>
-                                        {{ $time->started_time }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="relative">
+                                <select name="time_appointments_id" id="time_appointments_id" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-500 focus:ring-opacity-50 @error('time_appointments_id') border-red-500 @enderror" required>
+                                    <option value="">-- Chọn giờ hẹn --</option>
+                                    @foreach($times as $time)
+                                        <option value="{{ $time->id }}" {{ old('time_appointments_id', $appointment->time_appointments_id) == $time->id ? 'selected' : '' }}>
+                                            {{ $time->started_time }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            </div>
                             @error('time_appointments_id')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -129,12 +150,19 @@
 
                         <div class="mb-6">
                             <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Trạng thái <span class="text-red-500">*</span></label>
-                            <select name="status" id="status" class="w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-500 focus:ring-opacity-50 @error('status') border-red-500 @enderror" required>
-                                <option value="pending" {{ old('status', $appointment->status) == 'pending' ? 'selected' : '' }}>Chờ xác nhận</option>
-                                <option value="confirmed" {{ old('status', $appointment->status) == 'confirmed' ? 'selected' : '' }}>Đã xác nhận</option>
-                                <option value="completed" {{ old('status', $appointment->status) == 'completed' ? 'selected' : '' }}>Hoàn thành</option>
-                                <option value="cancelled" {{ old('status', $appointment->status) == 'cancelled' ? 'selected' : '' }}>Đã hủy</option>
-                            </select>
+                            <div class="relative">
+                                <select name="status" id="status" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-500 focus:ring-opacity-50 @error('status') border-red-500 @enderror" required>
+                                    <option value="pending" {{ old('status', $appointment->status) == 'pending' ? 'selected' : '' }}>Chờ xác nhận</option>
+                                    <option value="confirmed" {{ old('status', $appointment->status) == 'confirmed' ? 'selected' : '' }}>Đã xác nhận</option>
+                                    <option value="completed" {{ old('status', $appointment->status) == 'completed' ? 'selected' : '' }}>Hoàn thành</option>
+                                    <option value="cancelled" {{ old('status', $appointment->status) == 'cancelled' ? 'selected' : '' }}>Đã hủy</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            </div>
                             @error('status')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -142,15 +170,23 @@
 
                         <div class="mb-6">
                             <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
-                            <textarea name="notes" id="notes" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-500 focus:ring-opacity-50 @error('notes') border-red-500 @enderror" placeholder="Nhập ghi chú hoặc yêu cầu đặc biệt (nếu có)">{{ old('notes', $appointment->notes) }}</textarea>
+                            <div class="relative">
+                                <textarea name="notes" id="notes" rows="3" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-500 focus:ring-opacity-50 @error('notes') border-red-500 @enderror" placeholder="Nhập ghi chú hoặc yêu cầu đặc biệt (nếu có)">{{ old('notes', $appointment->notes) }}</textarea>
+                            </div>
                             @error('notes')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        <div class="flex justify-end">
-                            <button type="submit" class="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-all">
-                                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <div class="flex justify-end space-x-4">
+                            <a href="{{ route('staff.appointments.show', $appointment->id) }}" class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-150 flex items-center shadow-sm border border-gray-200">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Hủy
+                            </a>
+                            <button type="submit" class="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-all duration-150 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
                                 Cập nhật lịch hẹn
@@ -163,11 +199,16 @@
 
         <!-- Information Sidebar -->
         <div class="col-span-1">
-            <div class="staff-card mb-6">
-                <div class="staff-card-header">
-                    <h4 class="font-semibold text-gray-800">Thông tin lịch hẹn</h4>
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden mb-6">
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+                    <h4 class="font-semibold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                        </svg>
+                        Thông tin lịch hẹn
+                    </h4>
                 </div>
-                <div class="staff-card-body">
+                <div class="p-6">
                     <div class="space-y-3 text-sm">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Mã lịch hẹn:</span>
@@ -203,11 +244,16 @@
                 </div>
             </div>
 
-            <div class="staff-card mb-6">
-                <div class="staff-card-header">
-                    <h4 class="font-semibold text-gray-800">Hướng dẫn</h4>
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden mb-6">
+                <div class="bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b border-gray-200">
+                    <h4 class="font-semibold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                        </svg>
+                        Hướng dẫn
+                    </h4>
                 </div>
-                <div class="staff-card-body">
+                <div class="p-6">
                     <div class="space-y-4 text-sm">
                         <div>
                             <h5 class="flex items-center font-medium text-gray-700 mb-2">
@@ -257,12 +303,22 @@
             allowClear: true
         });
 
-        // Initialize date picker
+        // Initialize date picker with better formatting
         const datePicker = flatpickr("#date_appointments", {
             dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
             minDate: "today",
             locale: "vn",
-            disableMobile: "true"
+            disableMobile: "true",
+            allowInput: true,
+            onReady: function() {
+                // Fix for date display on page load
+                const dateValue = "{{ $appointment->date_appointments }}";
+                if (dateValue) {
+                    this.setDate(dateValue, false);
+                }
+            }
         });
 
         // Handle date and service change
