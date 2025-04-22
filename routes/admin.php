@@ -7,7 +7,12 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\HealthCheckupController;
+use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\PostController;
+use App\Http\Controllers\Admin\PromotionController;
 use App\Http\Controllers\Admin\ServiceController;
+use App\Http\Controllers\Admin\SettingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -71,10 +76,18 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $filename = time() . '_' . $image->getClientOriginalName();
-            $path = $image->storeAs('services', $filename, 'public');
-            $imagePath = '/storage/services/' . $filename;
-            return redirect()->route('admin.test-upload-form')->with('image_path', $imagePath);
+            $imagePath = $image->storeAs('services', $filename, 'public');
+            $publicPath = '/storage/services/' . $filename;
+            return redirect()->route('admin.test-upload-form')->with('image_path', $publicPath);
         }
         return redirect()->route('admin.test-upload-form')->with('error', 'No image uploaded');
     })->name('test-upload');
+
+    // Include additional admin routes
+    require __DIR__.'/admin/invoices.php';
+    require __DIR__.'/admin/posts.php';
+    require __DIR__.'/admin/promotions.php';
+    require __DIR__.'/admin/settings.php';
+    require __DIR__.'/admin/permissions.php';
+    require __DIR__.'/admin/roles.php';
 });

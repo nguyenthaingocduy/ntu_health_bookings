@@ -15,8 +15,32 @@ class RegisterRouteFiles
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // This middleware doesn't do anything as the route files are included in web.php
-        // It's just a placeholder to remind us that we have custom route files
+        // This middleware ensures that all route files are registered
+        // Main routes are included in web.php and admin.php
+        // Additional admin routes are included in admin.php
+
+        // List of route files that should be registered
+        $routeFiles = [
+            'web.php',
+            'admin.php',
+            'staff.php',
+            'admin/invoices.php',
+            'admin/posts.php',
+            'admin/promotions.php',
+            'admin/settings.php',
+            'admin/permissions.php',
+            'admin/roles.php',
+        ];
+
+        // Check if all route files exist
+        foreach ($routeFiles as $file) {
+            $path = base_path('routes/' . $file);
+            if (!file_exists($path)) {
+                // Log warning if a route file is missing
+                \Illuminate\Support\Facades\Log::warning('Route file not found: ' . $file);
+            }
+        }
+
         return $next($request);
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\StaffMiddleware;
 use App\Http\Middleware\UniversityStaffMiddleware;
 use App\Http\Middleware\RegisterRouteFiles;
+use App\Http\Middleware\CheckPermission;
 
 
 class Kernel extends HttpKernel
@@ -74,5 +75,6 @@ class Kernel extends HttpKernel
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'staff' => \App\Http\Middleware\StaffMiddleware::class,
         'university.staff' => \App\Http\Middleware\UniversityStaffMiddleware::class,
+        'permission' => \App\Http\Middleware\CheckPermission::class,
     ];
 }

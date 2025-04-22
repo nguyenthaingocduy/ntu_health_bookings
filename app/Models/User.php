@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Cache;
 
 class User extends Authenticatable
 {
@@ -91,6 +92,11 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class, 'role_id');
     }
 
+    public function userPermissions()
+    {
+        return $this->hasMany(UserPermission::class);
+    }
+
     public function isAdmin()
     {
         return $this->hasRole('Admin');
@@ -136,6 +142,160 @@ class User extends Authenticatable
         if (!$this->role) {
             return false;
         }
+
         return strtolower($this->role->name) === strtolower($roleName);
+    }
+
+    /**
+     * Check if user has a specific permission through role
+     *
+     * @param string $permissionName
+     * @return bool
+     */
+    public function hasPermissionThroughRole($permissionName)
+    {
+        if (!$this->role) {
+            return false;
+        }
+
+        $cacheKey = 'user_role_permission_' . $this->id . '_' . $permissionName;
+
+        return Cache::remember($cacheKey, 60 * 5, function () use ($permissionName) {
+            return $this->role->permissions()
+                ->where('name', $permissionName)
+                ->exists();
+        });
+    }
+
+    /**
+     * Check if user has a specific permission directly assigned
+     *
+     * @param string $permissionName
+     * @param string $action (view, create, edit, delete)
+     * @return bool
+     */
+    public function hasDirectPermission($permissionName, $action = 'view')
+    {
+        $cacheKey = 'user_direct_permission_' . $this->id . '_' . $permissionName . '_' . $action;
+
+        return Cache::remember($cacheKey, 60 * 5, function () use ($permissionName, $action) {
+            $permission = Permission::where('name', $permissionName)->first();
+
+            if (!$permission) {
+                return false;
+            }
+
+            $userPermission = $this->userPermissions()
+                ->where('permission_id', $permission->id)
+                ->first();
+
+            if (!$userPermission) {
+                return false;
+            }
+
+            $actionField = 'can_' . $action;
+
+            return $userPermission->$actionField;
+        });
+    }
+
+    /**
+     * Check if user has a specific permission (either through role or directly)
+     *
+     * @param string $permissionName
+     * @param string $action (view, create, edit, delete)
+     * @return bool
+     */
+    public function hasPermission($permissionName, $action = 'view')
+    {
+        // Admin has all permissions
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        // Check direct permission first
+        if ($this->hasDirectPermission($permissionName, $action)) {
+            return true;
+        }
+
+        // Then check role permission
+        return $this->hasPermissionThroughRole($permissionName);
+    }
+
+    /**
+     * Check if user can view a specific resource
+     *
+     * @param string $resource
+     * @return bool
+     */
+    public function canView($resource)
+    {
+        return $this->hasPermission($resource . '.view', 'view');
+    }
+
+    /**
+     * Check if user can create a specific resource
+     *
+     * @param string $resource
+     * @return bool
+     */
+    public function canCreate($resource)
+    {
+        return $this->hasPermission($resource . '.create', 'create');
+    }
+
+    /**
+     * Check if user can edit a specific resource
+     *
+     * @param string $resource
+     * @return bool
+     */
+    public function canEdit($resource)
+    {
+        return $this->hasPermission($resource . '.edit', 'edit');
+    }
+
+    /**
+     * Check if user can delete a specific resource
+     *
+     * @param string $resource
+     * @return bool
+     */
+    public function canDelete($resource)
+    {
+        return $this->hasPermission($resource . '.delete', 'delete');
+    }
+
+    /**
+     * Clear permission cache for this user
+     *
+     * @return void
+     */
+    public function clearPermissionCache()
+    {
+        $permissions = Permission::all();
+
+        foreach ($permissions as $permission) {
+            Cache::forget('user_role_permission_' . $this->id . '_' . $permission->name);
+
+            foreach (['view', 'create', 'edit', 'delete'] as $action) {
+                Cache::forget('user_direct_permission_' . $this->id . '_' . $permission->name . '_' . $action);
+            }
+        }
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'author_id');
+    }
+
+    public function promotions()
+    {
+        return $this->hasMany(Promotion::class, 'created_by');
     }
 }

@@ -6,19 +6,19 @@
 @section('content')
 <div class="container px-4 md:px-6 mx-auto grid">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 w-full md:w-auto">
+        <div class="bg-gradient-to-r dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 w-full md:w-auto">
             <h3 class="text-xl font-bold text-gray-800 dark:text-white">Chi tiết lịch hẹn</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Mã lịch hẹn: <span class="font-semibold text-indigo-600 dark:text-indigo-400">{{ substr($appointment->id, 0, 8) }}</span></p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Mã lịch hẹn: <span class="font-semibold text-black-600 dark:text-black-400">{{ substr($appointment->id, 0, 8) }}</span></p>
         </div>
         <div class="flex flex-wrap gap-3 w-full md:w-auto">
-            <a href="{{ route('staff.appointments.edit', $appointment->id) }}" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-amber-200 dark:shadow-none transition-all duration-300 flex items-center">
+            <a href="{{ route('staff.appointments.edit', $appointment->id) }}" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-black rounded-lg hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-amber-200 dark:shadow-none transition-all duration-300 flex items-center">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                 </svg>
                 Chỉnh sửa
             </a>
             <a href="{{ route('staff.appointments.index') }}" class="px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-300 flex items-center shadow-md">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <svg class="w-4 h-4 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
                 Quay lại
