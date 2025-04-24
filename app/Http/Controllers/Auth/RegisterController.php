@@ -132,7 +132,9 @@ class RegisterController extends Controller
     {
         // Gửi email xác nhận đăng ký tài khoản
         try {
-            Log::info('Bắt đầu gửi email xác nhận đăng ký cho: ' . $user->email);
+            if (config('app.debug')) {
+                Log::info('Bắt đầu gửi email xác nhận đăng ký cho: ' . $user->email);
+            }
 
             // Gửi email bằng cả ba phương thức để đảm bảo thành công
             $emailSent = false;
@@ -143,11 +145,15 @@ class RegisterController extends Controller
                 $result = $emailService->sendRegistrationConfirmation($user);
 
                 if ($result) {
-                    Log::info('Đã gửi email xác nhận đăng ký thành công (new service) cho: ' . $user->email);
+                    if (config('app.debug')) {
+                        Log::info('Đã gửi email xác nhận đăng ký thành công (new service) cho: ' . $user->email);
+                    }
                     $emailSent = true;
                 }
             } catch (\Exception $newServiceError) {
-                Log::warning('Không thể gửi email qua service mới: ' . $newServiceError->getMessage());
+                if (config('app.debug')) {
+                    Log::warning('Không thể gửi email qua service mới: ' . $newServiceError->getMessage());
+                }
             }
 
             // Phương thức 2: Sử dụng EmailNotificationService cũ (nếu phương thức 1 thất bại)
@@ -157,11 +163,15 @@ class RegisterController extends Controller
                     $notification = $legacyEmailService->sendRegistrationConfirmation($user);
 
                     if ($notification && $notification->status === 'sent') {
-                        Log::info('Đã gửi email xác nhận đăng ký thành công (legacy service) cho: ' . $user->email);
+                        if (config('app.debug')) {
+                            Log::info('Đã gửi email xác nhận đăng ký thành công (legacy service) cho: ' . $user->email);
+                        }
                         $emailSent = true;
                     }
                 } catch (\Exception $legacyServiceError) {
-                    Log::warning('Không thể gửi email qua service cũ: ' . $legacyServiceError->getMessage());
+                    if (config('app.debug')) {
+                        Log::warning('Không thể gửi email qua service cũ: ' . $legacyServiceError->getMessage());
+                    }
                 }
             }
 
@@ -169,20 +179,28 @@ class RegisterController extends Controller
             if (!$emailSent) {
                 try {
                     Mail::to($user->email)->send(new \App\Mail\UserRegistrationMail($user));
-                    Log::info('Đã gửi email xác nhận đăng ký thành công (direct) cho: ' . $user->email);
+                    if (config('app.debug')) {
+                        Log::info('Đã gửi email xác nhận đăng ký thành công (direct) cho: ' . $user->email);
+                    }
                     $emailSent = true;
                 } catch (\Exception $directMailError) {
-                    Log::error('Không thể gửi email trực tiếp: ' . $directMailError->getMessage());
+                    if (config('app.debug')) {
+                        Log::error('Không thể gửi email trực tiếp: ' . $directMailError->getMessage());
+                    }
                 }
             }
 
             // Ghi log kết quả cuối cùng
             if (!$emailSent) {
-                Log::error('Không thể gửi email xác nhận đăng ký cho: ' . $user->email . ' bằng cả ba phương thức');
+                if (config('app.debug')) {
+                    Log::error('Không thể gửi email xác nhận đăng ký cho: ' . $user->email . ' bằng cả ba phương thức');
+                }
             }
         } catch (\Exception $e) {
             // Ghi log lỗi nhưng không ngăn chặn đăng ký thành công
-            Log::error('Không thể gửi email xác nhận đăng ký: ' . $e->getMessage());
+            if (config('app.debug')) {
+                Log::error('Không thể gửi email xác nhận đăng ký: ' . $e->getMessage());
+            }
         }
 
         return redirect()->route('customer.dashboard');

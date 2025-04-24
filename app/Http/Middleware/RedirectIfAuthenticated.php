@@ -25,24 +25,28 @@ class RedirectIfAuthenticated
             if (Auth::guard($guard)->check()) {
                 $user = Auth::guard($guard)->user();
 
-                // Ghi log thông tin người dùng đã đăng nhập
-                Log::info('RedirectIfAuthenticated: Người dùng đã đăng nhập', [
-                    'user_id' => $user->id,
-                    'email' => $user->email,
-                    'role' => $user->role ? $user->role->name : 'No Role',
-                    'session_id' => Session::getId(),
-                    'url' => $request->url()
-                ]);
+                // Ghi log thông tin người dùng đã đăng nhập (chỉ trong môi trường debug)
+                if (config('app.debug')) {
+                    Log::info('RedirectIfAuthenticated: Người dùng đã đăng nhập', [
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                        'role' => $user->role ? $user->role->name : 'No Role',
+                        'session_id' => Session::getId(),
+                        'url' => $request->url()
+                    ]);
+                }
 
                 // Kiểm tra URL hiện tại để tránh chuyển hướng vô tận
                 $currentUrl = $request->path();
 
                 // Chỉ chuyển hướng nếu đang ở trang login hoặc register
                 if ($request->is('login') || $request->is('register')) {
-                    Log::info('RedirectIfAuthenticated: User is on login/register page, redirecting based on role', [
-                        'user_id' => $user->id,
-                        'current_url' => $currentUrl
-                    ]);
+                    if (config('app.debug')) {
+                        Log::info('RedirectIfAuthenticated: User is on login/register page, redirecting based on role', [
+                            'user_id' => $user->id,
+                            'current_url' => $currentUrl
+                        ]);
+                    }
 
                     // Chuyển hướng dựa vào vai trò
                     if ($user->role) {
@@ -52,6 +56,10 @@ class RedirectIfAuthenticated
                             return redirect()->route('admin.dashboard');
                         } elseif ($roleName === 'staff') {
                             return redirect()->route('staff.dashboard');
+                        } elseif ($roleName === 'receptionist') {
+                            return redirect()->route('receptionist.dashboard');
+                        } elseif ($roleName === 'technician') {
+                            return redirect()->route('technician.dashboard');
                         } else {
                             return redirect()->route('customer.dashboard');
                         }

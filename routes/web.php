@@ -11,8 +11,6 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\MailTestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,16 +45,7 @@ Route::middleware('guest')->group(function () {
 
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
-// Route kiểm tra đăng nhập
-Route::get('/check-auth', function() {
-    if (Auth::check()) {
-        return 'Đã đăng nhập với email: ' . Auth::user()->email .
-            '<br>Role: ' . (Auth::user()->role ? Auth::user()->role->name : 'Không có vai trò') .
-            '<br><a href="/logout" onclick="event.preventDefault(); document.getElementById(\'logout-form\').submit();">Đăng xuất</a>' .
-            '<form id="logout-form" action="/logout" method="POST" style="display: none;">' . csrf_field() . '</form>';
-    }
-    return 'Chưa đăng nhập. <a href="/login">Đăng nhập ngay</a>';
-})->name('check.auth');
+
 
 // Khu vực khách hàng
 Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(function () {
@@ -86,6 +75,12 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
 
 // Include admin routes from admin.php
 require __DIR__.'/admin.php';
+
+// Include receptionist routes from receptionist.php
+require __DIR__.'/receptionist.php';
+
+// Include technician routes from technician.php
+require __DIR__.'/technician.php';
 
 // Khu vực cán bộ viên chức (Staff)
 Route::middleware(['auth'])->prefix('staff')->name('staff.')->group(function () {
@@ -117,57 +112,15 @@ Route::middleware(['auth'])->prefix('staff')->name('staff.')->group(function () 
 // Include staff routes from staff.php
 require __DIR__.'/staff.php';
 
-// Route test chuyển hướng dashboard
-Route::get('/test-dashboard', function() {
-    if (Auth::check()) {
-        $user = Auth::user();
-        Log::info('Test dashboard route', [
-            'user_id' => $user->id,
-            'email' => $user->email,
-            'is_authenticated' => Auth::check(),
-            'role' => $user->role ? $user->role->name : 'No Role'
-        ]);
 
-        if ($user->role && strtolower($user->role->name) === 'admin') {
-            return redirect('/admin/dashboard');
-        }
-        return redirect('/customer/dashboard');
-    }
-    return redirect('/login');
-})->name('test.dashboard');
-
-// Thêm route mới không dùng middleware để kiểm tra
-Route::get('/direct-dashboard', function() {
-    // Lấy thông tin người dùng hiện tại
-    $user = Auth::user();
-
-    // Nếu chưa đăng nhập, hiển thị thông báo
-    if (!$user) {
-        return 'Bạn chưa đăng nhập. <a href="/login">Đăng nhập</a> hoặc <a href="/test-login">Đăng nhập test</a>';
-    }
-
-    // Hiển thị thông tin người dùng và link đến dashboard
-    $html = '
-    <h2>Thông tin người dùng</h2>
-    <p>ID: '.$user->id.'</p>
-    <p>Email: '.$user->email.'</p>
-    <p>Họ tên: '.$user->first_name.' '.$user->last_name.'</p>
-    <p>Role: '.($user->role ? $user->role->name : 'Không có').'</p>
-    <hr>
-    <h3>Liên kết</h3>
-    <a href="/customer/dashboard">Đến Customer Dashboard</a><br>
-    <a href="/admin/dashboard">Đến Admin Dashboard</a><br>
-    <form method="POST" action="/logout">
-        <input type="hidden" name="_token" value="'.csrf_token().'">
-        <button type="submit">Đăng xuất</button>
-    </form>
-    ';
-
-    return $html;
-})->name('direct.dashboard');
 
 // Route mặc định sau khi đăng nhập
 Route::get('/home', [HomeController::class, 'index'])->name('dashboard.home');
+
+// Route chuyển hướng dựa trên vai trò
+Route::get('/dashboard', function() {
+    return redirect()->route('home');
+})->middleware(['auth', 'redirect.role'])->name('dashboard');
 
 // API routes for time slots and services
 Route::prefix('api')->group(function () {
@@ -179,41 +132,6 @@ Route::prefix('api')->group(function () {
 // Legacy API route for backward compatibility
 Route::get('/api/check-available-slots', [\App\Http\Controllers\Api\TimeSlotController::class, 'checkAvailableSlots']);
 
-// Debug route để kiểm tra roles
-Route::get('check-roles', function() {
-    dd(App\Models\Role::all()->toArray());
-});
 
-// Test email routes
-Route::middleware(['auth'])->prefix('test-email')->group(function () {
-    Route::get('/registration', [\App\Http\Controllers\TestEmailController::class, 'testRegistrationEmail'])->name('test.email.registration');
-    Route::get('/booking', [\App\Http\Controllers\TestEmailController::class, 'testBookingEmail'])->name('test.email.booking');
-    Route::get('/reminder', [\App\Http\Controllers\TestEmailController::class, 'testReminderEmail'])->name('test.email.reminder');
-});
 
-// Routes kiểm tra email
-Route::get('/mail-test', [MailTestController::class, 'index'])->name('mail.test');
-Route::post('/mail-test', [MailTestController::class, 'sendTestMail'])->name('mail.test.send');
 
-// Email testing routes
-Route::prefix('email-test')->name('email.test.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\EmailTestController::class, 'index'])->name('index');
-    Route::post('/send', [\App\Http\Controllers\EmailTestController::class, 'sendTestEmail'])->name('send');
-    Route::post('/registration', [\App\Http\Controllers\EmailTestController::class, 'sendRegistrationEmail'])->name('registration');
-    Route::post('/appointment', [\App\Http\Controllers\EmailTestController::class, 'sendAppointmentEmail'])->name('appointment');
-    Route::post('/reminder', [\App\Http\Controllers\EmailTestController::class, 'sendReminderEmail'])->name('reminder');
-});
-
-// Simple email test route (legacy)
-Route::get('/test-email-config', function() {
-    try {
-        $email = request('email', 'ntuhealthbooking@gmail.com');
-        \Illuminate\Support\Facades\Mail::raw('This is a test email from Beauty Salon at ' . now(), function($message) use ($email) {
-            $message->to($email)
-                ->subject('Test Email from Beauty Salon');
-        });
-        return 'Email sent successfully to ' . $email . '. Please check your inbox.';
-    } catch (\Exception $e) {
-        return 'Error sending email: ' . $e->getMessage();
-    }
-});

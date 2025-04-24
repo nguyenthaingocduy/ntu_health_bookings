@@ -96,18 +96,22 @@ class HomeController extends Controller
                 'message' => $validated['message'],
             ]);
 
-            Log::info('New contact form submission', [
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-            ]);
+            if (config('app.debug')) {
+                Log::info('New contact form submission', [
+                    'name' => $validated['name'],
+                    'email' => $validated['email'],
+                ]);
+            }
 
             // You could also send an email notification here
 
             return redirect()->back()->with('success', 'Cảm ơn bạn đã liên hệ với chúng tôi. Chúng tôi sẽ phản hồi trong thời gian sớm nhất!');
         } catch (\Exception $e) {
-            Log::error('Error saving contact form', [
-                'error' => $e->getMessage(),
-            ]);
+            if (config('app.debug')) {
+                Log::error('Error saving contact form', [
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             return redirect()->back()
                 ->withInput()

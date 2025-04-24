@@ -2,12 +2,6 @@
 namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
-use App\Http\Middleware\RedirectIfAuthenticated;
-use App\Http\Middleware\AdminMiddleware;
-use App\Http\Middleware\StaffMiddleware;
-use App\Http\Middleware\UniversityStaffMiddleware;
-use App\Http\Middleware\RegisterRouteFiles;
-use App\Http\Middleware\CheckPermission;
 
 
 class Kernel extends HttpKernel
@@ -27,7 +21,6 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        \App\Http\Middleware\RegisterRouteFiles::class,
     ];
 
     /**
@@ -75,6 +68,9 @@ class Kernel extends HttpKernel
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'staff' => \App\Http\Middleware\StaffMiddleware::class,
         'university.staff' => \App\Http\Middleware\UniversityStaffMiddleware::class,
+        'receptionist' => \App\Http\Middleware\ReceptionistMiddleware::class,
+        'technician' => \App\Http\Middleware\TechnicianMiddleware::class,
         'permission' => \App\Http\Middleware\CheckPermission::class,
+        'redirect.role' => \App\Http\Middleware\RedirectBasedOnRole::class,
     ];
 }

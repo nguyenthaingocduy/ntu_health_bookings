@@ -62,12 +62,14 @@
             <!-- Auth Menu -->
             <div class="flex items-center">
                 @guest
-                    {{-- <a href="{{ route('login') }}" class="px-4 py-2 text-black-300 hover:text-white transition font-medium">
-                        <span>Đăng nhập</span>
-                    </a>
-                    <a href="{{ route('register') }}" class="ml-2 sm:ml-4 px-4 sm:px-6 py-2 bg-gradient-to-r from-blue-500 to-teal-500 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-blue-500/20 transition duration-300 transform hover:-translate-y-0.5">
-                        <span>Đăng ký</span>
-                    </a> --}}
+                    <div class="hidden md:flex items-center">
+                        <a href="{{ route('login') }}" class="px-4 py-2 text-gray-700 hover:text-pink-600 transition font-medium">
+                            <i class="fas fa-sign-in-alt mr-1.5"></i> Đăng nhập
+                        </a>
+                        <a href="{{ route('register') }}" class="ml-2 sm:ml-4 px-4 sm:px-6 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-pink-500/20 transition duration-300 transform hover:-translate-y-0.5">
+                            <i class="fas fa-user-plus mr-1.5"></i> Đăng ký
+                        </a>
+                    </div>
                     <div class="md:hidden flex justify-center space-x-4 py-3 border-t border-gray-100">
                         <a href="{{ route('login') }}" class="px-5 py-2 text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-pink-600 transition whitespace-nowrap text-sm font-medium">
                             <i class="fas fa-sign-in-alt mr-1.5"></i> Đăng nhập
@@ -107,6 +109,42 @@
                                 <p class="font-bold text-gray-800">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</p>
                             </div>
                             <div class="py-2">
+                                @if(Auth::user()->isAdmin())
+                                <a href="{{ route('admin.dashboard') }}" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-all duration-200">
+                                    <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-user-shield text-purple-500"></i>
+                                    </div>
+                                    <span class="font-medium">Quản trị hệ thống</span>
+                                </a>
+                                @endif
+
+                                @if(Auth::user()->isReceptionist())
+                                <a href="{{ route('receptionist.dashboard') }}" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-all duration-200">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-user-tie text-blue-500"></i>
+                                    </div>
+                                    <span class="font-medium">Lễ tân</span>
+                                </a>
+                                @endif
+
+                                @if(Auth::user()->isTechnician())
+                                <a href="{{ route('technician.dashboard') }}" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-all duration-200">
+                                    <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-user-md text-green-500"></i>
+                                    </div>
+                                    <span class="font-medium">Kỹ thuật viên</span>
+                                </a>
+                                @endif
+
+                                @if(Auth::user()->isStaff())
+                                <a href="{{ route('staff.dashboard') }}" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-all duration-200">
+                                    <div class="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-user-tie text-yellow-500"></i>
+                                    </div>
+                                    <span class="font-medium">Nhân viên</span>
+                                </a>
+                                @endif
+
                                 <a href="{{ route('customer.dashboard') }}" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-all duration-200">
                                     <div class="w-8 h-8 rounded-lg bg-pink-100 flex items-center justify-center mr-3">
                                         <i class="fas fa-tachometer-alt text-pink-500"></i>

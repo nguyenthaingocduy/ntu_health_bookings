@@ -83,6 +83,13 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix
         return redirect()->route('admin.test-upload-form')->with('error', 'No image uploaded');
     })->name('test-upload');
 
+    // Profile
+    Route::get('/profile', [\App\Http\Controllers\Staff\ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/edit', [\App\Http\Controllers\Staff\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [\App\Http\Controllers\Staff\ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/change-password', [\App\Http\Controllers\Staff\ProfileController::class, 'changePassword'])->name('profile.change-password');
+    Route::put('/profile/password', [\App\Http\Controllers\Staff\ProfileController::class, 'updatePassword'])->name('profile.update-password');
+
     // Include additional admin routes
     require __DIR__.'/admin/invoices.php';
     require __DIR__.'/admin/posts.php';

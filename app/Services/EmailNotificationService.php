@@ -47,7 +47,9 @@ class EmailNotificationService
         $service = $appointment->service;
 
         if (!$user) {
-            Log::error('User not found for appointment: ' . $appointment->id);
+            if (config('app.debug')) {
+                Log::error('User not found for appointment: ' . $appointment->id);
+            }
             return null;
         }
 
@@ -82,7 +84,9 @@ class EmailNotificationService
         $service = $appointment->service;
 
         if (!$user) {
-            Log::error('User not found for appointment: ' . $appointment->id);
+            if (config('app.debug')) {
+                Log::error('User not found for appointment: ' . $appointment->id);
+            }
             return null;
         }
 
@@ -114,30 +118,34 @@ class EmailNotificationService
     protected function createAndSendEmail(array $data)
     {
         try {
-            // Log the attempt
-            Log::info('Attempting to send email', [
-                'type' => $data['type'],
-                'email' => $data['email'],
-                'subject' => $data['subject'],
-            ]);
+            // Log the attempt (chỉ trong môi trường debug)
+            if (config('app.debug')) {
+                Log::info('Attempting to send email', [
+                    'type' => $data['type'],
+                    'email' => $data['email'],
+                    'subject' => $data['subject'],
+                ]);
+            }
 
             // Create the notification record
             $notification = EmailNotification::create($data);
 
-            // Log mail configuration with more details
-            Log::info('Mail configuration', [
-                'driver' => config('mail.default'),
-                'host' => config('mail.mailers.smtp.host'),
-                'port' => config('mail.mailers.smtp.port'),
-                'username' => config('mail.mailers.smtp.username'),
-                'password_set' => !empty(config('mail.mailers.smtp.password')),
-                'password_length' => !empty(config('mail.mailers.smtp.password')) ? strlen(config('mail.mailers.smtp.password')) : 0,
-                'from_address' => config('mail.from.address'),
-                'from_name' => config('mail.from.name'),
-                'encryption' => config('mail.mailers.smtp.encryption'),
-                'to_email' => $data['email'],
-                'subject' => $data['subject'],
-            ]);
+            // Log mail configuration with more details (chỉ trong môi trường debug)
+            if (config('app.debug')) {
+                Log::info('Mail configuration', [
+                    'driver' => config('mail.default'),
+                    'host' => config('mail.mailers.smtp.host'),
+                    'port' => config('mail.mailers.smtp.port'),
+                    'username' => config('mail.mailers.smtp.username'),
+                    'password_set' => !empty(config('mail.mailers.smtp.password')),
+                    'password_length' => !empty(config('mail.mailers.smtp.password')) ? strlen(config('mail.mailers.smtp.password')) : 0,
+                    'from_address' => config('mail.from.address'),
+                    'from_name' => config('mail.from.name'),
+                    'encryption' => config('mail.mailers.smtp.encryption'),
+                    'to_email' => $data['email'],
+                    'subject' => $data['subject'],
+                ]);
+            }
 
             // Send the email
             try {
@@ -155,22 +163,30 @@ class EmailNotificationService
                         });
 
                         // If we get here, the email was sent successfully
-                        Log::info('Email sent successfully on attempt ' . ($retryCount + 1));
+                        if (config('app.debug')) {
+                            Log::info('Email sent successfully on attempt ' . ($retryCount + 1));
+                        }
                         break;
                     } catch (\Exception $e) {
                         $retryCount++;
 
                         if ($retryCount < $maxRetries) {
-                            Log::warning('Email sending failed on attempt ' . $retryCount . ', retrying... Error: ' . $e->getMessage());
+                            if (config('app.debug')) {
+                                Log::warning('Email sending failed on attempt ' . $retryCount . ', retrying... Error: ' . $e->getMessage());
+                            }
                             sleep(2); // Wait 2 seconds before retrying
                         } else {
-                            Log::error('Email sending failed after ' . $maxRetries . ' attempts. Error: ' . $e->getMessage());
+                            if (config('app.debug')) {
+                                Log::error('Email sending failed after ' . $maxRetries . ' attempts. Error: ' . $e->getMessage());
+                            }
                             throw $e;
                         }
                     }
                 }
             } catch (\Exception $e) {
-                Log::error('Mail sending error: ' . $e->getMessage());
+                if (config('app.debug')) {
+                    Log::error('Mail sending error: ' . $e->getMessage());
+                }
                 throw $e;
             }
 
@@ -180,19 +196,23 @@ class EmailNotificationService
                 'sent_at' => now(),
             ]);
 
-            Log::info('Email sent successfully', [
-                'type' => $notification->type,
-                'email' => $notification->email,
-                'subject' => $notification->subject,
-            ]);
+            if (config('app.debug')) {
+                Log::info('Email sent successfully', [
+                    'type' => $notification->type,
+                    'email' => $notification->email,
+                    'subject' => $notification->subject,
+                ]);
+            }
 
             return $notification;
         } catch (Exception $e) {
-            Log::error('Failed to send email', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'data' => $data,
-            ]);
+            if (config('app.debug')) {
+                Log::error('Failed to send email', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                    'data' => $data,
+                ]);
+            }
 
             // If notification was created, update its status
             if (isset($notification)) {

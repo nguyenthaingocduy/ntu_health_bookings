@@ -24,21 +24,23 @@ class EmailService
      */
     public function send(string $to, string $subject, string $view, array $data = [], array $options = []): bool
     {
-        // Log the email attempt
-        Log::info('Attempting to send email', [
-            'to' => $to,
-            'subject' => $subject,
-            'view' => $view,
-            'mail_config' => [
-                'driver' => config('mail.default'),
-                'host' => config('mail.mailers.smtp.host'),
-                'port' => config('mail.mailers.smtp.port'),
-                'username' => config('mail.mailers.smtp.username'),
-                'encryption' => config('mail.mailers.smtp.encryption'),
-                'from_address' => config('mail.from.address'),
-                'from_name' => config('mail.from.name'),
-            ]
-        ]);
+        // Log the email attempt (chỉ trong môi trường debug)
+        if (config('app.debug')) {
+            Log::info('Attempting to send email', [
+                'to' => $to,
+                'subject' => $subject,
+                'view' => $view,
+                'mail_config' => [
+                    'driver' => config('mail.default'),
+                    'host' => config('mail.mailers.smtp.host'),
+                    'port' => config('mail.mailers.smtp.port'),
+                    'username' => config('mail.mailers.smtp.username'),
+                    'encryption' => config('mail.mailers.smtp.encryption'),
+                    'from_address' => config('mail.from.address'),
+                    'from_name' => config('mail.from.name'),
+                ]
+            ]);
+        }
 
         // Create an email log entry
         $emailLog = EmailLog::create([
@@ -93,10 +95,12 @@ class EmailService
 
                     // If we get here, the email was sent successfully
                     $success = true;
-                    Log::info('Email sent successfully on attempt ' . ($retryCount + 1), [
-                        'to' => $to,
-                        'subject' => $subject
-                    ]);
+                    if (config('app.debug')) {
+                        Log::info('Email sent successfully on attempt ' . ($retryCount + 1), [
+                            'to' => $to,
+                            'subject' => $subject
+                        ]);
+                    }
 
                     // Update email log
                     $emailLog->update([
@@ -109,11 +113,13 @@ class EmailService
                     $retryCount++;
 
                     if ($retryCount < $maxRetries) {
-                        Log::warning('Email sending failed on attempt ' . $retryCount . ', retrying...', [
-                            'error' => $e->getMessage(),
-                            'to' => $to,
-                            'subject' => $subject
-                        ]);
+                        if (config('app.debug')) {
+                            Log::warning('Email sending failed on attempt ' . $retryCount . ', retrying...', [
+                                'error' => $e->getMessage(),
+                                'to' => $to,
+                                'subject' => $subject
+                            ]);
+                        }
                         sleep(2); // Wait 2 seconds before retrying
                     }
                 }
@@ -121,11 +127,13 @@ class EmailService
 
             // If all retries failed, log the error and update the email log
             if (!$success) {
-                Log::error('Email sending failed after ' . $maxRetries . ' attempts', [
-                    'error' => $lastError ? $lastError->getMessage() : 'Unknown error',
-                    'to' => $to,
-                    'subject' => $subject
-                ]);
+                if (config('app.debug')) {
+                    Log::error('Email sending failed after ' . $maxRetries . ' attempts', [
+                        'error' => $lastError ? $lastError->getMessage() : 'Unknown error',
+                        'to' => $to,
+                        'subject' => $subject
+                    ]);
+                }
 
                 // Update email log
                 $emailLog->update([
@@ -139,11 +147,13 @@ class EmailService
             return true;
 
         } catch (\Exception $e) {
-            Log::error('Email sending error', [
-                'error' => $e->getMessage(),
-                'to' => $to,
-                'subject' => $subject
-            ]);
+            if (config('app.debug')) {
+                Log::error('Email sending error', [
+                    'error' => $e->getMessage(),
+                    'to' => $to,
+                    'subject' => $subject
+                ]);
+            }
 
             // Update email log
             $emailLog->update([

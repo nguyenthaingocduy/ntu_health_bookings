@@ -117,6 +117,16 @@ class User extends Authenticatable
         return !empty($this->staff_id) && !empty($this->department);
     }
 
+    public function isReceptionist()
+    {
+        return $this->hasRole('Receptionist');
+    }
+
+    public function isTechnician()
+    {
+        return $this->hasRole('Technician');
+    }
+
     public function appointments()
     {
         return $this->hasMany(Appointment::class, 'customer_id');

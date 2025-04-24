@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\Employee;
 use App\Models\Service;
 use App\Models\Time;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -29,6 +30,33 @@ class AppointmentController extends Controller
         ];
 
         return view('admin.appointments.index', compact('appointments', 'statistics'));
+    }
+
+    /**
+     * Show the form for creating a new appointment.
+     *
+     * @param int|null $serviceId
+     * @return \Illuminate\View\View
+     */
+    public function create($serviceId = null)
+    {
+        $service = null;
+        if ($serviceId) {
+            $service = Service::findOrFail($serviceId);
+        }
+
+        // Get all active services
+        $services = Service::where('status', 'active')->get();
+
+        // Get all time slots
+        $times = Time::orderBy('started_time')->get();
+
+        // Get all customers (users with customer role)
+        $customers = User::whereHas('role', function($query) {
+            $query->where('name', 'Customer');
+        })->get();
+
+        return view('admin.appointments.create', compact('services', 'times', 'service', 'customers'));
     }
 
     public function show($id)

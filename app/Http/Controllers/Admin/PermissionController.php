@@ -11,6 +11,7 @@ use App\Models\UserPermission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -24,10 +25,10 @@ class PermissionController extends Controller
     public function index()
     {
         $permissions = Permission::orderBy('group')->orderBy('name')->get()->groupBy('group');
-        
-        return view('admin.permissions.index', compact('permissions'));
+
+        return view('admin.permissions.index_tailwind', compact('permissions'));
     }
-    
+
     /**
      * Show the form for creating a new permission.
      *
@@ -36,10 +37,10 @@ class PermissionController extends Controller
     public function create()
     {
         $groups = Permission::select('group')->distinct()->pluck('group');
-        
-        return view('admin.permissions.create', compact('groups'));
+
+        return view('admin.permissions.create_tailwind', compact('groups'));
     }
-    
+
     /**
      * Store a newly created permission in storage.
      *
@@ -54,13 +55,13 @@ class PermissionController extends Controller
             'description' => 'nullable|string|max:1000',
             'group' => 'required|string|max:255',
         ]);
-        
+
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
-        
+
         try {
             $permission = Permission::create([
                 'id' => Str::uuid(),
@@ -69,10 +70,10 @@ class PermissionController extends Controller
                 'description' => $request->description,
                 'group' => $request->group,
             ]);
-            
+
             // Assign to admin role automatically
             $adminRole = Role::where('name', 'Admin')->first();
-            
+
             if ($adminRole) {
                 RolePermission::create([
                     'id' => Str::uuid(),
@@ -80,7 +81,7 @@ class PermissionController extends Controller
                     'permission_id' => $permission->id,
                 ]);
             }
-            
+
             return redirect()->route('admin.permissions.index')
                 ->with('success', 'Quyền đã được tạo thành công.');
         } catch (\Exception $e) {
@@ -89,7 +90,7 @@ class PermissionController extends Controller
                 ->withInput();
         }
     }
-    
+
     /**
      * Show the form for editing the specified permission.
      *
@@ -100,10 +101,10 @@ class PermissionController extends Controller
     {
         $permission = Permission::findOrFail($id);
         $groups = Permission::select('group')->distinct()->pluck('group');
-        
-        return view('admin.permissions.edit', compact('permission', 'groups'));
+
+        return view('admin.permissions.edit_tailwind', compact('permission', 'groups'));
     }
-    
+
     /**
      * Update the specified permission in storage.
      *
@@ -114,20 +115,20 @@ class PermissionController extends Controller
     public function update(Request $request, $id)
     {
         $permission = Permission::findOrFail($id);
-        
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255|unique:permissions,name,' . $permission->id,
             'display_name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'group' => 'required|string|max:255',
         ]);
-        
+
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
-        
+
         try {
             $permission->update([
                 'name' => $request->name,
@@ -135,7 +136,7 @@ class PermissionController extends Controller
                 'description' => $request->description,
                 'group' => $request->group,
             ]);
-            
+
             return redirect()->route('admin.permissions.index')
                 ->with('success', 'Quyền đã được cập nhật thành công.');
         } catch (\Exception $e) {
@@ -144,7 +145,7 @@ class PermissionController extends Controller
                 ->withInput();
         }
     }
-    
+
     /**
      * Remove the specified permission from storage.
      *
@@ -154,17 +155,17 @@ class PermissionController extends Controller
     public function destroy($id)
     {
         $permission = Permission::findOrFail($id);
-        
+
         try {
             // Delete role permissions
             RolePermission::where('permission_id', $permission->id)->delete();
-            
+
             // Delete user permissions
             UserPermission::where('permission_id', $permission->id)->delete();
-            
+
             // Delete permission
             $permission->delete();
-            
+
             return redirect()->route('admin.permissions.index')
                 ->with('success', 'Quyền đã được xóa thành công.');
         } catch (\Exception $e) {
@@ -172,7 +173,7 @@ class PermissionController extends Controller
                 ->with('error', 'Đã xảy ra lỗi khi xóa quyền: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Display the role permissions page.
      *
@@ -182,16 +183,16 @@ class PermissionController extends Controller
     {
         $roles = Role::all();
         $permissions = Permission::orderBy('group')->orderBy('name')->get()->groupBy('group');
-        
+
         $rolePermissions = [];
-        
+
         foreach ($roles as $role) {
             $rolePermissions[$role->id] = $role->permissions()->pluck('permissions.id')->toArray();
         }
-        
-        return view('admin.permissions.role_permissions', compact('roles', 'permissions', 'rolePermissions'));
+
+        return view('admin.permissions.role_permissions_tailwind', compact('roles', 'permissions', 'rolePermissions'));
     }
-    
+
     /**
      * Update the role permissions.
      *
@@ -205,22 +206,22 @@ class PermissionController extends Controller
             'permissions' => 'nullable|array',
             'permissions.*' => 'exists:permissions,id',
         ]);
-        
+
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
-        
+
         try {
             $roleId = $request->role_id;
             $permissions = $request->permissions ?? [];
-            
+
             DB::beginTransaction();
-            
+
             // Delete existing role permissions
             RolePermission::where('role_id', $roleId)->delete();
-            
+
             // Create new role permissions
             foreach ($permissions as $permissionId) {
                 RolePermission::create([
@@ -229,27 +230,27 @@ class PermissionController extends Controller
                     'permission_id' => $permissionId,
                 ]);
             }
-            
+
             // Clear permission cache for all users with this role
             $users = User::where('role_id', $roleId)->get();
-            
+
             foreach ($users as $user) {
                 $user->clearPermissionCache();
             }
-            
+
             DB::commit();
-            
+
             return redirect()->route('admin.permissions.role-permissions')
                 ->with('success', 'Quyền của vai trò đã được cập nhật thành công.');
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return redirect()->back()
                 ->with('error', 'Đã xảy ra lỗi khi cập nhật quyền của vai trò: ' . $e->getMessage())
                 ->withInput();
         }
     }
-    
+
     /**
      * Display the user permissions page.
      *
@@ -260,10 +261,10 @@ class PermissionController extends Controller
         $users = User::with('role')->whereHas('role', function($query) {
             $query->where('name', '!=', 'Customer');
         })->get();
-        
-        return view('admin.permissions.user_permissions', compact('users'));
+
+        return view('admin.permissions.user_permissions_tailwind', compact('users'));
     }
-    
+
     /**
      * Show the form for editing the user permissions.
      *
@@ -274,9 +275,9 @@ class PermissionController extends Controller
     {
         $user = User::with('role', 'userPermissions')->findOrFail($id);
         $permissions = Permission::orderBy('group')->orderBy('name')->get()->groupBy('group');
-        
+
         $userPermissions = [];
-        
+
         foreach ($user->userPermissions as $userPermission) {
             $userPermissions[$userPermission->permission_id] = [
                 'can_view' => $userPermission->can_view,
@@ -285,12 +286,12 @@ class PermissionController extends Controller
                 'can_delete' => $userPermission->can_delete,
             ];
         }
-        
+
         $rolePermissions = $user->role->permissions()->pluck('permissions.id')->toArray();
-        
-        return view('admin.permissions.edit_user_permissions', compact('user', 'permissions', 'userPermissions', 'rolePermissions'));
+
+        return view('admin.permissions.edit_user_permissions_fixed', compact('user', 'permissions', 'userPermissions', 'rolePermissions'));
     }
-    
+
     /**
      * Update the user permissions.
      *
@@ -301,38 +302,47 @@ class PermissionController extends Controller
     public function updateUserPermissions(Request $request, $id)
     {
         $user = User::findOrFail($id);
-        
+
         $validator = Validator::make($request->all(), [
             'permissions' => 'nullable|array',
             'permissions.*.id' => 'required|exists:permissions,id',
-            'permissions.*.can_view' => 'boolean',
-            'permissions.*.can_create' => 'boolean',
-            'permissions.*.can_edit' => 'boolean',
-            'permissions.*.can_delete' => 'boolean',
+            'permissions.*.can_view' => 'nullable|boolean',
+            'permissions.*.can_create' => 'nullable|boolean',
+            'permissions.*.can_edit' => 'nullable|boolean',
+            'permissions.*.can_delete' => 'nullable|boolean',
         ]);
-        
+
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
-        
+
         try {
             $permissions = $request->permissions ?? [];
-            
+
             DB::beginTransaction();
-            
+
             // Delete existing user permissions
             UserPermission::where('user_id', $user->id)->delete();
-            
+
             // Create new user permissions
             foreach ($permissions as $permission) {
                 if (isset($permission['id']) && (
-                    isset($permission['can_view']) || 
-                    isset($permission['can_create']) || 
-                    isset($permission['can_edit']) || 
+                    isset($permission['can_view']) ||
+                    isset($permission['can_create']) ||
+                    isset($permission['can_edit']) ||
                     isset($permission['can_delete'])
                 )) {
+                    // Log để kiểm tra
+                    Log::info('Creating permission:', [
+                        'permission_id' => $permission['id'],
+                        'can_view' => isset($permission['can_view']),
+                        'can_create' => isset($permission['can_create']),
+                        'can_edit' => isset($permission['can_edit']),
+                        'can_delete' => isset($permission['can_delete']),
+                    ]);
+
                     UserPermission::create([
                         'id' => Str::uuid(),
                         'user_id' => $user->id,
@@ -341,21 +351,21 @@ class PermissionController extends Controller
                         'can_create' => isset($permission['can_create']),
                         'can_edit' => isset($permission['can_edit']),
                         'can_delete' => isset($permission['can_delete']),
-                        'granted_by' => Auth::id(),
+                        'granted_by' => Auth::id() ?? $user->id,
                     ]);
                 }
             }
-            
+
             // Clear permission cache for the user
             $user->clearPermissionCache();
-            
+
             DB::commit();
-            
+
             return redirect()->route('admin.permissions.user-permissions')
                 ->with('success', 'Quyền của người dùng đã được cập nhật thành công.');
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return redirect()->back()
                 ->with('error', 'Đã xảy ra lỗi khi cập nhật quyền của người dùng: ' . $e->getMessage())
                 ->withInput();

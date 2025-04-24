@@ -1,3 +1,5 @@
+<?php
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\Appointment;
@@ -64,8 +66,10 @@ Route::post('/promotion-signup', function(Request $request) {
     // This is simplified - you would typically create a proper appointment or lead record
     // and send notifications to staff
 
-    // Log the promotion signup
-    \Illuminate\Support\Facades\Log::info('Promotion signup', $validated);
+    // Log the promotion signup (chỉ trong môi trường debug)
+    if (config('app.debug')) {
+        \Illuminate\Support\Facades\Log::info('Promotion signup', $validated);
+    }
 
     return response()->json(['success' => true]);
 });

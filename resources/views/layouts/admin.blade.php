@@ -89,6 +89,28 @@
                     Phòng khám
                 </a>
 
+                <a href="{{ route('admin.promotions.index') }}"
+                   class="block px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('admin/promotions*') ? 'bg-gray-700' : '' }}">
+                    <i class="fas fa-tags w-6"></i>
+                    Khuyến mãi
+                </a>
+
+                <div class="py-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Quản trị hệ thống
+                </div>
+
+                <a href="{{ route('admin.permissions.index') }}"
+                   class="block px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('admin/permissions*') || request()->is('admin/role-permissions*') || request()->is('admin/user-permissions*') ? 'bg-gray-700' : '' }}">
+                    <i class="fas fa-shield-alt w-6"></i>
+                    Phân quyền
+                </a>
+
+                <a href="{{ route('admin.roles.index') }}"
+                   class="block px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('admin/roles*') ? 'bg-gray-700' : '' }}">
+                    <i class="fas fa-user-shield w-6"></i>
+                    Vai trò
+                </a>
+
                 <a href="{{ route('admin.contacts.index') }}"
                    class="block px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->routeIs('admin.contacts.*') ? 'bg-gray-700' : '' }}">
                     <div class="flex items-center justify-between w-full">

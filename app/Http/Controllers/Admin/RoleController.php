@@ -20,10 +20,10 @@ class RoleController extends Controller
     public function index()
     {
         $roles = Role::withCount(['users', 'permissions'])->get();
-        
-        return view('admin.roles.index', compact('roles'));
+
+        return view('admin.roles.index_tailwind', compact('roles'));
     }
-    
+
     /**
      * Show the form for creating a new role.
      *
@@ -31,9 +31,9 @@ class RoleController extends Controller
      */
     public function create()
     {
-        return view('admin.roles.create');
+        return view('admin.roles.create_tailwind');
     }
-    
+
     /**
      * Store a newly created role in storage.
      *
@@ -46,20 +46,20 @@ class RoleController extends Controller
             'name' => 'required|string|max:255|unique:roles,name',
             'description' => 'nullable|string',
         ]);
-        
+
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
-        
+
         try {
             $role = Role::create([
                 'id' => Str::uuid(),
                 'name' => $request->name,
                 'description' => $request->description,
             ]);
-            
+
             return redirect()->route('admin.roles.index')
                 ->with('success', 'Vai trò đã được tạo thành công.');
         } catch (\Exception $e) {
@@ -68,7 +68,7 @@ class RoleController extends Controller
                 ->withInput();
         }
     }
-    
+
     /**
      * Show the form for editing the specified role.
      *
@@ -78,10 +78,12 @@ class RoleController extends Controller
     public function edit($id)
     {
         $role = Role::findOrFail($id);
-        
-        return view('admin.roles.edit', compact('role'));
+
+        $role->loadCount(['users', 'permissions']);
+
+        return view('admin.roles.edit_tailwind', compact('role'));
     }
-    
+
     /**
      * Update the specified role in storage.
      *
@@ -92,24 +94,24 @@ class RoleController extends Controller
     public function update(Request $request, $id)
     {
         $role = Role::findOrFail($id);
-        
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255|unique:roles,name,' . $id . ',id',
             'description' => 'nullable|string',
         ]);
-        
+
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
-        
+
         try {
             $role->update([
                 'name' => $request->name,
                 'description' => $request->description,
             ]);
-            
+
             return redirect()->route('admin.roles.index')
                 ->with('success', 'Vai trò đã được cập nhật thành công.');
         } catch (\Exception $e) {
@@ -118,7 +120,7 @@ class RoleController extends Controller
                 ->withInput();
         }
     }
-    
+
     /**
      * Remove the specified role from storage.
      *
@@ -128,28 +130,28 @@ class RoleController extends Controller
     public function destroy($id)
     {
         $role = Role::findOrFail($id);
-        
+
         // Không cho phép xóa các vai trò mặc định
         if (in_array($role->name, ['Admin', 'Nhân viên', 'Khách hàng'])) {
             return redirect()->back()
                 ->with('error', 'Không thể xóa vai trò mặc định.');
         }
-        
+
         try {
             // Kiểm tra xem có người dùng nào đang sử dụng vai trò này không
             $usersCount = User::where('role_id', $role->id)->count();
-            
+
             if ($usersCount > 0) {
                 return redirect()->back()
                     ->with('error', 'Không thể xóa vai trò này vì có ' . $usersCount . ' người dùng đang sử dụng.');
             }
-            
+
             // Xóa các quyền của vai trò
             DB::table('role_permissions')->where('role_id', $role->id)->delete();
-            
+
             // Xóa vai trò
             $role->delete();
-            
+
             return redirect()->route('admin.roles.index')
                 ->with('success', 'Vai trò đã được xóa thành công.');
         } catch (\Exception $e) {

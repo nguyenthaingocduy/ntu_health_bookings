@@ -87,7 +87,7 @@ class DashboardController extends Controller
         // Get revenue data for chart
         $revenueData = $this->getRevenueChartData();
 
-        return view('staff.dashboard_new', compact(
+        return view('staff.dashboard', compact(
             'staff',
             'appointments',
             'upcomingAppointmentsCount',

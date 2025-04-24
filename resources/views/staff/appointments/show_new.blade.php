@@ -285,7 +285,7 @@
                                     <div class="flex items-start">
                                         <div class="bg-pink-100 dark:bg-pink-900/50 p-2.5 rounded-lg mr-4 shadow-md flex-shrink-0">
                                             <svg class="w-5 h-5 text-pink-600 dark:text-pink-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2                                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
                                             </svg>
                                         </div>
                                         <div>
@@ -525,10 +525,10 @@
                                 </p>
                                 <div class="mt-4">
                                     <label for="cancellation_reason" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Lý do hủy</label>
-                                    <textarea 
-                                        name="cancellation_reason" 
-                                        id="cancellation_reason" 
-                                        rows="3" 
+                                    <textarea
+                                        name="cancellation_reason"
+                                        id="cancellation_reason"
+                                        rows="3"
                                         class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-pink-500 dark:focus:border-pink-400 focus:ring focus:ring-pink-500 dark:focus:ring-pink-400 focus:ring-opacity-50 dark:text-white transition-colors duration-200"></textarea>
                                 </div>
                             </div>
@@ -563,7 +563,7 @@
         document.getElementById('cancelModal').classList.add('hidden');
         document.getElementById('cancelModal').classList.remove('flex');
     }
-    
+
     // Đóng modal khi click bên ngoài
     window.addEventListener('click', function(e) {
         const modal = document.getElementById('cancelModal');
@@ -571,7 +571,7 @@
             closeCancelModal();
         }
     });
-    
+
     // Đóng modal khi nhấn ESC
     window.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && !document.getElementById('cancelModal').classList.contains('hidden')) {
