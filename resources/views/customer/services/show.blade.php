@@ -29,7 +29,14 @@
                         </li>
                     </ol>
                 </nav> --}}
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ $service->name }}</h1>
+                <div class="flex items-center mb-2">
+                    <h1 class="text-3xl font-bold text-gray-800">{{ $service->name }}</h1>
+                    @if($service->hasActivePromotion())
+                    <span class="ml-3 bg-pink-100 text-pink-800 text-sm font-semibold px-3 py-1 rounded-full">
+                        Giảm {{ $service->promotion_value }}
+                    </span>
+                    @endif
+                </div>
                 <div class="flex items-center mb-2">
                     @if($service->category)
                     <span class="bg-pink-100 text-pink-600 text-sm px-3 py-1 rounded-full">
@@ -44,12 +51,14 @@
                 </div>
             </div>
             <div class="text-right">
-                <div class="text-2xl font-bold text-pink-500 mb-1">{{ number_format($service->price) }}đ</div>
-                @if($service->promotion > 0)
+                @if($service->hasActivePromotion())
+                <div class="text-2xl font-bold text-pink-500 mb-1">{{ number_format($service->discounted_price) }}đ</div>
                 <div class="text-sm text-gray-500">
-                    <span class="line-through">{{ number_format($service->price * (1 + $service->promotion/100)) }}đ</span>
-                    <span class="ml-1 bg-pink-100 text-pink-600 px-2 py-0.5 rounded">-{{ $service->promotion }}%</span>
+                    <span class="line-through">{{ number_format($service->price) }}đ</span>
+                    <span class="ml-1 bg-pink-100 text-pink-600 px-2 py-0.5 rounded">Giảm {{ $service->promotion_value }}</span>
                 </div>
+                @else
+                <div class="text-2xl font-bold text-pink-500 mb-1">{{ number_format($service->price) }}đ</div>
                 @endif
             </div>
         </div>
@@ -218,9 +227,23 @@
             <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
                 <img src="{{ $relatedService->image_url }}" alt="{{ $relatedService->name }}" class="w-full h-40 object-cover">
                 <div class="p-4">
-                    <h3 class="font-medium text-gray-800 mb-1">{{ $relatedService->name }}</h3>
+                    <div class="flex items-center mb-1">
+                        <h3 class="font-medium text-gray-800">{{ $relatedService->name }}</h3>
+                        @if($relatedService->hasActivePromotion())
+                        <span class="ml-2 bg-pink-100 text-pink-800 text-xs font-semibold px-2 py-0.5 rounded-full">
+                            Giảm {{ $relatedService->promotion_value }}
+                        </span>
+                        @endif
+                    </div>
                     <div class="flex justify-between items-center mt-2">
+                        @if($relatedService->hasActivePromotion())
+                        <div class="flex items-center">
+                            <span class="text-gray-500 line-through text-xs mr-1">{{ number_format($relatedService->price) }}đ</span>
+                            <span class="text-pink-500 font-medium">{{ number_format($relatedService->discounted_price) }}đ</span>
+                        </div>
+                        @else
                         <span class="text-pink-500 font-medium">{{ number_format($relatedService->price) }}đ</span>
+                        @endif
                         <a href="{{ route('customer.services.show', $relatedService) }}" class="text-sm text-pink-500 hover:underline">
                             Chi tiết
                         </a>

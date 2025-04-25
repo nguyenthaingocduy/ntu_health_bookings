@@ -47,6 +47,25 @@
                 <div class="mb-8" id="step-1-content">
                     <h3 class="text-xl font-semibold mb-4">Chọn dịch vụ</h3>
 
+                    <!-- Khuyến mãi đang diễn ra -->
+                    <div id="active-promotions" class="mb-6 hidden">
+                        <div class="bg-gradient-to-r from-pink-50 to-pink-100 rounded-lg p-4 border border-pink-200">
+                            <h4 class="font-semibold text-pink-700 flex items-center mb-2">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm4.707 3.707a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L8.414 9H10a3 3 0 013 3v1a1 1 0 102 0v-1a5 5 0 00-5-5H8.414l1.293-1.293z" clip-rule="evenodd"></path>
+                                </svg>
+                                Khuyến mãi đang diễn ra
+                            </h4>
+                            <div id="promotions-list" class="space-y-2">
+                                <!-- Danh sách khuyến mãi sẽ được thêm vào đây bằng JavaScript -->
+                                <div class="text-center py-2">
+                                    <div class="loading-spinner"></div>
+                                    <p class="text-sm text-gray-500 mt-1">Đang tải khuyến mãi...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     @if($services->isEmpty())
                     <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
                         <p>Hiện tại không có dịch vụ nào khả dụng. Vui lòng quay lại sau.</p>
@@ -161,6 +180,18 @@
                              <input type="text" readonly value="{{ $user->address ?: '-' }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100">
                         </div>
                         <div class="md:col-span-2">
+                            <label for="promotion_code" class="block text-gray-700 mb-2">Mã khuyến mãi (nếu có)</label>
+                            <div class="flex">
+                                <input type="text" name="promotion_code" id="promotion_code"
+                                    class="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                    placeholder="Nhập mã khuyến mãi...">
+                                <button type="button" id="apply-promotion" class="px-4 py-2 bg-pink-500 text-white rounded-r-lg hover:bg-pink-600 transition">
+                                    Áp dụng
+                                </button>
+                            </div>
+                            <div id="promotion-message" class="mt-2 text-sm hidden"></div>
+                        </div>
+                        <div class="md:col-span-2">
                              <label for="notes" class="block text-gray-700 mb-2">Ghi chú</label>
                              <textarea name="notes" id="notes" rows="3"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
@@ -266,6 +297,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const timeSlotContainer = document.getElementById('time-slots-container');
     const submitButton = document.getElementById('submit-button');
     const submitHint = document.getElementById('submit-hint');
+    const activePromotionsContainer = document.getElementById('active-promotions');
+    const promotionsList = document.getElementById('promotions-list');
+    const promotionCodeInput = document.getElementById('promotion_code');
+    const applyPromotionButton = document.getElementById('apply-promotion');
+    const promotionMessage = document.getElementById('promotion-message');
 
     // Thiết lập ngày tối thiểu là ngày hôm nay thay vì ngày mai
     const today = new Date();
@@ -293,6 +329,22 @@ document.addEventListener('DOMContentLoaded', function() {
     if (checkedTimeRadio) {
         selectedTimeSlotId = checkedTimeRadio.value;
     }
+
+    // Lấy danh sách khuyến mãi đang hoạt động
+    fetchActivePromotions();
+
+    // Xử lý sự kiện khi nhấn nút áp dụng mã khuyến mãi
+    applyPromotionButton.addEventListener('click', function() {
+        validatePromotionCode();
+    });
+
+    // Xử lý sự kiện khi nhấn Enter trong ô nhập mã khuyến mãi
+    promotionCodeInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            validatePromotionCode();
+        }
+    });
 
     // Thêm sự kiện change cho các radio button dịch vụ
     document.querySelectorAll('input[name="service_id"]').forEach(radio => {
@@ -486,6 +538,166 @@ document.addEventListener('DOMContentLoaded', function() {
         if (submitHint) {
             submitHint.style.display = allSelected ? 'none' : 'block';
         }
+    }
+
+    // Hàm kiểm tra mã khuyến mãi
+    function validatePromotionCode() {
+        const code = promotionCodeInput.value.trim();
+        if (!code) {
+            showPromotionMessage('Vui lòng nhập mã khuyến mãi', 'warning');
+            return;
+        }
+
+        // Lấy giá dịch vụ đã chọn
+        let servicePrice = 0;
+        const selectedService = document.querySelector('input[name="service_id"]:checked');
+        if (selectedService) {
+            const serviceCard = selectedService.closest('.service-card');
+            const priceElement = serviceCard.querySelector('.text-pink-500.font-semibold');
+            if (priceElement) {
+                // Chuyển đổi chuỗi "1,500,000đ" thành số 1500000
+                servicePrice = parseInt(priceElement.textContent.replace(/[^\d]/g, ''));
+            }
+        }
+
+        if (servicePrice === 0) {
+            showPromotionMessage('Vui lòng chọn dịch vụ trước khi áp dụng mã khuyến mãi', 'warning');
+            return;
+        }
+
+        // Hiển thị trạng thái đang tải
+        promotionMessage.innerHTML = '<div class="flex items-center text-gray-500"><div class="loading-spinner mr-2"></div> Đang kiểm tra mã khuyến mãi...</div>';
+        promotionMessage.classList.remove('hidden');
+
+        // Gọi API để kiểm tra mã khuyến mãi
+        fetch('/api/validate-promotion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                code: code,
+                amount: servicePrice
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Hiển thị thông tin khuyến mãi
+                const discountAmount = data.data.formatted_discount;
+                const newPrice = new Intl.NumberFormat('vi-VN').format(servicePrice - data.data.discount) + 'đ';
+
+                showPromotionMessage(`
+                    <div class="text-green-600 font-semibold">Mã khuyến mãi hợp lệ!</div>
+                    <div class="mt-1">Giảm giá: <span class="font-semibold">${discountAmount}</span></div>
+                    <div>Giá sau khuyến mãi: <span class="font-semibold">${newPrice}</span></div>
+                `, 'success');
+
+                // Thêm input ẩn để lưu mã khuyến mãi
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'applied_promotion_code';
+                hiddenInput.value = code;
+                document.querySelector('form').appendChild(hiddenInput);
+
+                // Vô hiệu hóa input và nút áp dụng
+                promotionCodeInput.disabled = true;
+                applyPromotionButton.disabled = true;
+                applyPromotionButton.classList.add('opacity-50');
+            } else {
+                // Hiển thị thông báo lỗi
+                showPromotionMessage(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Lỗi khi kiểm tra mã khuyến mãi:', error);
+            showPromotionMessage('Đã xảy ra lỗi khi kiểm tra mã khuyến mãi. Vui lòng thử lại sau.', 'error');
+        });
+    }
+
+    // Hàm hiển thị thông báo về mã khuyến mãi
+    function showPromotionMessage(message, type) {
+        promotionMessage.innerHTML = message;
+        promotionMessage.classList.remove('hidden', 'text-yellow-600', 'text-red-600', 'text-green-600');
+
+        switch (type) {
+            case 'success':
+                promotionMessage.classList.add('text-green-600');
+                break;
+            case 'error':
+                promotionMessage.classList.add('text-red-600');
+                break;
+            case 'warning':
+                promotionMessage.classList.add('text-yellow-600');
+                break;
+        }
+    }
+
+    // Hàm lấy danh sách khuyến mãi đang hoạt động
+    function fetchActivePromotions() {
+        fetch('/api/active-promotions')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Lỗi kết nối: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Dữ liệu khuyến mãi:', data);
+
+                if (data.success && data.promotions && data.promotions.length > 0) {
+                    // Hiển thị container khuyến mãi
+                    activePromotionsContainer.classList.remove('hidden');
+
+                    // Xóa nội dung loading
+                    promotionsList.innerHTML = '';
+
+                    // Thêm các khuyến mãi vào danh sách
+                    data.promotions.forEach(promotion => {
+                        const discountText = promotion.discount_type === 'percentage'
+                            ? `${promotion.discount_value}%`
+                            : `${new Intl.NumberFormat('vi-VN').format(promotion.discount_value)}đ`;
+
+                        const minimumText = promotion.minimum_purchase > 0
+                            ? `<span class="text-xs text-gray-600">Áp dụng cho đơn hàng từ ${new Intl.NumberFormat('vi-VN').format(promotion.minimum_purchase)}đ</span>`
+                            : '';
+
+                        const validUntil = new Date(promotion.end_date);
+                        const formattedDate = new Intl.DateTimeFormat('vi-VN', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        }).format(validUntil);
+
+                        const promotionHTML = `
+                            <div class="bg-white rounded-lg p-3 border border-pink-100 shadow-sm">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <div class="font-semibold text-pink-600">${promotion.title}</div>
+                                        <div class="text-sm text-gray-600">Mã: <span class="font-mono font-semibold">${promotion.code}</span></div>
+                                        <div class="text-sm font-semibold text-green-600">Giảm ${discountText}</div>
+                                        ${minimumText}
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-xs text-gray-500">Có hiệu lực đến</div>
+                                        <div class="text-sm font-medium">${formattedDate}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        promotionsList.insertAdjacentHTML('beforeend', promotionHTML);
+                    });
+                } else {
+                    // Ẩn container khuyến mãi nếu không có khuyến mãi nào
+                    activePromotionsContainer.classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi khi lấy khuyến mãi:', error);
+                activePromotionsContainer.classList.add('hidden');
+            });
     }
 
     // Kích hoạt kiểm tra lần đầu

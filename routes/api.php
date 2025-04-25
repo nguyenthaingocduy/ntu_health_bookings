@@ -34,6 +34,10 @@ Route::get('/time-slots', [TimeSlotController::class, 'getAllTimeSlots']);
 // Customer search for staff appointment booking
 Route::get('/customers/search', [\App\Http\Controllers\Api\CustomerController::class, 'search']);
 
+// Promotions API
+Route::get('/active-promotions', [\App\Http\Controllers\Api\PromotionController::class, 'getActivePromotions']);
+Route::post('/validate-promotion', [\App\Http\Controllers\Api\PromotionController::class, 'validateCode']);
+
 // Service promotion popup routes
 Route::get('/random-featured-service', function() {
     // Get a random active service with promotion

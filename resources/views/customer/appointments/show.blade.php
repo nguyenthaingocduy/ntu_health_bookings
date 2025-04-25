@@ -47,7 +47,7 @@
                         @endif
                     </span>
                 </div>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <!-- Thông tin dịch vụ -->
                     <div>
@@ -58,28 +58,40 @@
                                 <p class="text-gray-600">Tên dịch vụ</p>
                                 <p class="font-semibold text-lg">{{ $appointment->service->name }}</p>
                             </div>
-                            
+
                             @if(isset($appointment->service->price))
                             <div>
                                 <p class="text-gray-600">Giá</p>
+                                @if($appointment->service->hasActivePromotion())
+                                <div>
+                                    <p class="font-semibold text-pink-500">{{ number_format($appointment->service->discounted_price) }}đ</p>
+                                    <p class="text-sm text-gray-500">
+                                        <span class="line-through">{{ number_format($appointment->service->price) }}đ</span>
+                                        <span class="ml-2 bg-pink-100 text-pink-800 text-xs font-semibold px-2 py-0.5 rounded-full">
+                                            Giảm {{ $appointment->service->promotion_value }}
+                                        </span>
+                                    </p>
+                                </div>
+                                @else
                                 <p class="font-semibold text-pink-500">{{ number_format($appointment->service->price) }}đ</p>
+                                @endif
                             </div>
                             @endif
-                            
+
                             @if(isset($appointment->service->duration))
                             <div>
                                 <p class="text-gray-600">Thời gian thực hiện</p>
                                 <p class="font-semibold">{{ $appointment->service->duration }} phút</p>
                             </div>
                             @endif
-                            
+
                             @if(isset($appointment->service->category) && $appointment->service->category)
                             <div>
                                 <p class="text-gray-600">Danh mục</p>
                                 <p class="font-semibold">{{ $appointment->service->category->name }}</p>
                             </div>
                             @endif
-                            
+
                             @if(isset($appointment->service->descriptive))
                             <div>
                                 <p class="text-gray-600">Mô tả</p>
@@ -91,7 +103,7 @@
                             @endif
                         </div>
                     </div>
-                    
+
                     <!-- Thông tin lịch hẹn -->
                     <div>
                         <h3 class="text-lg font-semibold mb-4 border-b pb-2">Thông tin lịch hẹn</h3>
@@ -100,7 +112,7 @@
                                 <p class="text-gray-600">Ngày đặt lịch</p>
                                 <p class="font-semibold">{{ $appointment->created_at->format('d/m/y') }}</p>
                             </div>
-                            
+
                             <div>
                                 <p class="text-gray-600">Ngày hẹn</p>
                                 <p class="font-semibold">
@@ -108,7 +120,7 @@
                                     {{ \Carbon\Carbon::parse($appointment->date_appointments)->format('d/m/Y') }}
                                 </p>
                             </div>
-                            
+
                             <div>
                                 <p class="text-gray-600">Giờ hẹn</p>
                                 <p class="font-semibold">
@@ -120,14 +132,14 @@
                                     @endif
                                 </p>
                             </div>
-                            
+
                             @if($appointment->notes)
                             <div>
                                 <p class="text-gray-600">Ghi chú</p>
                                 <p class="italic bg-gray-50 p-3 rounded-lg">{{ $appointment->notes }}</p>
                             </div>
                             @endif
-                            
+
                             @if($appointment->employee)
                             <div>
                                 <p class="text-gray-600">Nhân viên phụ trách</p>
@@ -140,7 +152,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Hành động -->
                 @if(in_array($appointment->status, ['pending', 'confirmed']))
                 <div class="mt-8 border-t pt-6">

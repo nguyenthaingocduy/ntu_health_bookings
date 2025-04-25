@@ -24,16 +24,32 @@
                 <div class="bg-white rounded-lg shadow-lg overflow-hidden">
                     <img src="{{ $service->image_url }}" alt="{{ $service->name }}" class="w-full h-48 object-cover">
                     <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2">{{ $service->name }}</h3>
+                        <div class="flex items-center mb-2">
+                            <h3 class="text-xl font-semibold">{{ $service->name }}</h3>
+                            @if($service->hasActivePromotion())
+                            <span class="ml-2 bg-pink-100 text-pink-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                                Giảm {{ $service->promotion_value }}
+                            </span>
+                            @endif
+                        </div>
                         <p class="text-gray-600 mb-4">{{ Str::limit($service->description, 100) }}</p>
                         <div class="flex justify-between items-center">
-                            <span class="text-pink-500 font-bold">{{ number_format($service->price) }}đ</span>
+                            <div>
+                                @if($service->hasActivePromotion())
+                                <div class="flex items-center">
+                                    <span class="text-gray-500 line-through text-sm mr-2">{{ number_format($service->price) }}đ</span>
+                                    <span class="text-pink-500 font-bold">{{ number_format($service->discounted_price) }}đ</span>
+                                </div>
+                                @else
+                                <span class="text-pink-500 font-bold">{{ number_format($service->price) }}đ</span>
+                                @endif
+                            </div>
                             <div class="space-x-2">
-                                <a href="{{ route('customer.services.show', $service->id) }}" 
+                                <a href="{{ route('customer.services.show', $service->id) }}"
                                     class="inline-block bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 transition">
                                     Chi tiết
                                 </a>
-                                <a href="{{ route('customer.appointments.create', ['service' => $service->id]) }}" 
+                                <a href="{{ route('customer.appointments.create', ['service' => $service->id]) }}"
                                     class="inline-block bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900 transition">
                                     Đặt lịch
                                 </a>
@@ -57,4 +73,4 @@
         </a>
     </div>
 </section>
-@endsection 
+@endsection
