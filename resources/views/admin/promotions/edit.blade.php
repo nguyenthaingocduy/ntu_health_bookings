@@ -91,7 +91,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Tiêu đề <span class="text-red-500">*</span></label>
-                                <input type="text" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('title') border-red-500 @enderror" id="title" name="title" value="{{ old('title', $promotion->title) }}" required>
+                                <input type="text" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 @error('title') border-red-500 @enderror" id="title" name="title" value="{{ old('title', $promotion->title) }}" required>
                                 @error('title')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -99,7 +99,7 @@
 
                             <div>
                                 <label for="code" class="block text-sm font-medium text-gray-700 mb-2">Mã khuyến mãi <span class="text-red-500">*</span></label>
-                                <input type="text" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('code') border-red-500 @enderror" id="code" name="code" value="{{ old('code', $promotion->code) }}" required>
+                                <input type="text" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 @error('code') border-red-500 @enderror" id="code" name="code" value="{{ old('code', $promotion->code) }}" required>
                                 @error('code')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -109,7 +109,7 @@
 
                         <div class="mb-6">
                             <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Mô tả</label>
-                            <textarea class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('description') border-red-500 @enderror" id="description" name="description" rows="3">{{ old('description', $promotion->description) }}</textarea>
+                            <textarea class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 @error('description') border-red-500 @enderror" id="description" name="description" rows="3">{{ old('description', $promotion->description) }}</textarea>
                             @error('description')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -118,7 +118,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label for="discount_type" class="block text-sm font-medium text-gray-700 mb-2">Loại giảm giá <span class="text-red-500">*</span></label>
-                                <select class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('discount_type') border-red-500 @enderror" id="discount_type" name="discount_type" required>
+                                <select class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 @error('discount_type') border-red-500 @enderror" id="discount_type" name="discount_type" required>
                                     <option value="percentage" {{ old('discount_type', $promotion->discount_type) == 'percentage' ? 'selected' : '' }}>Phần trăm (%)</option>
                                     <option value="fixed" {{ old('discount_type', $promotion->discount_type) == 'fixed' ? 'selected' : '' }}>Số tiền cố định (VNĐ)</option>
                                 </select>
@@ -129,7 +129,7 @@
 
                             <div>
                                 <label for="discount_value" class="block text-sm font-medium text-gray-700 mb-2">Giá trị giảm giá <span class="text-red-500">*</span></label>
-                                <input type="number" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('discount_value') border-red-500 @enderror" id="discount_value" name="discount_value" value="{{ old('discount_value', $promotion->discount_value) }}" min="0" step="0.01" required>
+                                <input type="number" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 @error('discount_value') border-red-500 @enderror" id="discount_value" name="discount_value" value="{{ old('discount_value', $promotion->discount_value) }}" min="0" step="0.01" required>
                                 @error('discount_value')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -139,7 +139,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label for="minimum_purchase" class="block text-sm font-medium text-gray-700 mb-2">Giá trị đơn hàng tối thiểu</label>
-                                <input type="number" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('minimum_purchase') border-red-500 @enderror" id="minimum_purchase" name="minimum_purchase" value="{{ old('minimum_purchase', $promotion->minimum_purchase) }}" min="0" step="0.01">
+                                <input type="number" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 @error('minimum_purchase') border-red-500 @enderror" id="minimum_purchase" name="minimum_purchase" value="{{ old('minimum_purchase', $promotion->minimum_purchase) }}" min="0" step="0.01">
                                 @error('minimum_purchase')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -147,7 +147,7 @@
 
                             <div>
                                 <label for="maximum_discount" class="block text-sm font-medium text-gray-700 mb-2">Giảm giá tối đa</label>
-                                <input type="number" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('maximum_discount') border-red-500 @enderror" id="maximum_discount" name="maximum_discount" value="{{ old('maximum_discount', $promotion->maximum_discount) }}" min="0" step="0.01">
+                                <input type="number" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 @error('maximum_discount') border-red-500 @enderror" id="maximum_discount" name="maximum_discount" value="{{ old('maximum_discount', $promotion->maximum_discount) }}" min="0" step="0.01">
                                 @error('maximum_discount')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -164,7 +164,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                         </svg>
                                     </div>
-                                    <input type="text" class="w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('start_date') border-red-500 @enderror" id="start_date" name="start_date" value="{{ old('start_date', $promotion->start_date->format('Y-m-d')) }}" required>
+                                    <input type="date" class="w-full px-4 py-2 pl-10 roun borderded-lg border-grnk-500 focu-2ity-50 @error('start_date') border-red-500 @enderror" id="start_date" name="start_date" value="{{ old('start_date', $promotion->start_date->format('Y-m-d')) }}" required>
                                 </div>
                                 @error('start_date')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -179,7 +179,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                         </svg>
                                     </div>
-                                    <input type="text" class="w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('end_date') border-red-500 @enderror" id="end_date" name="end_date" value="{{ old('end_date', $promotion->end_date->format('Y-m-d')) }}" required>
+                                    <input type="date" class="w-full px-4 py-2 pl-10 roun borderded-lg border-grnk-500 focu-2ity-50 @error('end_date') border-red-500 @enderror" id="end_date" name="end_date" value="{{ old('end_date', $promotion->end_date->format('Y-m-d')) }}" required>
                                 </div>
                                 @error('end_date')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -190,7 +190,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label for="usage_limit" class="block text-sm font-medium text-gray-700 mb-2">Giới hạn sử dụng</label>
-                                <input type="number" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('usage_limit') border-red-500 @enderror" id="usage_limit" name="usage_limit" value="{{ old('usage_limit', $promotion->usage_limit) }}" min="{{ $promotion->usage_count }}" step="1">
+                                <input type="number" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 @error('usage_limit') border-red-500 @enderror" id="usage_limit" name="usage_limit" value="{{ old('usage_limit', $promotion->usage_limit) }}" min="{{ $promotion->usage_count }}" step="1">
                                 @error('usage_limit')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror

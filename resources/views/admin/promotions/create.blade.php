@@ -150,7 +150,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                         </svg>
                                     </div>
-                                    <input type="date" class="w-full px-4 py-2 pl-10 rounded-lg border border-gray-300  focus:ring-2 @error('start_date') border-red-500 @enderror" id="start_date" name="start_date" value="{{ old('start_date') }}" required min="{{ date('Y-m-d') }}">
+                                    <input type="date" class="w-full px-4 py-2 pl-10 rounded-lg border border-gray-300  focus:ring-2 @error('start_date') border-red-500 @enderror" id="start_date" name="start_date" value="{{ old('start_date') }}" required max="format('Y-m-d')">
                                 </div>
                                 @error('start_date')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -165,7 +165,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                         </svg>
                                     </div>
-                                    <input type="date" class="w-full px-4 py-2 pl-10 rounded-lg border border-gray-300 focus:ring-2 @error('end_date') border-red-500 @enderror" id="end_date" name="end_date" value="{{ old('end_date') }}" required max="{{ date('Y-m-d') }}">
+                                    <input type="date" class="w-full px-4 py-2 pl-10 rounded-lg border border-gray-300 focus:ring-2 @error('end_date') border-red-500 @enderror" id="end_date" name="end_date" value="{{ old('end_date') }}" required min="format('Y-m-d')">
                                 </div>
                                 @error('end_date')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

@@ -197,7 +197,7 @@
                             <form action="{{ route('admin.promotions.toggle-active', $promotion->id) }}" method="POST" class="inline">
                                 @csrf
                                 @method('PUT')
-                                <button type="submit" class="w-full flex items-center justify-center px-4 py-2 {{ $promotion->is_active ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200' }} rounded-lg transition-colors duration-150">
+                                <button type="submit" class="w-full flex items-center justify-center px-4 py-2 m-2 {{ $promotion->is_active ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200' }} rounded-lg transition-colors duration-150">
                                     @if($promotion->is_active)
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -217,7 +217,7 @@
                             <form action="{{ route('admin.promotions.reset-usage', $promotion->id) }}" method="POST" class="inline" onsubmit="return confirm('Bạn có chắc chắn muốn đặt lại số lần sử dụng về 0?');">
                                 @csrf
                                 @method('PUT')
-                                <button type="submit" class="w-full flex items-center justify-center px-4 py-2 bg-yellow-100 text-yellow-700 hover:bg-yellow-200 rounded-lg transition-colors duration-150">
+                                <button type="submit" class="w-full flex items-center justify-center px-4 py-2 bg-yellow-100 text-yellow-700 hover:bg-yellow-200 rounded-lg transition-colors duration-150 m-2">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                                     </svg>
@@ -230,7 +230,7 @@
                             <form action="{{ route('admin.promotions.destroy', $promotion->id) }}" method="POST" class="inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa khuyến mãi này?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="w-full flex items-center justify-center px-4 py-2 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg transition-colors duration-150">
+                                <button type="submit" class="w-full flex items-center justify-center px-4 py-2 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg transition-colors duration-150 m-2">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                     </svg>
