@@ -288,7 +288,7 @@
         flatpickr("#start_date", {
             dateFormat: "Y-m-d",
             altInput: true,
-            altFormat: "d/m/Y",
+            altFormat: "d F Y",
             locale: "vn",
             disableMobile: true,
             enableTime: false,
@@ -304,7 +304,7 @@
         const endDatePicker = flatpickr("#end_date", {
             dateFormat: "Y-m-d",
             altInput: true,
-            altFormat: "d/m/Y",
+            altFormat: "d F Y",
             locale: "vn",
             disableMobile: true,
             enableTime: false,
