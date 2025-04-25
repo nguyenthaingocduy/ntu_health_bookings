@@ -13,7 +13,7 @@
         <div class="max-w-3xl">
             <h1 class="text-5xl font-bold mb-6">Chào mừng đến với Beauty Spa</h1>
             <p class="text-xl mb-8">Khám phá trải nghiệm chăm sóc sức khỏe và làm đẹp tuyệt vời với các dịch vụ chuyên nghiệp của chúng tôi.</p>
-            <a href="{{ route('customer.services.index') }}" class="inline-block bg-pink text-pink-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-50 transition shadow-md border border-pink-100">
+            <a href="{{ route('services.index') }}" class="inline-block bg-pink text-pink-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-50 transition shadow-md border border-pink-100">
                 Xem dịch vụ
             </a>
         </div>
@@ -34,7 +34,7 @@
                     <p class="text-gray-600 mb-4">{{ Str::limit($service->description, 100) }}</p>
                     <div class="flex justify-between items-center">
                         <span class="text-pink-500 font-bold">{{ number_format($service->price) }}đ</span>
-                        <a href="{{ route('customer.services.show', $service) }}" class="text-pink-500 hover:text-pink-600">
+                        <a href="{{ route('services.show', $service) }}" class="text-pink-500 hover:text-pink-600">
                             Chi tiết <i class="fas fa-arrow-right ml-1"></i>
                         </a>
                     </div>
@@ -44,7 +44,7 @@
         </div>
         
         <div class="text-center mt-12">
-            <a href="{{ route('customer.services.index') }}" class="inline-block bg-white text-pink-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-50 transition shadow-md border border-pink-100">
+            <a href="{{ route('services.index') }}" class="inline-block bg-white text-pink-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-50 transition shadow-md border border-pink-100">
                 Xem tất cả dịch vụ
             </a>
         </div>

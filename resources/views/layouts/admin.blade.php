@@ -111,6 +111,12 @@
                     Vai trò
                 </a>
 
+                <a href="{{ route('admin.permissions.my-permissions') }}"
+                   class="block px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('admin/my-permissions*') ? 'bg-gray-700' : '' }}">
+                    <i class="fas fa-key w-6"></i>
+                    Quyền của tôi
+                </a>
+
                 <a href="{{ route('admin.contacts.index') }}"
                    class="block px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->routeIs('admin.contacts.*') ? 'bg-gray-700' : '' }}">
                     <div class="flex items-center justify-between w-full">

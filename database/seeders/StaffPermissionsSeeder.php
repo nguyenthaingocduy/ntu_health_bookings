@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\RolePermission;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
 
 class StaffPermissionsSeeder extends Seeder
 {
@@ -15,6 +16,57 @@ class StaffPermissionsSeeder extends Seeder
      */
     public function run(): void
     {
+        // Kiểm tra xem các cột cần thiết có tồn tại không
+        $hasDisplayNameColumn = Schema::hasColumn('permissions', 'display_name');
+        $hasDescriptionColumn = Schema::hasColumn('permissions', 'description');
+        $hasGroupColumn = Schema::hasColumn('permissions', 'group');
+
+        // Nếu không có các cột cần thiết, thông báo và thoát
+        if (!$hasDisplayNameColumn || !$hasDescriptionColumn || !$hasGroupColumn) {
+            $this->command->error('Bảng permissions chưa có đủ các cột cần thiết. Vui lòng chạy migration trước.');
+            $this->command->info('Đang tạo các quyền cơ bản cho nhân viên...');
+
+            // Tạo các quyền cơ bản nếu không có các cột mở rộng
+            $basicPermissions = [
+                ['name' => 'appointments.view'],
+                ['name' => 'appointments.create'],
+                ['name' => 'appointments.edit'],
+                ['name' => 'appointments.cancel'],
+                ['name' => 'customers.view'],
+                ['name' => 'customers.create'],
+                ['name' => 'customers.edit'],
+                ['name' => 'services.view'],
+                ['name' => 'service_packages.register'],
+                ['name' => 'payments.create'],
+                ['name' => 'payments.view'],
+                ['name' => 'notifications.send'],
+                ['name' => 'work_schedule.view'],
+                ['name' => 'treatment_progress.update'],
+                ['name' => 'treatment_progress.view'],
+                ['name' => 'professional_notes.create'],
+                ['name' => 'professional_notes.view'],
+                ['name' => 'professional_notes.edit'],
+                ['name' => 'session_status.update'],
+                ['name' => 'customers.view_limited'],
+            ];
+
+            foreach ($basicPermissions as $permission) {
+                // Kiểm tra xem quyền đã tồn tại chưa
+                $exists = Permission::where('name', $permission['name'])->exists();
+                if (!$exists) {
+                    Permission::create([
+                        'id' => Str::uuid(),
+                        'name' => $permission['name'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                    $this->command->info("Đã tạo quyền {$permission['name']}");
+                }
+            }
+
+            return;
+        }
+
         // Tạo các quyền cho Receptionist
         $receptionistPermissions = [
             // Quản lý lịch hẹn
@@ -54,7 +106,7 @@ class StaffPermissionsSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            
+
             // Quản lý khách hàng
             [
                 'id' => Str::uuid(),
@@ -83,7 +135,7 @@ class StaffPermissionsSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            
+
             // Quản lý dịch vụ
             [
                 'id' => Str::uuid(),
@@ -103,7 +155,7 @@ class StaffPermissionsSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            
+
             // Quản lý thanh toán
             [
                 'id' => Str::uuid(),
@@ -123,7 +175,7 @@ class StaffPermissionsSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            
+
             // Quản lý thông báo
             [
                 'id' => Str::uuid(),
@@ -135,7 +187,7 @@ class StaffPermissionsSeeder extends Seeder
                 'updated_at' => now(),
             ],
         ];
-        
+
         // Tạo các quyền cho Technician
         $technicianPermissions = [
             // Lịch làm việc
@@ -148,7 +200,7 @@ class StaffPermissionsSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            
+
             // Quản lý tiến trình
             [
                 'id' => Str::uuid(),
@@ -168,7 +220,7 @@ class StaffPermissionsSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            
+
             // Ghi chú chuyên môn
             [
                 'id' => Str::uuid(),
@@ -197,7 +249,7 @@ class StaffPermissionsSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            
+
             // Cập nhật trạng thái
             [
                 'id' => Str::uuid(),
@@ -208,7 +260,7 @@ class StaffPermissionsSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            
+
             // Xem thông tin khách hàng (giới hạn)
             [
                 'id' => Str::uuid(),
@@ -220,13 +272,20 @@ class StaffPermissionsSeeder extends Seeder
                 'updated_at' => now(),
             ],
         ];
-        
+
         // Lưu tất cả quyền vào cơ sở dữ liệu
         $allPermissions = array_merge($receptionistPermissions, $technicianPermissions);
         foreach ($allPermissions as $permission) {
-            Permission::create($permission);
+            // Kiểm tra xem quyền đã tồn tại chưa
+            $exists = Permission::where('name', $permission['name'])->exists();
+            if (!$exists) {
+                Permission::create($permission);
+                $this->command->info("Đã tạo quyền {$permission['name']}");
+            } else {
+                $this->command->info("Quyền {$permission['name']} đã tồn tại");
+            }
         }
-        
+
         // Gán quyền cho vai trò Receptionist
         $receptionistRole = Role::where('name', 'Receptionist')->first();
         if ($receptionistRole) {
@@ -243,7 +302,7 @@ class StaffPermissionsSeeder extends Seeder
                 }
             }
         }
-        
+
         // Gán quyền cho vai trò Technician
         $technicianRole = Role::where('name', 'Technician')->first();
         if ($technicianRole) {

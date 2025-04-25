@@ -35,9 +35,6 @@
                 <a href="{{ route('admin.permissions.role-permissions') }}" class="btn btn-info">
                     <i class="fas fa-user-tag"></i> Phân quyền theo vai trò
                 </a>
-                <a href="{{ route('admin.permissions.user-permissions') }}" class="btn btn-info">
-                    <i class="fas fa-user-cog"></i> Phân quyền theo người dùng
-                </a>
             </div>
 
             @foreach($permissions as $group => $groupPermissions)
@@ -66,12 +63,12 @@
                                         <a href="{{ route('admin.permissions.edit', $permission->id) }}" class="btn btn-sm btn-primary">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button type="button" class="btn btn-sm btn-danger" 
+                                        <button type="button" class="btn btn-sm btn-danger"
                                                 onclick="confirmDelete('{{ $permission->id }}', '{{ $permission->display_name }}')">
                                             <i class="fas fa-trash"></i>
                                         </button>
-                                        <form id="delete-form-{{ $permission->id }}" 
-                                              action="{{ route('admin.permissions.destroy', $permission->id) }}" 
+                                        <form id="delete-form-{{ $permission->id }}"
+                                              action="{{ route('admin.permissions.destroy', $permission->id) }}"
                                               method="POST" style="display: none;">
                                             @csrf
                                             @method('DELETE')

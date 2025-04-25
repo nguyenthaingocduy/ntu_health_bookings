@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('invoice_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('invoice_id');
-            $table->uuid('service_id')->nullable();
+            $table->unsignedBigInteger('service_id')->nullable();
             $table->string('item_name');
             $table->text('item_description')->nullable();
             $table->integer('quantity');
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->decimal('discount', 12, 2)->default(0);
             $table->decimal('total', 12, 2);
             $table->timestamps();
-            
+
             $table->foreign('invoice_id')->references('id')->on('invoices')->cascadeOnDelete();
             $table->foreign('service_id')->references('id')->on('services')->nullOnDelete();
         });

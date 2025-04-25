@@ -54,7 +54,7 @@ class RoleController extends Controller
         }
 
         try {
-            $role = Role::create([
+            Role::create([
                 'id' => Str::uuid(),
                 'name' => $request->name,
                 'description' => $request->description,
@@ -132,7 +132,7 @@ class RoleController extends Controller
         $role = Role::findOrFail($id);
 
         // Không cho phép xóa các vai trò mặc định
-        if (in_array($role->name, ['Admin', 'Nhân viên', 'Khách hàng'])) {
+        if (in_array(strtolower($role->name), ['admin', 'technician', 'receptionist', 'customer', 'staff'])) {
             return redirect()->back()
                 ->with('error', 'Không thể xóa vai trò mặc định.');
         }

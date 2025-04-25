@@ -65,11 +65,8 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'role' => \App\Http\Middleware\CheckRole::class,
+        'user.role' => \App\Http\Middleware\CheckUserRole::class,
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
-        'staff' => \App\Http\Middleware\StaffMiddleware::class,
-        'university.staff' => \App\Http\Middleware\UniversityStaffMiddleware::class,
-        'receptionist' => \App\Http\Middleware\ReceptionistMiddleware::class,
-        'technician' => \App\Http\Middleware\TechnicianMiddleware::class,
         'permission' => \App\Http\Middleware\CheckPermission::class,
         'redirect.role' => \App\Http\Middleware\RedirectBasedOnRole::class,
     ];

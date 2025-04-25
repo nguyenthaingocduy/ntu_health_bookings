@@ -35,19 +35,17 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
-                
+
             // Đăng ký các file route mới
             Route::middleware('web')
                 ->group(base_path('routes/admin.php'));
-                
+
+            // Đăng ký các route cho lễ tân và nhân viên kỹ thuật
             Route::middleware('web')
-                ->group(base_path('routes/staff.php'));
-                
+                ->group(base_path('routes/le-tan.php'));
+
             Route::middleware('web')
-                ->group(base_path('routes/receptionist.php'));
-                
-            Route::middleware('web')
-                ->group(base_path('routes/technician.php'));
+                ->group(base_path('routes/nvkt.php'));
         });
     }
 }

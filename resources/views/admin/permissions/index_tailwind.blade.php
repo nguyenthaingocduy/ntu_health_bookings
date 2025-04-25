@@ -22,7 +22,7 @@
                 </svg>
                 Phân quyền theo vai trò
             </a>
-            <a href="{{ route('admin.permissions.user-permissions') }}" class="flex items-center px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors duration-150 shadow-md">
+            <a href="{{ route('admin.permissions.role-permissions') }}" class="flex items-center px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors duration-150 shadow-md">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                 </svg>
@@ -68,7 +68,7 @@
             <div class="mb-4">
                 <input type="text" id="searchInput" placeholder="Tìm kiếm quyền..." class="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent">
             </div>
-            
+
             @foreach($permissions as $group => $groupPermissions)
             <div class="mb-8 permission-group">
                 <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
@@ -109,21 +109,21 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex justify-end space-x-2">
-                                        <a href="{{ route('admin.permissions.edit', $permission->id) }}" 
+                                        <a href="{{ route('admin.permissions.edit', $permission->id) }}"
                                            class="text-indigo-600 hover:text-indigo-900 bg-indigo-100 hover:bg-indigo-200 p-2 rounded-lg transition-colors duration-150" title="Chỉnh sửa">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                             </svg>
                                         </a>
-                                        <button type="button" 
+                                        <button type="button"
                                                 onclick="confirmDelete('{{ $permission->id }}', '{{ $permission->name }}')"
                                                 class="text-red-600 hover:text-red-900 bg-red-100 hover:bg-red-200 p-2 rounded-lg transition-colors duration-150" title="Xóa">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                             </svg>
                                         </button>
-                                        <form id="delete-form-{{ $permission->id }}" 
-                                              action="{{ route('admin.permissions.destroy', $permission->id) }}" 
+                                        <form id="delete-form-{{ $permission->id }}"
+                                              action="{{ route('admin.permissions.destroy', $permission->id) }}"
                                               method="POST" class="hidden">
                                             @csrf
                                             @method('DELETE')
@@ -149,23 +149,23 @@
             document.getElementById('delete-form-' + id).submit();
         }
     }
-    
+
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
-        
+
         searchInput.addEventListener('keyup', function() {
             const searchValue = this.value.toLowerCase();
             const permissionGroups = document.querySelectorAll('.permission-group');
-            
+
             permissionGroups.forEach(function(group) {
                 let hasVisibleRows = false;
                 const rows = group.querySelectorAll('.permission-row');
-                
+
                 rows.forEach(function(row) {
                     const name = row.querySelector('.permission-name').textContent.toLowerCase();
                     const displayName = row.querySelector('.permission-display-name').textContent.toLowerCase();
                     const description = row.querySelector('.permission-description').textContent.toLowerCase();
-                    
+
                     if (name.includes(searchValue) || displayName.includes(searchValue) || description.includes(searchValue)) {
                         row.style.display = '';
                         hasVisibleRows = true;
@@ -173,7 +173,7 @@
                         row.style.display = 'none';
                     }
                 });
-                
+
                 group.style.display = hasVisibleRows ? '' : 'none';
             });
         });

@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -24,9 +25,26 @@ class PermissionController extends Controller
      */
     public function index()
     {
-        $permissions = Permission::orderBy('group')->orderBy('name')->get()->groupBy('group');
+        // Kiểm tra xem cột 'group' có tồn tại trong bảng permissions không
+        try {
+            $permissions = Permission::orderBy('name')->get();
 
-        return view('admin.permissions.index_tailwind', compact('permissions'));
+            // Nếu có cột 'group', nhóm theo group
+            if (Schema::hasColumn('permissions', 'group')) {
+                $permissions = Permission::orderBy('group')->orderBy('name')->get()->groupBy('group');
+            } else {
+                // Nếu không có cột 'group', tạo một nhóm mặc định
+                $permissions = ['Tất cả quyền' => $permissions];
+            }
+
+            return view('admin.permissions.index_tailwind', compact('permissions'));
+        } catch (\Exception $e) {
+            // Nếu có lỗi, lấy tất cả quyền mà không sắp xếp theo group
+            $permissions = Permission::orderBy('name')->get();
+            $permissions = ['Tất cả quyền' => $permissions];
+
+            return view('admin.permissions.index_tailwind', compact('permissions'));
+        }
     }
 
     /**
@@ -36,7 +54,12 @@ class PermissionController extends Controller
      */
     public function create()
     {
-        $groups = Permission::select('group')->distinct()->pluck('group');
+        $groups = [];
+
+        // Kiểm tra xem cột 'group' có tồn tại trong bảng permissions không
+        if (Schema::hasColumn('permissions', 'group')) {
+            $groups = Permission::select('group')->distinct()->pluck('group');
+        }
 
         return view('admin.permissions.create_tailwind', compact('groups'));
     }
@@ -49,12 +72,24 @@ class PermissionController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validationRules = [
             'name' => 'required|string|max:255|unique:permissions,name',
-            'display_name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'group' => 'required|string|max:255',
-        ]);
+        ];
+
+        // Kiểm tra xem các cột có tồn tại trong bảng permissions không
+        if (Schema::hasColumn('permissions', 'display_name')) {
+            $validationRules['display_name'] = 'required|string|max:255';
+        }
+
+        if (Schema::hasColumn('permissions', 'description')) {
+            $validationRules['description'] = 'nullable|string|max:1000';
+        }
+
+        if (Schema::hasColumn('permissions', 'group')) {
+            $validationRules['group'] = 'required|string|max:255';
+        }
+
+        $validator = Validator::make($request->all(), $validationRules);
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -63,13 +98,25 @@ class PermissionController extends Controller
         }
 
         try {
-            $permission = Permission::create([
+            $permissionData = [
                 'id' => Str::uuid(),
                 'name' => $request->name,
-                'display_name' => $request->display_name,
-                'description' => $request->description,
-                'group' => $request->group,
-            ]);
+            ];
+
+            // Thêm các trường khác nếu chúng tồn tại
+            if (Schema::hasColumn('permissions', 'display_name')) {
+                $permissionData['display_name'] = $request->display_name;
+            }
+
+            if (Schema::hasColumn('permissions', 'description')) {
+                $permissionData['description'] = $request->description;
+            }
+
+            if (Schema::hasColumn('permissions', 'group')) {
+                $permissionData['group'] = $request->group;
+            }
+
+            $permission = Permission::create($permissionData);
 
             // Assign to admin role automatically
             $adminRole = Role::where('name', 'Admin')->first();
@@ -100,7 +147,12 @@ class PermissionController extends Controller
     public function edit($id)
     {
         $permission = Permission::findOrFail($id);
-        $groups = Permission::select('group')->distinct()->pluck('group');
+        $groups = [];
+
+        // Kiểm tra xem cột 'group' có tồn tại trong bảng permissions không
+        if (Schema::hasColumn('permissions', 'group')) {
+            $groups = Permission::select('group')->distinct()->pluck('group');
+        }
 
         return view('admin.permissions.edit_tailwind', compact('permission', 'groups'));
     }
@@ -116,12 +168,24 @@ class PermissionController extends Controller
     {
         $permission = Permission::findOrFail($id);
 
-        $validator = Validator::make($request->all(), [
+        $validationRules = [
             'name' => 'required|string|max:255|unique:permissions,name,' . $permission->id,
-            'display_name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'group' => 'required|string|max:255',
-        ]);
+        ];
+
+        // Kiểm tra xem các cột có tồn tại trong bảng permissions không
+        if (Schema::hasColumn('permissions', 'display_name')) {
+            $validationRules['display_name'] = 'required|string|max:255';
+        }
+
+        if (Schema::hasColumn('permissions', 'description')) {
+            $validationRules['description'] = 'nullable|string|max:1000';
+        }
+
+        if (Schema::hasColumn('permissions', 'group')) {
+            $validationRules['group'] = 'required|string|max:255';
+        }
+
+        $validator = Validator::make($request->all(), $validationRules);
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -130,12 +194,24 @@ class PermissionController extends Controller
         }
 
         try {
-            $permission->update([
+            $permissionData = [
                 'name' => $request->name,
-                'display_name' => $request->display_name,
-                'description' => $request->description,
-                'group' => $request->group,
-            ]);
+            ];
+
+            // Thêm các trường khác nếu chúng tồn tại
+            if (Schema::hasColumn('permissions', 'display_name')) {
+                $permissionData['display_name'] = $request->display_name;
+            }
+
+            if (Schema::hasColumn('permissions', 'description')) {
+                $permissionData['description'] = $request->description;
+            }
+
+            if (Schema::hasColumn('permissions', 'group')) {
+                $permissionData['group'] = $request->group;
+            }
+
+            $permission->update($permissionData);
 
             return redirect()->route('admin.permissions.index')
                 ->with('success', 'Quyền đã được cập nhật thành công.');
@@ -177,12 +253,27 @@ class PermissionController extends Controller
     /**
      * Display the role permissions page.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function rolePermissions()
+    public function rolePermissions(Request $request)
     {
         $roles = Role::all();
-        $permissions = Permission::orderBy('group')->orderBy('name')->get()->groupBy('group');
+        $permissions = [];
+        $selectedRoleId = $request->query('role_id');
+
+        // Kiểm tra xem cột 'group' có tồn tại trong bảng permissions không
+        try {
+            if (Schema::hasColumn('permissions', 'group')) {
+                $permissions = Permission::orderBy('group')->orderBy('name')->get()->groupBy('group');
+            } else {
+                $allPermissions = Permission::orderBy('name')->get();
+                $permissions = ['Tất cả quyền' => $allPermissions];
+            }
+        } catch (\Exception $e) {
+            $allPermissions = Permission::orderBy('name')->get();
+            $permissions = ['Tất cả quyền' => $allPermissions];
+        }
 
         $rolePermissions = [];
 
@@ -190,7 +281,7 @@ class PermissionController extends Controller
             $rolePermissions[$role->id] = $role->permissions()->pluck('permissions.id')->toArray();
         }
 
-        return view('admin.permissions.role_permissions_tailwind', compact('roles', 'permissions', 'rolePermissions'));
+        return view('admin.permissions.role_permissions_tailwind', compact('roles', 'permissions', 'rolePermissions', 'selectedRoleId'));
     }
 
     /**
@@ -274,7 +365,20 @@ class PermissionController extends Controller
     public function editUserPermissions($id)
     {
         $user = User::with('role', 'userPermissions')->findOrFail($id);
-        $permissions = Permission::orderBy('group')->orderBy('name')->get()->groupBy('group');
+        $permissions = [];
+
+        // Kiểm tra xem cột 'group' có tồn tại trong bảng permissions không
+        try {
+            if (Schema::hasColumn('permissions', 'group')) {
+                $permissions = Permission::orderBy('group')->orderBy('name')->get()->groupBy('group');
+            } else {
+                $allPermissions = Permission::orderBy('name')->get();
+                $permissions = ['Tất cả quyền' => $allPermissions];
+            }
+        } catch (\Exception $e) {
+            $allPermissions = Permission::orderBy('name')->get();
+            $permissions = ['Tất cả quyền' => $allPermissions];
+        }
 
         $userPermissions = [];
 
@@ -361,7 +465,7 @@ class PermissionController extends Controller
 
             DB::commit();
 
-            return redirect()->route('admin.permissions.user-permissions')
+            return redirect()->route('admin.permissions.index')
                 ->with('success', 'Quyền của người dùng đã được cập nhật thành công.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -370,5 +474,15 @@ class PermissionController extends Controller
                 ->with('error', 'Đã xảy ra lỗi khi cập nhật quyền của người dùng: ' . $e->getMessage())
                 ->withInput();
         }
+    }
+
+    /**
+     * Display the current user's permissions.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function myPermissions()
+    {
+        return view('admin.permissions.my_permissions');
     }
 }

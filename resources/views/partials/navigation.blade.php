@@ -119,7 +119,7 @@
                                 @endif
 
                                 @if(Auth::user()->isReceptionist())
-                                <a href="{{ route('receptionist.dashboard') }}" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-all duration-200">
+                                <a href="{{ route('le-tan.dashboard') }}" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-all duration-200">
                                     <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mr-3">
                                         <i class="fas fa-user-tie text-blue-500"></i>
                                     </div>
@@ -128,7 +128,7 @@
                                 @endif
 
                                 @if(Auth::user()->isTechnician())
-                                <a href="{{ route('technician.dashboard') }}" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-all duration-200">
+                                <a href="{{ route('nvkt.dashboard') }}" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-all duration-200">
                                     <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mr-3">
                                         <i class="fas fa-user-md text-green-500"></i>
                                     </div>

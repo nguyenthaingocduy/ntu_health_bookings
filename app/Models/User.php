@@ -210,25 +210,19 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user has a specific permission (either through role or directly)
+     * Check if user has a specific permission (only through role)
      *
      * @param string $permissionName
-     * @param string $action (view, create, edit, delete)
      * @return bool
      */
-    public function hasPermission($permissionName, $action = 'view')
+    public function hasPermission($permissionName)
     {
         // Admin has all permissions
         if ($this->isAdmin()) {
             return true;
         }
 
-        // Check direct permission first
-        if ($this->hasDirectPermission($permissionName, $action)) {
-            return true;
-        }
-
-        // Then check role permission
+        // Only check role permission
         return $this->hasPermissionThroughRole($permissionName);
     }
 
@@ -240,7 +234,7 @@ class User extends Authenticatable
      */
     public function canView($resource)
     {
-        return $this->hasPermission($resource . '.view', 'view');
+        return $this->hasPermission($resource . '.view');
     }
 
     /**
@@ -251,7 +245,7 @@ class User extends Authenticatable
      */
     public function canCreate($resource)
     {
-        return $this->hasPermission($resource . '.create', 'create');
+        return $this->hasPermission($resource . '.create');
     }
 
     /**
@@ -262,7 +256,7 @@ class User extends Authenticatable
      */
     public function canEdit($resource)
     {
-        return $this->hasPermission($resource . '.edit', 'edit');
+        return $this->hasPermission($resource . '.edit');
     }
 
     /**
@@ -273,7 +267,7 @@ class User extends Authenticatable
      */
     public function canDelete($resource)
     {
-        return $this->hasPermission($resource . '.delete', 'delete');
+        return $this->hasPermission($resource . '.delete');
     }
 
     /**

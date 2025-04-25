@@ -9,7 +9,7 @@
         border-radius: 0.25rem;
         margin-bottom: 1rem;
     }
-    
+
     .permission-group-header {
         background-color: #f8f9fa;
         padding: 0.75rem 1rem;
@@ -17,19 +17,19 @@
         font-weight: bold;
         cursor: pointer;
     }
-    
+
     .permission-group-body {
         padding: 1rem;
     }
-    
+
     .permission-item {
         margin-bottom: 1rem;
     }
-    
+
     .permission-search {
         margin-bottom: 1rem;
     }
-    
+
     .permission-counter {
         background-color: #007bff;
         color: white;
@@ -37,21 +37,21 @@
         border-radius: 0.25rem;
         margin-bottom: 1rem;
     }
-    
+
     .permission-actions {
         margin-bottom: 1rem;
     }
-    
+
     .permission-table {
         width: 100%;
     }
-    
+
     .permission-table th {
         text-align: center;
         font-weight: normal;
         font-size: 0.9rem;
     }
-    
+
     .role-permission {
         background-color: #e9ecef;
         padding: 0.25rem 0.5rem;
@@ -69,7 +69,6 @@
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Tổng quan</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.permissions.index') }}">Quản lý quyền</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.permissions.user-permissions') }}">Phân quyền người dùng</a></li>
         <li class="breadcrumb-item active">{{ $user->full_name }}</li>
     </ol>
 
@@ -92,33 +91,33 @@
         </div>
         <div class="card-body">
             <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> 
-                Người dùng này có vai trò <strong>{{ $user->role->name }}</strong>. 
+                <i class="fas fa-info-circle"></i>
+                Người dùng này có vai trò <strong>{{ $user->role->name }}</strong>.
                 Các quyền được gán cho vai trò này được hiển thị dưới dạng <span class="role-permission">quyền từ vai trò</span>.
                 Bạn có thể gán thêm quyền riêng cho người dùng này.
             </div>
-            
-            <form action="{{ route('admin.permissions.update-user-permissions', $user->id) }}" method="POST" id="user-permissions-form">
+
+            <form action="{{ route('admin.permissions.role-permissions') }}" method="POST" id="user-permissions-form">
                 @csrf
                 @method('PUT')
-                
+
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="permission-counter">
-                        Tổng Routes: <span id="total-permissions">{{ $permissions->flatten()->count() }}</span> | 
+                        Tổng Routes: <span id="total-permissions">{{ $permissions->flatten()->count() }}</span> |
                         Đã chọn: <span id="selected-permissions">0</span>
                     </div>
-                    
+
                     <div class="permission-actions">
-                        <button type="button" class="btn btn-secondary" id="select-all-btn">Chọn tất cả</button>
-                        <button type="button" class="btn btn-secondary" id="deselect-all-btn">Bỏ chọn</button>
+                        <button type="button" class="btn btn-secondary" id="select-all-btn" onclick="selectAll(); return false;">Chọn tất cả</button>
+                        <button type="button" class="btn btn-secondary" id="deselect-all-btn" onclick="deselectAll(); return false;">Bỏ chọn</button>
                     </div>
                 </div>
-                
+
                 <div class="permission-search mb-3">
-                    <input type="text" class="form-control" id="permission-search" 
+                    <input type="text" class="form-control" id="permission-search"
                            placeholder="Tìm kiếm quyền..." aria-label="Tìm kiếm quyền">
                 </div>
-                
+
                 @foreach($permissions as $group => $groupPermissions)
                 <div class="permission-group" data-group="{{ $group }}">
                     <div class="permission-group-header d-flex justify-content-between align-items-center">
@@ -147,8 +146,8 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="form-check d-flex justify-content-center">
-                                            <input class="form-check-input permission-checkbox" type="checkbox" 
-                                                   name="permissions[{{ $permission->id }}][can_view]" value="1" 
+                                            <input class="form-check-input permission-checkbox" type="checkbox"
+                                                   name="permissions[{{ $permission->id }}][can_view]" value="1"
                                                    id="permission-{{ $permission->id }}-view"
                                                    {{ isset($userPermissions[$permission->id]) && $userPermissions[$permission->id]['can_view'] ? 'checked' : '' }}
                                                    {{ in_array($permission->id, $rolePermissions) ? 'disabled' : '' }}>
@@ -157,24 +156,24 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="form-check d-flex justify-content-center">
-                                            <input class="form-check-input permission-checkbox" type="checkbox" 
-                                                   name="permissions[{{ $permission->id }}][can_create]" value="1" 
+                                            <input class="form-check-input permission-checkbox" type="checkbox"
+                                                   name="permissions[{{ $permission->id }}][can_create]" value="1"
                                                    id="permission-{{ $permission->id }}-create"
                                                    {{ isset($userPermissions[$permission->id]) && $userPermissions[$permission->id]['can_create'] ? 'checked' : '' }}>
                                         </div>
                                     </td>
                                     <td class="text-center">
                                         <div class="form-check d-flex justify-content-center">
-                                            <input class="form-check-input permission-checkbox" type="checkbox" 
-                                                   name="permissions[{{ $permission->id }}][can_edit]" value="1" 
+                                            <input class="form-check-input permission-checkbox" type="checkbox"
+                                                   name="permissions[{{ $permission->id }}][can_edit]" value="1"
                                                    id="permission-{{ $permission->id }}-edit"
                                                    {{ isset($userPermissions[$permission->id]) && $userPermissions[$permission->id]['can_edit'] ? 'checked' : '' }}>
                                         </div>
                                     </td>
                                     <td class="text-center">
                                         <div class="form-check d-flex justify-content-center">
-                                            <input class="form-check-input permission-checkbox" type="checkbox" 
-                                                   name="permissions[{{ $permission->id }}][can_delete]" value="1" 
+                                            <input class="form-check-input permission-checkbox" type="checkbox"
+                                                   name="permissions[{{ $permission->id }}][can_delete]" value="1"
                                                    id="permission-{{ $permission->id }}-delete"
                                                    {{ isset($userPermissions[$permission->id]) && $userPermissions[$permission->id]['can_delete'] ? 'checked' : '' }}>
                                         </div>
@@ -186,9 +185,9 @@
                     </div>
                 </div>
                 @endforeach
-                
+
                 <div class="d-flex justify-content-end mt-3">
-                    <a href="{{ route('admin.permissions.user-permissions') }}" class="btn btn-secondary me-2">Hủy</a>
+                    <a href="{{ route('admin.permissions.index') }}" class="btn btn-secondary me-2">Hủy</a>
                     <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
                 </div>
             </form>
@@ -199,6 +198,34 @@
 
 @section('scripts')
 <script>
+    // Định nghĩa các hàm trong phạm vi toàn cục (window)
+    window.selectAll = function() {
+        const permissionCheckboxes = document.querySelectorAll('.permission-checkbox:not([disabled])');
+        permissionCheckboxes.forEach(checkbox => {
+            const item = checkbox.closest('.permission-item');
+            if (!item || item.style.display !== 'none') {
+                checkbox.checked = true;
+            }
+        });
+        window.updateSelectedCount();
+    };
+
+    window.deselectAll = function() {
+        const permissionCheckboxes = document.querySelectorAll('.permission-checkbox:not([disabled])');
+        permissionCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        window.updateSelectedCount();
+    };
+
+    window.updateSelectedCount = function() {
+        const selectedCount = document.querySelectorAll('.permission-checkbox:checked:not([disabled])').length;
+        const selectedPermissionsCounter = document.getElementById('selected-permissions');
+        if (selectedPermissionsCounter) {
+            selectedPermissionsCounter.textContent = selectedCount;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const permissionCheckboxes = document.querySelectorAll('.permission-checkbox:not([disabled])');
         const selectAllBtn = document.getElementById('select-all-btn');
@@ -206,57 +233,49 @@
         const selectedPermissionsCounter = document.getElementById('selected-permissions');
         const permissionSearch = document.getElementById('permission-search');
         const permissionGroups = document.querySelectorAll('.permission-group-header');
-        
-        // Cập nhật số lượng quyền đã chọn
-        function updateSelectedCount() {
-            const selectedCount = document.querySelectorAll('.permission-checkbox:checked:not([disabled])').length;
-            selectedPermissionsCounter.textContent = selectedCount;
-        }
-        
+
         // Khởi tạo số lượng
-        updateSelectedCount();
-        
-        // Chọn tất cả quyền
-        selectAllBtn.addEventListener('click', function() {
-            permissionCheckboxes.forEach(checkbox => {
-                const item = checkbox.closest('.permission-item');
-                if (item.style.display !== 'none') {
-                    checkbox.checked = true;
-                }
+        window.updateSelectedCount();
+
+        // Gắn sự kiện cho các nút
+        if (selectAllBtn) {
+            selectAllBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.selectAll();
+                return false;
             });
-            updateSelectedCount();
-        });
-        
-        // Bỏ chọn tất cả quyền
-        deselectAllBtn.addEventListener('click', function() {
-            permissionCheckboxes.forEach(checkbox => {
-                checkbox.checked = false;
+        }
+
+        if (deselectAllBtn) {
+            deselectAllBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.deselectAll();
+                return false;
             });
-            updateSelectedCount();
-        });
-        
+        }
+
         // Cập nhật số lượng khi thay đổi checkbox
         permissionCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', function() {
-                updateSelectedCount();
+                window.updateSelectedCount();
             });
         });
-        
+
         // Tìm kiếm quyền
         permissionSearch.addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase();
-            
+
             document.querySelectorAll('.permission-item').forEach(item => {
                 const permissionName = item.getAttribute('data-permission-name').toLowerCase();
                 const permissionLabel = item.querySelector('td:first-child').textContent.toLowerCase();
-                
+
                 if (permissionName.includes(searchTerm) || permissionLabel.includes(searchTerm)) {
                     item.style.display = '';
                 } else {
                     item.style.display = 'none';
                 }
             });
-            
+
             // Hiển thị/ẩn nhóm dựa trên kết quả tìm kiếm
             document.querySelectorAll('.permission-group').forEach(group => {
                 const visibleItems = group.querySelectorAll('.permission-item[style=""]').length;
@@ -267,7 +286,7 @@
                 }
             });
         });
-        
+
         // Mở/đóng nhóm quyền
         permissionGroups.forEach(header => {
             header.addEventListener('click', function() {

@@ -92,5 +92,21 @@ class Appointment extends Model
     {
         return 'APT-' . substr($this->id, 0, 8);
     }
+
+    /**
+     * Get the professional notes for the appointment.
+     */
+    public function professionalNotes()
+    {
+        return $this->hasMany(ProfessionalNote::class);
+    }
+
+    /**
+     * Get the payment for the appointment.
+     */
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
+    }
 }
 

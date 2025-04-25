@@ -9,14 +9,12 @@
             <h1 class="text-2xl font-bold text-gray-800">Quản lý khuyến mãi</h1>
             <p class="text-sm text-gray-500 mt-1">Quản lý các chương trình khuyến mãi, mã giảm giá</p>
         </div>
-        @can('promotions.create')
-        <a href="{{ route('admin.promotions.create') }}" class="flex items-center px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors duration-150 shadow-md">
+        <a href="/admin/promotions/create" class="flex items-center px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors duration-150 shadow-md">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
             Thêm khuyến mãi
         </a>
-        @endcan
     </div>
 
     <nav class="mb-8">

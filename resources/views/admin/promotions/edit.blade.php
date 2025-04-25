@@ -87,7 +87,7 @@
                     <form action="{{ route('admin.promotions.update', $promotion->id) }}" method="POST" id="promotion-form">
                         @csrf
                         @method('PUT')
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Tiêu đề <span class="text-red-500">*</span></label>
@@ -96,7 +96,7 @@
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
-                            
+
                             <div>
                                 <label for="code" class="block text-sm font-medium text-gray-700 mb-2">Mã khuyến mãi <span class="text-red-500">*</span></label>
                                 <input type="text" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('code') border-red-500 @enderror" id="code" name="code" value="{{ old('code', $promotion->code) }}" required>
@@ -106,7 +106,7 @@
                                 <p class="mt-1 text-xs text-gray-500">Mã khuyến mãi sẽ được chuyển thành chữ hoa</p>
                             </div>
                         </div>
-                        
+
                         <div class="mb-6">
                             <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Mô tả</label>
                             <textarea class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('description') border-red-500 @enderror" id="description" name="description" rows="3">{{ old('description', $promotion->description) }}</textarea>
@@ -114,7 +114,7 @@
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label for="discount_type" class="block text-sm font-medium text-gray-700 mb-2">Loại giảm giá <span class="text-red-500">*</span></label>
@@ -126,7 +126,7 @@
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
-                            
+
                             <div>
                                 <label for="discount_value" class="block text-sm font-medium text-gray-700 mb-2">Giá trị giảm giá <span class="text-red-500">*</span></label>
                                 <input type="number" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('discount_value') border-red-500 @enderror" id="discount_value" name="discount_value" value="{{ old('discount_value', $promotion->discount_value) }}" min="0" step="0.01" required>
@@ -135,7 +135,7 @@
                                 @enderror
                             </div>
                         </div>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label for="minimum_purchase" class="block text-sm font-medium text-gray-700 mb-2">Giá trị đơn hàng tối thiểu</label>
@@ -144,7 +144,7 @@
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
-                            
+
                             <div>
                                 <label for="maximum_discount" class="block text-sm font-medium text-gray-700 mb-2">Giảm giá tối đa</label>
                                 <input type="number" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('maximum_discount') border-red-500 @enderror" id="maximum_discount" name="maximum_discount" value="{{ old('maximum_discount', $promotion->maximum_discount) }}" min="0" step="0.01">
@@ -154,7 +154,7 @@
                                 <p class="mt-1 text-xs text-gray-500">Chỉ áp dụng cho loại giảm giá theo phần trăm</p>
                             </div>
                         </div>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">Ngày bắt đầu <span class="text-red-500">*</span></label>
@@ -170,7 +170,7 @@
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
-                            
+
                             <div>
                                 <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">Ngày kết thúc <span class="text-red-500">*</span></label>
                                 <div class="relative">
@@ -186,7 +186,7 @@
                                 @enderror
                             </div>
                         </div>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label for="usage_limit" class="block text-sm font-medium text-gray-700 mb-2">Giới hạn sử dụng</label>
@@ -196,7 +196,7 @@
                                 @enderror
                                 <p class="mt-1 text-xs text-gray-500">Để trống nếu không giới hạn số lần sử dụng. Giá trị tối thiểu: {{ $promotion->usage_count }}</p>
                             </div>
-                            
+
                             <div class="flex items-center">
                                 <div class="flex items-center h-5 mt-6">
                                     <input type="checkbox" class="w-4 h-4 text-pink-600 border-gray-300 rounded focus:ring-pink-500" id="is_active" name="is_active" value="1" {{ old('is_active', $promotion->is_active) ? 'checked' : '' }}>
@@ -207,7 +207,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="flex justify-end mt-8">
                             <a href="{{ route('admin.promotions.show', $promotion->id) }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-150 mr-4">
                                 Hủy
@@ -223,7 +223,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div>
             <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 sticky top-6">
                 <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-gray-200">
@@ -261,7 +261,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="mb-6">
                         <h4 class="text-sm font-medium text-gray-500 uppercase mb-2">Lưu ý</h4>
                         <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4">
@@ -291,23 +291,33 @@
             altFormat: "d/m/Y",
             locale: "vn",
             disableMobile: true,
+            enableTime: false,
+            time_24hr: true,
+            monthSelectorType: "dropdown",
+            yearSelectorType: "dropdown",
+            showMonths: 1,
             onChange: function(selectedDates, dateStr, instance) {
                 endDatePicker.set('minDate', dateStr);
             }
         });
-        
+
         const endDatePicker = flatpickr("#end_date", {
             dateFormat: "Y-m-d",
             altInput: true,
             altFormat: "d/m/Y",
             locale: "vn",
-            disableMobile: true
+            disableMobile: true,
+            enableTime: false,
+            time_24hr: true,
+            monthSelectorType: "dropdown",
+            yearSelectorType: "dropdown",
+            showMonths: 1
         });
-        
+
         // Toggle maximum_discount field based on discount_type
         const discountTypeSelect = document.getElementById('discount_type');
         const maximumDiscountDiv = document.getElementById('maximum_discount').closest('div');
-        
+
         if (discountTypeSelect && maximumDiscountDiv) {
             function toggleMaximumDiscount() {
                 if (discountTypeSelect.value === 'percentage') {
@@ -319,7 +329,7 @@
                     document.getElementById('maximum_discount').value = '';
                 }
             }
-            
+
             discountTypeSelect.addEventListener('change', toggleMaximumDiscount);
             toggleMaximumDiscount(); // Run on page load
         }

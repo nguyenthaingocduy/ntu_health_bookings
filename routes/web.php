@@ -76,41 +76,14 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
 // Include admin routes from admin.php
 require __DIR__.'/admin.php';
 
-// Include receptionist routes from receptionist.php
-require __DIR__.'/receptionist.php';
+// Include le-tan routes from le-tan.php
+require __DIR__.'/le-tan.php';
 
-// Include technician routes from technician.php
-require __DIR__.'/technician.php';
+// Include nvkt routes from nvkt.php
+require __DIR__.'/nvkt.php';
 
-// Khu vực cán bộ viên chức (Staff)
-Route::middleware(['auth'])->prefix('staff')->name('staff.')->group(function () {
-    Route::get('/dashboard', [\App\Http\Controllers\Staff\DashboardController::class, 'index'])->name('dashboard');
-
-    Route::middleware([\App\Http\Middleware\StaffMiddleware::class])->group(function () {
-
-        // Quản lý lịch hẹn khám sức khỏe
-        Route::get('/appointments', [\App\Http\Controllers\Staff\AppointmentController::class, 'index'])->name('appointments.index');
-        Route::get('/appointments/create/{serviceId?}', [\App\Http\Controllers\Staff\AppointmentController::class, 'create'])->name('appointments.create');
-        Route::get('/appointments/create-customer-style/{serviceId?}', [\App\Http\Controllers\Staff\AppointmentController::class, 'createCustomerStyle'])->name('appointments.create-customer-style');
-        Route::post('/appointments', [\App\Http\Controllers\Staff\AppointmentController::class, 'store'])->name('appointments.store');
-        Route::get('/appointments/{id}', [\App\Http\Controllers\Staff\AppointmentController::class, 'show'])->name('appointments.show');
-        Route::get('/appointments/{id}/edit', [\App\Http\Controllers\Staff\AppointmentController::class, 'edit'])->name('appointments.edit');
-        Route::put('/appointments/{id}', [\App\Http\Controllers\Staff\AppointmentController::class, 'update'])->name('appointments.update');
-        Route::post('/appointments/{id}/cancel', [\App\Http\Controllers\Staff\AppointmentController::class, 'cancel'])->name('appointments.cancel');
-        Route::get('/appointments/{id}/edit-customer', [\App\Http\Controllers\Staff\AppointmentController::class, 'editCustomer'])->name('appointments.edit-customer');
-        Route::put('/appointments/{id}/update-customer', [\App\Http\Controllers\Staff\AppointmentController::class, 'updateCustomer'])->name('appointments.update-customer');
-
-        // Quản lý thông tin cá nhân
-        Route::get('/profile', [\App\Http\Controllers\Staff\ProfileController::class, 'index'])->name('profile.index');
-        Route::get('/profile/edit', [\App\Http\Controllers\Staff\ProfileController::class, 'edit'])->name('profile.edit');
-        Route::put('/profile', [\App\Http\Controllers\Staff\ProfileController::class, 'update'])->name('profile.update');
-        Route::get('/profile/change-password', [\App\Http\Controllers\Staff\ProfileController::class, 'changePassword'])->name('profile.change-password');
-        Route::put('/profile/password', [\App\Http\Controllers\Staff\ProfileController::class, 'updatePassword'])->name('profile.update-password');
-    });
-});
-
-// Include staff routes from staff.php
-require __DIR__.'/staff.php';
+// Redirect từ /staff sang /le-tan/dashboard
+Route::redirect('/staff', '/le-tan/dashboard');
 
 
 

@@ -9,7 +9,7 @@
             <h1 class="text-2xl font-bold text-gray-800">Phân quyền cho người dùng</h1>
             <p class="text-sm text-gray-500 mt-1">Quản lý quyền của người dùng: {{ $user->full_name }}</p>
         </div>
-        <a href="{{ route('admin.permissions.user-permissions') }}" class="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-150 shadow-sm border border-gray-200">
+        <a href="{{ route('admin.permissions.index') }}" class="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-150 shadow-sm border border-gray-200">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -32,7 +32,7 @@
                 </svg>
             </li>
             <li class="flex items-center">
-                <a href="{{ route('admin.permissions.user-permissions') }}" class="hover:text-pink-500">Phân quyền người dùng</a>
+                <a href="{{ route('admin.permissions.index') }}" class="hover:text-pink-500">Quản lý quyền</a>
                 <svg class="w-3 h-3 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -65,7 +65,7 @@
                     </h3>
                 </div>
                 <div class="p-6">
-                    <form action="{{ route('admin.permissions.update-user-permissions', $user->id) }}" method="POST" id="permissionsForm">
+                    <form action="{{ route('admin.permissions.role-permissions') }}" method="POST" id="permissionsForm">
                         @csrf
                         @method('PUT')
 
@@ -73,10 +73,10 @@
                             <div class="flex justify-between items-center mb-4">
                                 <h4 class="text-lg font-semibold text-gray-700">Danh sách quyền</h4>
                                 <div class="flex space-x-2">
-                                    <button type="button" id="selectAllBtn" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-150 text-sm">
+                                    <button type="button" onclick="selectAll()" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-150 text-sm">
                                         Chọn tất cả
                                     </button>
-                                    <button type="button" id="deselectAllBtn" class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-150 text-sm">
+                                    <button type="button" onclick="deselectAll()" class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-150 text-sm">
                                         Bỏ chọn tất cả
                                     </button>
                                 </div>
@@ -150,7 +150,7 @@
                         </div>
 
                         <div class="flex justify-end mt-8">
-                            <a href="{{ route('admin.permissions.user-permissions') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-150 mr-4">
+                            <a href="{{ route('admin.permissions.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-150 mr-4">
                                 Hủy
                             </a>
                             <button type="submit" class="px-6 py-2 bg-gradient-to-r from-pink-500 to-pink-600 text-white rounded-lg hover:from-pink-600 hover:to-pink-700 transition-colors duration-150 shadow-md flex items-center">
@@ -219,52 +219,19 @@
 
 @section('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Kiểm tra số lượng checkbox
-        console.log('Total checkboxes:', document.querySelectorAll('.permission-checkbox').length);
-
-        // Kiểm tra form
-        var form = document.getElementById('permissionsForm');
-        console.log('Form:', form);
-
-        // Thêm sự kiện cho nút chọn tất cả
-        var selectAllBtn = document.getElementById('selectAllBtn');
-        if (selectAllBtn) {
-            console.log('Select all button found');
-            selectAllBtn.addEventListener('click', function() {
-                console.log('Select all button clicked');
-                var checkboxes = document.querySelectorAll('.permission-checkbox');
-                console.log('Found ' + checkboxes.length + ' checkboxes');
-                for (var i = 0; i < checkboxes.length; i++) {
-                    checkboxes[i].checked = true;
-                }
-            });
-        } else {
-            console.error('Select all button not found');
+    // Định nghĩa các hàm trong phạm vi toàn cục
+    function selectAll() {
+        var checkboxes = document.querySelectorAll('.permission-checkbox');
+        for (var i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].checked = true;
         }
+    }
 
-        // Thêm sự kiện cho nút bỏ chọn tất cả
-        var deselectAllBtn = document.getElementById('deselectAllBtn');
-        if (deselectAllBtn) {
-            console.log('Deselect all button found');
-            deselectAllBtn.addEventListener('click', function() {
-                console.log('Deselect all button clicked');
-                var checkboxes = document.querySelectorAll('.permission-checkbox');
-                console.log('Found ' + checkboxes.length + ' checkboxes');
-                for (var i = 0; i < checkboxes.length; i++) {
-                    checkboxes[i].checked = false;
-                }
-            });
-        } else {
-            console.error('Deselect all button not found');
+    function deselectAll() {
+        var checkboxes = document.querySelectorAll('.permission-checkbox');
+        for (var i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].checked = false;
         }
-
-        // Thêm sự kiện submit cho form
-        if (form) {
-            form.addEventListener('submit', function() {
-                console.log('Form submitted');
-            });
-        }
-    });
+    }
 </script>
 @endsection

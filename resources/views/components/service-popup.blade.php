@@ -14,7 +14,7 @@
         <div class="flex flex-col">
             <!-- Header with Logo -->
             <div class="bg-indigo-800 p-4 flex items-center">
-                <img src="{{ asset('images/logo.png') }}" alt="Beauty Center Logo" class="h-10">
+                <img src="{{ asset('images\employees\1745472719_6809cccfb74d9.jpg') }}" alt="Beauty Center Logo" class="w-10 h-10 object-cover opacity-50">
                 <div id="popupServiceTitle" class="ml-4 text-xl font-bold uppercase"></div>
             </div>
             

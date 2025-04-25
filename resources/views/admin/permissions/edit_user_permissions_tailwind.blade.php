@@ -7,11 +7,11 @@
     .permission-card:hover {
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
-    
+
     .permission-card.active {
         border-color: #f56565;
     }
-    
+
     .permission-checkbox:checked + label {
         background-color: #fed7e2;
         border-color: #f56565;
@@ -27,7 +27,7 @@
             <p class="text-sm text-gray-500 mt-1">Quản lý quyền của người dùng: {{ $user->full_name }}</p>
         </div>
         <div class="flex space-x-2">
-            <a href="{{ route('admin.permissions.user-permissions') }}" class="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-150 shadow-sm border border-gray-200">
+            <a href="{{ route('admin.permissions.index') }}" class="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-150 shadow-sm border border-gray-200">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
@@ -51,7 +51,7 @@
                 </svg>
             </li>
             <li class="flex items-center">
-                <a href="{{ route('admin.permissions.user-permissions') }}" class="hover:text-pink-500">Phân quyền người dùng</a>
+                <a href="{{ route('admin.permissions.index') }}" class="hover:text-pink-500">Quản lý quyền</a>
                 <svg class="w-3 h-3 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -84,14 +84,14 @@
                     </h3>
                 </div>
                 <div class="p-6">
-                    <form action="{{ route('admin.permissions.update-user-permissions', $user->id) }}" method="POST">
+                    <form action="{{ route('admin.permissions.role-permissions') }}" method="POST">
                         @csrf
                         @method('PUT')
-                        
+
                         <div class="mb-6 flex items-center justify-between">
                             <div class="flex items-center space-x-4">
                                 <input type="text" id="searchInput" placeholder="Tìm kiếm quyền..." class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                                
+
                                 <div class="relative">
                                     <select id="groupFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent">
                                         <option value="">Tất cả nhóm</option>
@@ -101,7 +101,7 @@
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="flex items-center space-x-2">
                                 <button type="button" id="selectAllBtn" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-150 text-sm">
                                     Chọn tất cả
@@ -111,7 +111,7 @@
                                 </button>
                             </div>
                         </div>
-                        
+
                         @foreach($permissions as $group => $groupPermissions)
                         <div class="mb-8 permission-group" data-group="{{ $group }}">
                             <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
@@ -126,7 +126,7 @@
                                     Bỏ chọn nhóm
                                 </button>
                             </h4>
-                            
+
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 @foreach($groupPermissions as $permission)
                                 <div class="permission-card border rounded-lg p-4 transition-all duration-150 permission-item" data-name="{{ $permission->name }}" data-display-name="{{ $permission->display_name }}">
@@ -139,14 +139,14 @@
                                         <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Vai trò</span>
                                         @endif
                                     </div>
-                                    
+
                                     <p class="text-sm text-gray-600 mb-4 h-12 overflow-hidden">
                                         {{ $permission->description ?: 'Không có mô tả' }}
                                     </p>
-                                    
+
                                     <div class="grid grid-cols-2 gap-2">
                                         <div class="flex items-center">
-                                            <input type="checkbox" id="can_view_{{ $permission->id }}" name="permissions[{{ $permission->id }}][can_view]" value="1" class="permission-checkbox hidden" 
+                                            <input type="checkbox" id="can_view_{{ $permission->id }}" name="permissions[{{ $permission->id }}][can_view]" value="1" class="permission-checkbox hidden"
                                                 {{ isset($userPermissions[$permission->id]) && $userPermissions[$permission->id]['can_view'] ? 'checked' : '' }}>
                                             <label for="can_view_{{ $permission->id }}" class="flex items-center justify-center w-full px-2 py-1 border border-gray-300 rounded-lg cursor-pointer text-sm transition-colors duration-150">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -156,9 +156,9 @@
                                                 Xem
                                             </label>
                                         </div>
-                                        
+
                                         <div class="flex items-center">
-                                            <input type="checkbox" id="can_create_{{ $permission->id }}" name="permissions[{{ $permission->id }}][can_create]" value="1" class="permission-checkbox hidden" 
+                                            <input type="checkbox" id="can_create_{{ $permission->id }}" name="permissions[{{ $permission->id }}][can_create]" value="1" class="permission-checkbox hidden"
                                                 {{ isset($userPermissions[$permission->id]) && $userPermissions[$permission->id]['can_create'] ? 'checked' : '' }}>
                                             <label for="can_create_{{ $permission->id }}" class="flex items-center justify-center w-full px-2 py-1 border border-gray-300 rounded-lg cursor-pointer text-sm transition-colors duration-150">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -167,9 +167,9 @@
                                                 Thêm
                                             </label>
                                         </div>
-                                        
+
                                         <div class="flex items-center">
-                                            <input type="checkbox" id="can_edit_{{ $permission->id }}" name="permissions[{{ $permission->id }}][can_edit]" value="1" class="permission-checkbox hidden" 
+                                            <input type="checkbox" id="can_edit_{{ $permission->id }}" name="permissions[{{ $permission->id }}][can_edit]" value="1" class="permission-checkbox hidden"
                                                 {{ isset($userPermissions[$permission->id]) && $userPermissions[$permission->id]['can_edit'] ? 'checked' : '' }}>
                                             <label for="can_edit_{{ $permission->id }}" class="flex items-center justify-center w-full px-2 py-1 border border-gray-300 rounded-lg cursor-pointer text-sm transition-colors duration-150">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -178,9 +178,9 @@
                                                 Sửa
                                             </label>
                                         </div>
-                                        
+
                                         <div class="flex items-center">
-                                            <input type="checkbox" id="can_delete_{{ $permission->id }}" name="permissions[{{ $permission->id }}][can_delete]" value="1" class="permission-checkbox hidden" 
+                                            <input type="checkbox" id="can_delete_{{ $permission->id }}" name="permissions[{{ $permission->id }}][can_delete]" value="1" class="permission-checkbox hidden"
                                                 {{ isset($userPermissions[$permission->id]) && $userPermissions[$permission->id]['can_delete'] ? 'checked' : '' }}>
                                             <label for="can_delete_{{ $permission->id }}" class="flex items-center justify-center w-full px-2 py-1 border border-gray-300 rounded-lg cursor-pointer text-sm transition-colors duration-150">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -190,16 +190,16 @@
                                             </label>
                                         </div>
                                     </div>
-                                    
+
                                     <input type="hidden" name="permissions[{{ $permission->id }}][id]" value="{{ $permission->id }}">
                                 </div>
                                 @endforeach
                             </div>
                         </div>
                         @endforeach
-                        
+
                         <div class="flex justify-end mt-8">
-                            <a href="{{ route('admin.permissions.user-permissions') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-150 mr-4">
+                            <a href="{{ route('admin.permissions.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-150 mr-4">
                                 Hủy
                             </a>
                             <button type="submit" class="px-6 py-2 bg-gradient-to-r from-pink-500 to-pink-600 text-white rounded-lg hover:from-pink-600 hover:to-pink-700 transition-colors duration-150 shadow-md flex items-center">
@@ -213,7 +213,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div>
             <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 sticky top-6">
                 <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-gray-200">
@@ -236,7 +236,7 @@
                             <p class="text-sm text-gray-500">{{ $user->email }}</p>
                         </div>
                     </div>
-                    
+
                     <div class="mb-6">
                         <h5 class="text-sm font-medium text-gray-500 uppercase mb-2">Thông tin</h5>
                         <div class="bg-gray-50 rounded-lg p-4">
@@ -250,7 +250,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4 mt-4">
                         <p class="font-medium">Lưu ý:</p>
                         <ul class="list-disc list-inside mt-2 text-sm">
@@ -272,34 +272,34 @@
         // Search functionality
         const searchInput = document.getElementById('searchInput');
         const permissionItems = document.querySelectorAll('.permission-item');
-        
+
         searchInput.addEventListener('keyup', function() {
             const searchValue = this.value.toLowerCase();
-            
+
             permissionItems.forEach(function(item) {
                 const name = item.dataset.name.toLowerCase();
                 const displayName = item.dataset.displayName.toLowerCase();
-                
+
                 if (name.includes(searchValue) || displayName.includes(searchValue)) {
                     item.style.display = '';
                 } else {
                     item.style.display = 'none';
                 }
             });
-            
+
             // Hide empty groups
             document.querySelectorAll('.permission-group').forEach(function(group) {
                 const visibleItems = group.querySelectorAll('.permission-item[style=""]').length;
                 group.style.display = visibleItems > 0 ? '' : 'none';
             });
         });
-        
+
         // Group filter
         const groupFilter = document.getElementById('groupFilter');
-        
+
         groupFilter.addEventListener('change', function() {
             const selectedGroup = this.value;
-            
+
             document.querySelectorAll('.permission-group').forEach(function(group) {
                 if (!selectedGroup || group.dataset.group === selectedGroup) {
                     group.style.display = '';
@@ -308,11 +308,11 @@
                 }
             });
         });
-        
+
         // Select/deselect all
         const selectAllBtn = document.getElementById('selectAllBtn');
         const deselectAllBtn = document.getElementById('deselectAllBtn');
-        
+
         selectAllBtn.addEventListener('click', function() {
             document.querySelectorAll('.permission-checkbox').forEach(function(checkbox) {
                 if (checkbox.closest('.permission-item').style.display !== 'none') {
@@ -320,7 +320,7 @@
                 }
             });
         });
-        
+
         deselectAllBtn.addEventListener('click', function() {
             document.querySelectorAll('.permission-checkbox').forEach(function(checkbox) {
                 if (checkbox.closest('.permission-item').style.display !== 'none') {
@@ -328,13 +328,13 @@
                 }
             });
         });
-        
+
         // Select/deselect group
         document.querySelectorAll('.select-group-btn').forEach(function(button) {
             button.addEventListener('click', function() {
                 const group = this.dataset.group;
                 const groupElement = document.querySelector(`.permission-group[data-group="${group}"]`);
-                
+
                 groupElement.querySelectorAll('.permission-checkbox').forEach(function(checkbox) {
                     if (checkbox.closest('.permission-item').style.display !== 'none') {
                         checkbox.checked = true;
@@ -342,12 +342,12 @@
                 });
             });
         });
-        
+
         document.querySelectorAll('.deselect-group-btn').forEach(function(button) {
             button.addEventListener('click', function() {
                 const group = this.dataset.group;
                 const groupElement = document.querySelector(`.permission-group[data-group="${group}"]`);
-                
+
                 groupElement.querySelectorAll('.permission-checkbox').forEach(function(checkbox) {
                     if (checkbox.closest('.permission-item').style.display !== 'none') {
                         checkbox.checked = false;
@@ -355,19 +355,19 @@
                 });
             });
         });
-        
+
         // Highlight cards with selected permissions
         function updateCardHighlights() {
             document.querySelectorAll('.permission-item').forEach(function(card) {
                 const checkboxes = card.querySelectorAll('.permission-checkbox');
                 let hasChecked = false;
-                
+
                 checkboxes.forEach(function(checkbox) {
                     if (checkbox.checked) {
                         hasChecked = true;
                     }
                 });
-                
+
                 if (hasChecked) {
                     card.classList.add('active');
                 } else {
@@ -375,10 +375,10 @@
                 }
             });
         }
-        
+
         // Initial highlight
         updateCardHighlights();
-        
+
         // Update highlights when checkboxes change
         document.querySelectorAll('.permission-checkbox').forEach(function(checkbox) {
             checkbox.addEventListener('change', function() {
