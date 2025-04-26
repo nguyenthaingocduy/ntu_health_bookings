@@ -68,12 +68,13 @@ class Service extends Model
      */
     public function hasActivePromotion()
     {
-        if (empty($this->promotion)) {
+        // Đảm bảo promotion không phải là null, chuỗi rỗng hoặc 0
+        if (empty($this->promotion) && $this->promotion !== '0' && $this->promotion !== 0) {
             return false;
         }
 
         // Nếu promotion là một số, đó là phần trăm giảm giá
-        if (is_numeric($this->promotion)) {
+        if (is_numeric($this->promotion) && $this->promotion > 0) {
             return true;
         }
 
@@ -115,6 +116,20 @@ class Service extends Model
         }
 
         return null;
+    }
+
+    /**
+     * Lấy tên dịch vụ kèm khuyến mãi nếu có
+     *
+     * @return string
+     */
+    public function getNameWithPromotionAttribute()
+    {
+        if ($this->hasActivePromotion()) {
+            return $this->name . ' ' . $this->promotion_value;
+        }
+
+        return $this->name;
     }
 
     /**
@@ -162,6 +177,48 @@ class Service extends Model
         }
 
         return number_format($discountedPrice, 0, ',', '.') . ' VNĐ';
+    }
+
+    /**
+     * Lấy thông tin chi tiết về khuyến mãi
+     *
+     * @return array|null
+     */
+    public function getPromotionDetailsAttribute()
+    {
+        if (!$this->hasActivePromotion()) {
+            return null;
+        }
+
+        // Nếu promotion là một số, đó là phần trăm giảm giá trực tiếp của dịch vụ
+        if (is_numeric($this->promotion)) {
+            return [
+                'discount_value' => $this->promotion . '%',
+                'start_date' => null,
+                'end_date' => null,
+                'is_direct' => true,
+                'title' => 'Giảm giá trực tiếp'
+            ];
+        }
+
+        // Nếu promotion là mã khuyến mãi, lấy thông tin từ bảng promotions
+        $promotion = \App\Models\Promotion::where('code', $this->promotion)
+            ->where('is_active', true)
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now())
+            ->first();
+
+        if ($promotion) {
+            return [
+                'discount_value' => $promotion->formatted_discount_value,
+                'start_date' => $promotion->start_date->format('d/m/Y'),
+                'end_date' => $promotion->end_date->format('d/m/Y'),
+                'is_direct' => false,
+                'title' => $promotion->title
+            ];
+        }
+
+        return null;
     }
 }
 

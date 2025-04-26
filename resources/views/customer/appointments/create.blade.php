@@ -81,6 +81,17 @@
                                 {{ (old('service_id') == $service->id || (isset($serviceId) && $serviceId == $service->id)) ? 'checked' : '' }}
                                 class="absolute opacity-0" required>
 
+                            @if($service->hasActivePromotion())
+                            <div class="absolute -top-2 -right-2 bg-pink-500 text-black text-xs px-2 py-1 rounded-full promotion-badge">
+                                <div>{{ $service->promotion_value }}</div>
+                                @if($service->promotion_details && !$service->promotion_details['is_direct'])
+                                <div class="text-xs text-black">
+                                    {{ $service->promotion_details['start_date'] }} - {{ $service->promotion_details['end_date'] }}
+                                </div>
+                                @endif
+                            </div>
+                            @endif
+
                             <div class="flex items-start relative z-0">
                                 <div class="w-20 h-20 bg-pink-100 rounded flex items-center justify-center text-pink-500">
                                     <i class="fas fa-spa text-2xl"></i>

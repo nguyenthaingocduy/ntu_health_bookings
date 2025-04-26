@@ -16,7 +16,7 @@
             </div>
         </div>
         @endif
-        
+
         <!-- Welcome Section -->
         <div class="bg-white overflow-hidden shadow-xl rounded-2xl mb-8 border border-gray-100">
             <div class="p-6 sm:p-8">
@@ -31,16 +31,16 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Profile Summary Card -->
         <div class="bg-gradient-to-r from-purple-100 to-pink-100 overflow-hidden shadow-lg rounded-2xl mb-8 border border-purple-200">
             <div class="p-6 sm:p-8">
                 <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
                     <div class="flex items-center mb-4 md:mb-0">
                         <div class="relative mr-5">
-                            <img 
-                                class="h-16 w-16 rounded-full object-cover border-4 border-white shadow-md" 
-                                src="https://ui-avatars.com/api/?name={{ Auth::user()->first_name }}&background=f9a8d4&color=ffffff" 
+                            <img
+                                class="h-16 w-16 rounded-full object-cover border-4 border-white shadow-md"
+                                src="https://ui-avatars.com/api/?name={{ Auth::user()->first_name }}&background=f9a8d4&color=ffffff"
                                 alt="{{ Auth::user()->first_name }}">
                             <div class="absolute bottom-0 right-0 h-4 w-4 rounded-full bg-green-400 border-2 border-white"></div>
                         </div>
@@ -112,7 +112,7 @@
                     </div>
                 </div>
                 <div class="bg-gray-50 px-6 py-3 border-t border-gray-100">
-                    <a href="{{ route('customer.services.index') }}" class="text-purple-600 hover:text-purple-700 font-medium text-sm flex items-center">
+                    <a href="{{ route('services.index') }}" class="text-purple-600 hover:text-purple-700 font-medium text-sm flex items-center">
                         Khám phá dịch vụ
                         <i class="fas fa-arrow-right ml-1 text-xs"></i>
                     </a>
@@ -161,7 +161,7 @@
                             <i class="fas fa-arrow-right ml-2 text-sm transition-transform group-hover:translate-x-1"></i>
                         </a>
                     </div>
-                    
+
                     @if(isset($upcomingAppointments) && count($upcomingAppointments) > 0)
                         <div class="overflow-x-auto bg-white rounded-xl shadow-inner">
                             <table class="min-w-full divide-y divide-gray-200">
@@ -198,7 +198,7 @@
                                                 </div>
                                             </td>
                                             <td class="px-6 py-5 whitespace-nowrap">
-                                                <span class="px-3 py-1.5 inline-flex items-center text-xs leading-5 font-semibold rounded-full 
+                                                <span class="px-3 py-1.5 inline-flex items-center text-xs leading-5 font-semibold rounded-full
                                                     {{ $appointment->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : '' }}
                                                     {{ $appointment->status === 'confirmed' ? 'bg-green-100 text-green-800' : '' }}
                                                     {{ $appointment->status === 'cancelled' ? 'bg-red-100 text-red-800' : '' }}">
@@ -232,7 +232,7 @@
                             </div>
                             <h3 class="text-gray-700 font-semibold text-xl mb-2">Không có lịch hẹn sắp tới</h3>
                             <p class="text-gray-500 mb-6 max-w-md mx-auto">Bạn chưa có lịch hẹn nào. Hãy đặt lịch để trải nghiệm dịch vụ của chúng tôi.</p>
-                            <a href="{{ route('customer.appointments.create') }}" 
+                            <a href="{{ route('customer.appointments.create') }}"
                                class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-black font-medium rounded-full hover:from-pink-600 hover:to-purple-700 transition shadow-md">
                                 <i class="fas fa-calendar-plus mr-2"></i>
                                 Đặt lịch ngay
@@ -241,7 +241,7 @@
                     @endif
                 </div>
             </div>
-            
+
             <!-- Tips and Reminders - 1/3 width on larger screens -->
             <div class="bg-gradient-to-b from-blue-50 to-purple-50 overflow-hidden shadow-xl rounded-2xl border border-blue-100">
                 <div class="p-6 sm:p-8">
@@ -251,7 +251,7 @@
                         </span>
                         Mẹo chăm sóc
                     </h2>
-                    
+
                     <div class="space-y-4">
                         <div class="bg-white rounded-xl p-4 shadow-sm border border-blue-50">
                             <h3 class="font-semibold text-gray-800 mb-2 flex items-center">
@@ -260,7 +260,7 @@
                             </h3>
                             <p class="text-gray-600 text-sm">Uống ít nhất 2 lít nước mỗi ngày để giữ cho làn da luôn đủ ẩm và khỏe mạnh.</p>
                         </div>
-                        
+
                         <div class="bg-white rounded-xl p-4 shadow-sm border border-blue-50">
                             <h3 class="font-semibold text-gray-800 mb-2 flex items-center">
                                 <i class="fas fa-sun text-yellow-500 mr-2"></i>
@@ -268,7 +268,7 @@
                             </h3>
                             <p class="text-gray-600 text-sm">Thoa kem chống nắng hàng ngày, ngay cả khi trời không nắng, để bảo vệ da khỏi tia UV.</p>
                         </div>
-                        
+
                         <div class="bg-white rounded-xl p-4 shadow-sm border border-blue-50">
                             <h3 class="font-semibold text-gray-800 mb-2 flex items-center">
                                 <i class="fas fa-bed text-indigo-500 mr-2"></i>
@@ -277,9 +277,9 @@
                             <p class="text-gray-600 text-sm">Đảm bảo ngủ 7-8 tiếng mỗi đêm để cơ thể có thời gian tái tạo và làn da trở nên tươi sáng.</p>
                         </div>
                     </div>
-                    
+
                     <div class="mt-6 text-center">
-                        <a href="{{ route('customer.services.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition">
+                        <a href="{{ route('services.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition">
                             <i class="fas fa-info-circle mr-2"></i> Tư vấn thêm
                         </a>
                     </div>
@@ -302,7 +302,7 @@
                     <p class="text-gray-600 mb-8">
                         Chọn dịch vụ và thời gian phù hợp để đặt lịch hẹn dễ dàng và nhanh chóng. Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng phục vụ bạn.
                     </p>
-                    <a href="{{ route('customer.appointments.create') }}" 
+                    <a href="{{ route('customer.appointments.create') }}"
                         class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-pink-600 text-black font-medium rounded-full hover:from-pink-600 hover:to-pink-700 transition shadow-md group">
                         Đặt lịch ngay
                         <i class="fas fa-arrow-right ml-2 transition-transform group-hover:translate-x-1"></i>
@@ -323,7 +323,7 @@
                     <p class="text-gray-600 mb-8">
                         Tìm hiểu về các dịch vụ chăm sóc sức khỏe và làm đẹp cao cấp của chúng tôi. Đa dạng lựa chọn với chất lượng đảm bảo.
                     </p>
-                    <a href="{{ route('customer.services.index') }}" 
+                    <a href="{{ route('services.index') }}"
                         class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-black font-medium rounded-full hover:from-purple-600 hover:to-purple-700 transition shadow-md group">
                         Xem dịch vụ
                         <i class="fas fa-arrow-right ml-2 transition-transform group-hover:translate-x-1"></i>
@@ -333,4 +333,4 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection

@@ -20,8 +20,8 @@ use Illuminate\Support\Facades\Auth;
 
 // Trang chủ và các trang công khai
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/services', [HomeController::class, 'index2'])->name('services.index');
-Route::get('/services/{id}', [HomeController::class, 'show'])->name('services.show');
+Route::get('/services', [App\Http\Controllers\Customer\ServiceController::class, 'index'])->name('services.index');
+Route::get('/services/{id}', [App\Http\Controllers\Customer\ServiceController::class, 'show'])->name('services.show');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 Route::post('/contact', [HomeController::class, 'submitContact'])->name('contact.submit');
@@ -65,8 +65,6 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::get('/appointments/{id}', [AppointmentController::class, 'show'])->name('appointments.show');
     Route::post('/appointments/{id}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
 
-    Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
-    Route::get('/services/{id}', [ServiceController::class, 'show'])->name('services.show');
     Route::get('/clinics/{clinicId}/services', [ServiceController::class, 'byClinic'])->name('services.by-clinic');
 });
 

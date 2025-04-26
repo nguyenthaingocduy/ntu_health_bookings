@@ -48,18 +48,33 @@ class HomeController extends Controller
 
     public function index2()
     {
-        $services = Service::with('clinic')
+        $services = Service::with(['clinic', 'category'])
             ->where('status', 'active')
             ->paginate(9);
 
-        return view('home.services', compact('services'));
+        $categories = \App\Models\Category::withCount('services')->get();
+
+        return view('services.index', compact('services', 'categories'));
     }
 
     public function show($id)
     {
-        $service = Service::with('clinic')->findOrFail($id);
+        $service = Service::with(['clinic', 'category'])->findOrFail($id);
 
-        return view('home.service_details', compact('service'));
+        // Lấy các dịch vụ liên quan (cùng danh mục hoặc cùng phòng khám)
+        $relatedServices = Service::where('id', '!=', $id)
+            ->where(function($query) use ($service) {
+                if ($service->category_id) {
+                    $query->where('category_id', $service->category_id);
+                } else {
+                    $query->where('clinic_id', $service->clinic_id);
+                }
+            })
+            ->where('status', 'active')
+            ->limit(3)
+            ->get();
+
+        return view('services.show', compact('service', 'relatedServices'));
     }
 
     public function about()

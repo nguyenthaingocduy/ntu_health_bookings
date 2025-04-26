@@ -16,12 +16,15 @@ class ServiceController extends Controller
     public function index() // <--- Thêm phương thức này vào
     {
         // Lấy danh sách dịch vụ (chỉ lấy các dịch vụ đang hoạt động và phân trang)
-         $services = Service::where('status', 'active')
-                           ->paginate(10); // Sử dụng paginate để phân trang (10 dịch vụ/trang)
+        $services = Service::with('category')
+                          ->where('status', 'active')
+                          ->paginate(10); // Sử dụng paginate để phân trang (10 dịch vụ/trang)
+
+        // Lấy danh sách danh mục
+        $categories = \App\Models\Category::withCount('services')->get();
 
         // Trả về view để hiển thị danh sách dịch vụ
-        // Đảm bảo bạn đã tạo file view tại: resources/views/customer/services/index.blade.php
-        return view('customer.services.index', compact('services'));
+        return view('services.index', compact('services', 'categories'));
     }
     public function show($id)
     {
@@ -93,8 +96,8 @@ class ServiceController extends Controller
             $service->duration = '60'; // Thời gian mặc định 60 phút
         }
 
-        // Đảm bảo bạn có view tại 'resources/views/customer/services/show.blade.php'
-        return view('customer.services.show', compact('service', 'relatedServices', 'timeSlots', 'faqs'));
+        // Sử dụng view mới tại 'resources/views/services/show.blade.php'
+        return view('services.show', compact('service', 'relatedServices', 'timeSlots', 'faqs'));
     }
 
     // Bạn có thể thêm các phương thức khác vào đây sau nếu cần (ví dụ: show, create, store, ...)
