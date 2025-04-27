@@ -26,7 +26,7 @@
     <div class="container mx-auto px-6">
         <h2 class="text-3xl font-bold text-center mb-12">Dịch vụ nổi bật</h2>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {{-- <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             @foreach($featuredServices as $service)
             <div class="bg-white rounded-lg shadow-lg overflow-hidden">
                 <img src="{{ $service->image_url }}" alt="{{ $service->name }}" class="w-full h-48 object-cover">
@@ -42,7 +42,57 @@
                 </div>
             </div>
             @endforeach
+        </div> --}}
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            @foreach($featuredServices as $service)
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden relative">
+                @if($service->hasActivePromotion())
+                <div class="absolute top-0 right-0 bg-pink-500 text-white px-3 py-1 z-10">
+                    <div class="font-bold">{{ $service->promotion_value }}</div>
+                    @if($service->promotion_details && !$service->promotion_details['is_direct'])
+                    <div class="text-xs">
+                        {{ $service->promotion_details['start_date'] }} - {{ $service->promotion_details['end_date'] }}
+                    </div>
+                    @endif
+                </div>
+                @endif
+                <img src="{{ $service->image_url }}" alt="{{ $service->name }}" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <div class="flex items-center mb-2">
+                        <span class="px-3 py-1 bg-pink-100 text-pink-500 rounded-full text-sm">
+                            {{ $service->category ? $service->category->name : 'Không phân loại' }}
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">{{ $service->name }}</h3>
+                    <p class="text-gray-600 mb-4">{{ Str::limit($service->description, 100) }}</p>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            @if($service->hasActivePromotion())
+                            <div class="flex flex-col">
+                                <span class="text-pink-500 font-bold text-lg">{{ $service->formatted_discounted_price }}</span>
+                                <span class="text-gray-500 line-through text-sm font-medium">{{ number_format($service->price) }}đ</span>
+                            </div>
+                            @else
+                            <span class="text-pink-500 font-bold">{{ number_format($service->price) }}đ</span>
+                            @endif
+                        </div>
+                        <div class="space-x-2">
+                            <a href="{{ route('services.show', $service->id) }}"
+                                class="inline-block bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 transition">
+                                Chi tiết
+                            </a>
+                            <a href="{{ route('customer.appointments.create', ['service' => $service->id]) }}"
+                                class="inline-block bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900 transition">
+                                Đặt lịch
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
         </div>
+
         
         <div class="text-center mt-12">
             <a href="{{ route('services.index') }}" class="inline-block bg-white text-pink-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-50 transition shadow-md border border-pink-100">

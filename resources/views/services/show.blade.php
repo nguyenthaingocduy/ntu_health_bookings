@@ -5,7 +5,7 @@
 @section('content')
 <!-- Service Details -->
 <div class="bg-white">
-    <div class="container mx-auto px-6 py-16">
+    <div class="container mx-auto px-6 pt-4 pb-16">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
             <!-- Image Gallery -->
             <div class="space-y-4">
@@ -91,7 +91,7 @@
                         @endphp
 
                         <div class="flex items-center text-gray-700">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-2 w-2 mr-2 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             <span>Tiết kiệm: <span class="font-semibold">{{ number_format($totalSavings) }}đ ({{ $savingsPercent }}%)</span></span>
@@ -99,7 +99,7 @@
 
                         @foreach($discountInfo as $info)
                         <div class="flex items-center text-gray-700 mt-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-2 w-2 mr-2 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                             </svg>
                             <span>{!! $info !!}</span>
@@ -120,14 +120,14 @@
 
                 <!-- Booking Form -->
                 <div class="bg-gray-100 rounded-lg p-6 mb-8">
-                    <h3 class="text-xl font-semibold mb-4">Đặt lịch ngay</h3>
+                    {{-- <h3 class="text-xl font-semibold mb-4">Đặt lịch ngay</h3> --}}
                     <a href="{{ route('customer.appointments.create', ['service' => $service->id]) }}" class="w-full bg-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-pink-600 transition block text-center">
                         Đặt lịch ngay
                     </a>
                 </div>
 
                 <!-- Features -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4 mb-4">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center">
                             <i class="fas fa-clock text-pink-500"></i>
@@ -174,7 +174,7 @@
 </div>
 
 <!-- Related Services -->
-<section class="py-16 bg-gray-100">
+<section class="py-16 bg-gray-100 mb-6 mt-6">
     <div class="container mx-auto px-6">
         <h2 class="text-3xl font-bold text-center mb-12">Dịch vụ liên quan</h2>
 
@@ -224,7 +224,7 @@
 </section>
 
 <!-- FAQ Section -->
-<section class="py-16 bg-white">
+<section class="py-16 bg-white mb-6">
     <div class="container mx-auto px-6">
         <h2 class="text-3xl font-bold text-center mb-12">Câu hỏi thường gặp</h2>
 

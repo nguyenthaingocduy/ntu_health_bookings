@@ -10,9 +10,9 @@
             <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn. Hãy liên hệ với chúng tôi theo những cách sau.</p>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-8 mb-12">
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
             <!-- Thông tin liên hệ -->
-            <div class="col-span-1">
+            <div class="col-span-3">
                 <div class="bg-white rounded-xl shadow-lg p-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-6">Thông tin liên hệ</h2>
 
@@ -108,7 +108,7 @@
 
                     <form action="{{ route('contact.submit') }}" method="POST">
                         @csrf
-                        <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <div class="grid md:grid-cols-1 gap-8 mb-6">
                             <div>
                                 <label for="name" class="block text-gray-700 mb-2">Họ và tên <span class="text-red-500">*</span></label>
                                 <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500" required>
