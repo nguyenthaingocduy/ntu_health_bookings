@@ -62,15 +62,62 @@
                             @if(isset($appointment->service->price))
                             <div>
                                 <p class="text-gray-600">Giá</p>
-                                @if($appointment->service->hasActivePromotion())
+                                @if($appointment->service->hasActivePromotion() || $appointment->promotion_code)
                                 <div>
-                                    <p class="font-semibold text-pink-500">{{ number_format($appointment->service->discounted_price) }}đ</p>
-                                    <p class="text-sm text-gray-500">
-                                        <span class="line-through">{{ number_format($appointment->service->price) }}đ</span>
-                                        <span class="ml-2 bg-pink-100 text-pink-800 text-xs font-semibold px-2 py-0.5 rounded-full">
-                                            Giảm {{ $appointment->service->promotion_value }}
+                                    <p class="font-semibold text-pink-500 text-xl">{{ $appointment->formatted_final_price }}</p>
+                                    <p class="text-gray-500 line-through text-base font-medium">{{ number_format($appointment->service->price) }}đ</p>
+                                    <p class="mt-1">
+                                        <span class="bg-pink-100 text-pink-800 text-sm font-semibold px-2 py-1 rounded-full">
+                                            Giảm {{ $appointment->applied_promotion }}
                                         </span>
                                     </p>
+
+                                    @php
+                                        $details = $appointment->service->getPromotionDetailsAttribute($appointment->promotion_code);
+                                        $discountInfo = [];
+
+                                        if (is_array($details) && isset($details['direct'])) {
+                                            // Giảm giá trực tiếp
+                                            $discountInfo[] = "Giảm giá hệ thống: <span class=\"font-semibold\">{$details['direct']['discount_value']}</span>";
+                                        } elseif (is_array($details) && isset($details['discount_value']) && isset($details['is_direct']) && $details['is_direct']) {
+                                            // Giảm giá trực tiếp (một loại)
+                                            $discountInfo[] = "Giảm giá hệ thống: <span class=\"font-semibold\">{$details['discount_value']}</span>";
+                                        }
+
+                                        if (is_array($details) && isset($details['service_promotion'])) {
+                                            // Mã khuyến mãi của dịch vụ
+                                            $discountInfo[] = "Mã khuyến mãi dịch vụ: <span class=\"font-semibold\">{$details['service_promotion']['discount_value']}</span>";
+                                        }
+
+                                        if (is_array($details) && isset($details['additional_promotion'])) {
+                                            // Mã khuyến mãi bổ sung
+                                            $discountInfo[] = "Mã khuyến mãi bổ sung: <span class=\"font-semibold\">{$details['additional_promotion']['discount_value']}</span>";
+                                        } elseif ($appointment->promotion_code && !is_array($details)) {
+                                            // Mã khuyến mãi bổ sung (nếu có)
+                                            $discountInfo[] = "Mã khuyến mãi: <span class=\"font-semibold\">{$appointment->promotion_code}</span>";
+                                        }
+
+                                        $totalSavings = $appointment->service->price - $appointment->final_price;
+                                        $savingsPercent = round(($totalSavings / $appointment->service->price) * 100, 1);
+                                    @endphp
+
+                                    <div class="mt-2 bg-gray-50 p-2 rounded-md text-xs">
+                                        <div class="flex items-center text-gray-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <span>Tiết kiệm: <span class="font-semibold">{{ number_format($totalSavings) }}đ ({{ $savingsPercent }}%)</span></span>
+                                        </div>
+
+                                        @foreach($discountInfo as $info)
+                                        <div class="flex items-center text-gray-700 mt-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                            </svg>
+                                            <span>{!! $info !!}</span>
+                                        </div>
+                                        @endforeach
+                                    </div>
                                 </div>
                                 @else
                                 <p class="font-semibold text-pink-500">{{ number_format($appointment->service->price) }}đ</p>

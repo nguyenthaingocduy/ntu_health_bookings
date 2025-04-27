@@ -28,7 +28,7 @@ class AppointmentController extends Controller
         return view('customer.appointments.index', compact('appointments'));
     }
 
-    public function create($serviceId = null)
+    public function create(Request $request, $serviceId = null)
     {
         $service = null;
         if ($serviceId) {
@@ -41,7 +41,10 @@ class AppointmentController extends Controller
         // Get times with booking counts
         $times = Time::orderBy('started_time')->get();
 
-        return view('customer.appointments.create', compact('services', 'times', 'service'));
+        // Lấy mã khuyến mãi bổ sung (nếu có)
+        $promotionCode = $request->input('promotion_code');
+
+        return view('customer.appointments.create', compact('services', 'times', 'service', 'promotionCode'));
     }
 
     public function store(Request $request)
@@ -51,6 +54,7 @@ class AppointmentController extends Controller
             'date_appointments' => 'required|date|after_or_equal:today',
             'time_appointments_id' => 'required|exists:times,id',
             'notes' => 'nullable|string|max:500',
+            'promotion_code' => 'nullable|string|max:50',
         ]);
 
         // Kiểm tra xem thời gian đã đầy chưa
@@ -92,6 +96,7 @@ class AppointmentController extends Controller
                     'time_appointments_id' => $request->time_appointments_id,
                     'employee_id' => $employeeId, // Gán nhân viên tạm thời
                     'notes' => $request->notes,
+                    'promotion_code' => $request->promotion_code, // Lưu mã khuyến mãi bổ sung
                 ]);
 
                 DB::commit();

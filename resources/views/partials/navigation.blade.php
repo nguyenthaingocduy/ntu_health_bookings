@@ -1,5 +1,8 @@
 <!-- Main Navigation -->
-<nav class="bg-white sticky top-0 z-40 font-sans transition-all duration-300 shadow-md">
+<nav class="bg-white w-full left-0 right-0 top-0 z-40 font-sans transition-all duration-300 shadow-md">
+
+    {{-- fixed = luôn luôn cố định vị trí theo viewport (không phụ thuộc cuộn trang).
+    sticky = chỉ cố định sau khi lướt đến vị trí đó (trước đó thì scroll bình thường). --}}
     <!-- Top Header with Gradient -->
     <div class="bg-gradient-to-r from-pink-500 to-purple-600 py-2 px-4 sm:px-6 lg:px-8">
         <div class="container mx-auto flex justify-end items-center space-x-4 text-black text-sm">
@@ -239,6 +242,10 @@ nav.scrolled .container {
 /* Fix z-index issues */
 .relative {
     position: relative;
+}
+
+.fixed {
+    position: fixed;
 }
 
 /* Tăng z-index cho dropdown menu */

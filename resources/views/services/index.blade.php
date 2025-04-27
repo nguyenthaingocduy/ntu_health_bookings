@@ -80,9 +80,9 @@
                         <div class="flex justify-between items-center">
                             <div>
                                 @if($service->hasActivePromotion())
-                                <div class="flex items-center gap-2">
-                                    <span class="text-pink-500 font-bold">{{ $service->formatted_discounted_price }}</span>
-                                    <span class="text-gray-500 line-through text-sm">{{ number_format($service->price) }}đ</span>
+                                <div class="flex flex-col">
+                                    <span class="text-pink-500 font-bold text-lg">{{ $service->formatted_discounted_price }}</span>
+                                    <span class="text-gray-500 line-through text-sm font-medium">{{ number_format($service->price) }}đ</span>
                                 </div>
                                 @else
                                 <span class="text-pink-500 font-bold">{{ number_format($service->price) }}đ</span>

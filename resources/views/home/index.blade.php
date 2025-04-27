@@ -3,7 +3,8 @@
 @section('title', 'Trang chủ')
 
 @section('content')
-<!-- Hero Section -->
+<main class="py-4">
+    <!-- Hero Section -->
 <section class="relative bg-gray-900 text-white">
     <div class="absolute inset-0">
         <img src="{{ asset('images\clinics\1745049992.jpg') }}" alt="Hero background" class="w-full h-full object-cover opacity-50">
@@ -120,4 +121,5 @@
         </a>
     </div>
 </section>
+</main>
 @endsection

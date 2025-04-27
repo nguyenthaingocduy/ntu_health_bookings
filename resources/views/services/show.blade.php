@@ -52,16 +52,65 @@
                 </div>
                 @endif
 
-                <div class="flex items-center mb-6">
+                <div class="mb-6">
                     @if($service->hasActivePromotion())
-                    <div class="flex items-center">
-                        <span class="text-2xl font-bold text-pink-500">{{ $service->formatted_discounted_price }}</span>
-                        <span class="text-gray-500 ml-2">/{{ $service->duration }} phút</span>
-                        <span class="text-gray-500 line-through ml-4">{{ number_format($service->price) }}đ</span>
+                    <div class="flex items-center mb-2">
+                        <div class="flex flex-col">
+                            <span class="text-3xl font-bold text-pink-500">{{ $service->formatted_discounted_price }}</span>
+                            <span class="text-gray-500 line-through text-lg font-medium">{{ number_format($service->price) }}đ</span>
+                        </div>
+                        <span class="text-gray-500 ml-4">/{{ $service->duration }} phút</span>
+                    </div>
+                    <div class="bg-gray-100 rounded-md p-2 text-sm">
+                        @php
+                            $details = $service->promotion_details;
+                            $discountPercent = 0;
+                            $discountInfo = [];
+
+                            if (is_array($details) && isset($details['direct'])) {
+                                // Giảm giá trực tiếp
+                                $directDiscount = str_replace('%', '', $details['direct']['discount_value']);
+                                $discountPercent += (float)$directDiscount;
+                                $discountInfo[] = "Giảm giá hệ thống: <span class=\"font-semibold\">{$details['direct']['discount_value']}</span>";
+                            } elseif (is_array($details) && isset($details['discount_value'])) {
+                                // Giảm giá trực tiếp (một loại)
+                                $directDiscount = str_replace('%', '', $details['discount_value']);
+                                $discountPercent += (float)$directDiscount;
+                                $discountInfo[] = "Giảm giá hệ thống: <span class=\"font-semibold\">{$details['discount_value']}</span>";
+                            }
+
+                            if (is_array($details) && isset($details['service_promotion'])) {
+                                // Mã khuyến mãi của dịch vụ
+                                $promoDiscount = str_replace('%', '', $details['service_promotion']['discount_value']);
+                                $discountPercent += (float)$promoDiscount;
+                                $discountInfo[] = "Mã khuyến mãi: <span class=\"font-semibold\">{$details['service_promotion']['discount_value']}</span>";
+                            }
+
+                            $totalSavings = $service->price - $service->discounted_price;
+                            $savingsPercent = round(($totalSavings / $service->price) * 100, 1);
+                        @endphp
+
+                        <div class="flex items-center text-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>Tiết kiệm: <span class="font-semibold">{{ number_format($totalSavings) }}đ ({{ $savingsPercent }}%)</span></span>
+                        </div>
+
+                        @foreach($discountInfo as $info)
+                        <div class="flex items-center text-gray-700 mt-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                            <span>{!! $info !!}</span>
+                        </div>
+                        @endforeach
                     </div>
                     @else
-                    <span class="text-2xl font-bold text-pink-500">{{ number_format($service->price) }}đ</span>
-                    <span class="text-gray-500 ml-2">/{{ $service->duration }} phút</span>
+                    <div class="flex items-center">
+                        <span class="text-2xl font-bold text-pink-500">{{ number_format($service->price) }}đ</span>
+                        <span class="text-gray-500 ml-2">/{{ $service->duration }} phút</span>
+                    </div>
                     @endif
                 </div>
 
@@ -154,9 +203,9 @@
                     <div class="flex justify-between items-center">
                         <div>
                             @if($relatedService->hasActivePromotion())
-                            <div class="flex items-center gap-2">
-                                <span class="text-pink-500 font-bold">{{ $relatedService->formatted_discounted_price }}</span>
-                                <span class="text-gray-500 line-through text-sm">{{ number_format($relatedService->price) }}đ</span>
+                            <div class="flex flex-col">
+                                <span class="text-pink-500 font-bold text-lg">{{ $relatedService->formatted_discounted_price }}</span>
+                                <span class="text-gray-500 line-through text-sm font-medium">{{ number_format($relatedService->price) }}đ</span>
                             </div>
                             @else
                             <span class="text-pink-500 font-bold">{{ number_format($relatedService->price) }}đ</span>

@@ -91,31 +91,59 @@ class Service extends Model
     /**
      * Lấy giá trị khuyến mãi (phần trăm hoặc số tiền cố định)
      *
+     * @param string|null $promotionCode Mã khuyến mãi bổ sung (nếu có)
      * @return string
      */
-    public function getPromotionValueAttribute()
+    public function getPromotionValueAttribute($promotionCode = null)
     {
-        if (!$this->hasActivePromotion()) {
+        if (!$this->hasActivePromotion() && empty($promotionCode)) {
             return null;
         }
 
-        // Nếu promotion là một số, đó là phần trăm giảm giá
-        if (is_numeric($this->promotion)) {
-            return $this->promotion . '%';
+        $discounts = [];
+
+        // Lấy giảm giá trực tiếp của dịch vụ (nếu có)
+        if (is_numeric($this->promotion) && $this->promotion > 0) {
+            $discounts[] = $this->promotion . '%';
         }
 
-        // Nếu promotion là mã khuyến mãi, lấy thông tin từ bảng promotions
-        $promotion = \App\Models\Promotion::where('code', $this->promotion)
-            ->where('is_active', true)
-            ->where('start_date', '<=', now())
-            ->where('end_date', '>=', now())
-            ->first();
+        // Lấy giảm giá từ mã khuyến mãi của dịch vụ (nếu có)
+        if (!is_numeric($this->promotion) && !empty($this->promotion)) {
+            $servicePromotion = \App\Models\Promotion::where('code', $this->promotion)
+                ->where('is_active', true)
+                ->where('start_date', '<=', now())
+                ->where('end_date', '>=', now())
+                ->first();
 
-        if ($promotion) {
-            return $promotion->formatted_discount_value;
+            if ($servicePromotion) {
+                $discounts[] = $servicePromotion->formatted_discount_value;
+            }
         }
 
-        return null;
+        // Lấy giảm giá từ mã khuyến mãi bổ sung (nếu có)
+        if (!empty($promotionCode) && $promotionCode !== $this->promotion) {
+            $additionalPromotion = \App\Models\Promotion::where('code', $promotionCode)
+                ->where('is_active', true)
+                ->where('start_date', '<=', now())
+                ->where('end_date', '>=', now())
+                ->first();
+
+            if ($additionalPromotion) {
+                $discounts[] = $additionalPromotion->formatted_discount_value;
+            }
+        }
+
+        if (empty($discounts)) {
+            return null;
+        }
+
+        // Nếu chỉ có một loại giảm giá, trả về giá trị đó
+        if (count($discounts) === 1) {
+            return $discounts[0];
+        }
+
+        // Nếu có nhiều loại giảm giá, trả về tổng hợp
+        return implode(' + ', $discounts);
     }
 
     /**
@@ -135,32 +163,56 @@ class Service extends Model
     /**
      * Lấy giá sau khi áp dụng khuyến mãi
      *
+     * @param string|null $promotionCode Mã khuyến mãi bổ sung (nếu có)
      * @return float
      */
-    public function getDiscountedPriceAttribute()
+    public function getDiscountedPriceAttribute($promotionCode = null)
     {
-        if (!$this->hasActivePromotion()) {
-            return $this->price;
+        $price = $this->price;
+        $totalDiscount = 0;
+
+        // Áp dụng giảm giá trực tiếp của dịch vụ (nếu có)
+        if (is_numeric($this->promotion) && $this->promotion > 0) {
+            $directDiscount = $price * ($this->promotion / 100);
+            $totalDiscount += $directDiscount;
         }
 
-        // Nếu promotion là một số, đó là phần trăm giảm giá
-        if (is_numeric($this->promotion)) {
-            $discount = $this->price * ($this->promotion / 100);
-            return $this->price - $discount;
+        // Áp dụng mã khuyến mãi của dịch vụ (nếu có)
+        if (!is_numeric($this->promotion) && !empty($this->promotion)) {
+            $servicePromotion = \App\Models\Promotion::where('code', $this->promotion)
+                ->where('is_active', true)
+                ->where('start_date', '<=', now())
+                ->where('end_date', '>=', now())
+                ->first();
+
+            if ($servicePromotion) {
+                $promotionDiscount = $servicePromotion->calculateDiscount($price);
+                $totalDiscount += $promotionDiscount;
+            }
         }
 
-        // Nếu promotion là mã khuyến mãi, tính toán giảm giá dựa trên loại khuyến mãi
-        $promotion = \App\Models\Promotion::where('code', $this->promotion)
-            ->where('is_active', true)
-            ->where('start_date', '<=', now())
-            ->where('end_date', '>=', now())
-            ->first();
+        // Áp dụng mã khuyến mãi bổ sung (nếu có)
+        if (!empty($promotionCode) && $promotionCode !== $this->promotion) {
+            $additionalPromotion = \App\Models\Promotion::where('code', $promotionCode)
+                ->where('is_active', true)
+                ->where('start_date', '<=', now())
+                ->where('end_date', '>=', now())
+                ->first();
 
-        if ($promotion) {
-            return $this->price - $promotion->calculateDiscount($this->price);
+            if ($additionalPromotion) {
+                // Tính giảm giá trên giá đã giảm
+                $discountedPrice = $price - $totalDiscount;
+                $additionalDiscount = $additionalPromotion->calculateDiscount($discountedPrice);
+                $totalDiscount += $additionalDiscount;
+            }
         }
 
-        return $this->price;
+        // Đảm bảo tổng giảm giá không vượt quá giá gốc
+        if ($totalDiscount > $price) {
+            $totalDiscount = $price;
+        }
+
+        return $price - $totalDiscount;
     }
 
     /**
@@ -180,19 +232,51 @@ class Service extends Model
     }
 
     /**
+     * Tính giá sau khi áp dụng mã khuyến mãi bổ sung
+     *
+     * @param string $promotionCode Mã khuyến mãi bổ sung
+     * @return float
+     */
+    public function calculatePriceWithPromotion($promotionCode)
+    {
+        // Sử dụng phương thức getDiscountedPriceAttribute với mã khuyến mãi bổ sung
+        return $this->getDiscountedPriceAttribute($promotionCode);
+    }
+
+    /**
+     * Lấy giá đã giảm được định dạng sau khi áp dụng mã khuyến mãi bổ sung
+     *
+     * @param string $promotionCode Mã khuyến mãi bổ sung
+     * @return string
+     */
+    public function getFormattedPriceWithPromotion($promotionCode)
+    {
+        $discountedPrice = $this->calculatePriceWithPromotion($promotionCode);
+
+        if ($discountedPrice == 0) {
+            return 'Miễn phí';
+        }
+
+        return number_format($discountedPrice, 0, ',', '.') . ' VNĐ';
+    }
+
+    /**
      * Lấy thông tin chi tiết về khuyến mãi
      *
+     * @param string|null $promotionCode Mã khuyến mãi bổ sung (nếu có)
      * @return array|null
      */
-    public function getPromotionDetailsAttribute()
+    public function getPromotionDetailsAttribute($promotionCode = null)
     {
-        if (!$this->hasActivePromotion()) {
+        if (!$this->hasActivePromotion() && empty($promotionCode)) {
             return null;
         }
 
-        // Nếu promotion là một số, đó là phần trăm giảm giá trực tiếp của dịch vụ
-        if (is_numeric($this->promotion)) {
-            return [
+        $details = [];
+
+        // Lấy thông tin giảm giá trực tiếp của dịch vụ (nếu có)
+        if (is_numeric($this->promotion) && $this->promotion > 0) {
+            $details['direct'] = [
                 'discount_value' => $this->promotion . '%',
                 'start_date' => null,
                 'end_date' => null,
@@ -201,24 +285,55 @@ class Service extends Model
             ];
         }
 
-        // Nếu promotion là mã khuyến mãi, lấy thông tin từ bảng promotions
-        $promotion = \App\Models\Promotion::where('code', $this->promotion)
-            ->where('is_active', true)
-            ->where('start_date', '<=', now())
-            ->where('end_date', '>=', now())
-            ->first();
+        // Lấy thông tin từ mã khuyến mãi của dịch vụ (nếu có)
+        if (!is_numeric($this->promotion) && !empty($this->promotion)) {
+            $servicePromotion = \App\Models\Promotion::where('code', $this->promotion)
+                ->where('is_active', true)
+                ->where('start_date', '<=', now())
+                ->where('end_date', '>=', now())
+                ->first();
 
-        if ($promotion) {
-            return [
-                'discount_value' => $promotion->formatted_discount_value,
-                'start_date' => $promotion->start_date->format('d/m/Y'),
-                'end_date' => $promotion->end_date->format('d/m/Y'),
-                'is_direct' => false,
-                'title' => $promotion->title
-            ];
+            if ($servicePromotion) {
+                $details['service_promotion'] = [
+                    'discount_value' => $servicePromotion->formatted_discount_value,
+                    'start_date' => $servicePromotion->start_date->format('d/m/Y'),
+                    'end_date' => $servicePromotion->end_date->format('d/m/Y'),
+                    'is_direct' => false,
+                    'title' => $servicePromotion->title
+                ];
+            }
         }
 
-        return null;
+        // Lấy thông tin từ mã khuyến mãi bổ sung (nếu có)
+        if (!empty($promotionCode) && $promotionCode !== $this->promotion) {
+            $additionalPromotion = \App\Models\Promotion::where('code', $promotionCode)
+                ->where('is_active', true)
+                ->where('start_date', '<=', now())
+                ->where('end_date', '>=', now())
+                ->first();
+
+            if ($additionalPromotion) {
+                $details['additional_promotion'] = [
+                    'discount_value' => $additionalPromotion->formatted_discount_value,
+                    'start_date' => $additionalPromotion->start_date->format('d/m/Y'),
+                    'end_date' => $additionalPromotion->end_date->format('d/m/Y'),
+                    'is_direct' => false,
+                    'title' => $additionalPromotion->title
+                ];
+            }
+        }
+
+        if (empty($details)) {
+            return null;
+        }
+
+        // Nếu chỉ có một loại giảm giá, trả về thông tin chi tiết của loại đó
+        if (count($details) === 1) {
+            return reset($details);
+        }
+
+        // Nếu có nhiều loại giảm giá, trả về tất cả thông tin
+        return $details;
     }
 }
 

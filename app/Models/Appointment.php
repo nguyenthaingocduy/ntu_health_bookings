@@ -24,7 +24,8 @@ class Appointment extends Model
         'check_in_time',
         'check_out_time',
         'is_completed',
-        'cancellation_reason'
+        'cancellation_reason',
+        'promotion_code'
     ];
 
     protected $casts = [
@@ -91,6 +92,50 @@ class Appointment extends Model
     public function getCodeAttribute()
     {
         return 'APT-' . substr($this->id, 0, 8);
+    }
+
+    /**
+     * Lấy giá dịch vụ sau khi áp dụng tất cả các khuyến mãi
+     *
+     * @return float
+     */
+    public function getFinalPriceAttribute()
+    {
+        if (!$this->service) {
+            return 0;
+        }
+
+        return $this->service->calculatePriceWithPromotion($this->promotion_code);
+    }
+
+    /**
+     * Lấy giá dịch vụ sau khi áp dụng tất cả các khuyến mãi (đã định dạng)
+     *
+     * @return string
+     */
+    public function getFormattedFinalPriceAttribute()
+    {
+        $finalPrice = $this->final_price;
+
+        if ($finalPrice == 0) {
+            return 'Miễn phí';
+        }
+
+        return number_format($finalPrice, 0, ',', '.') . ' VNĐ';
+    }
+
+    /**
+     * Lấy thông tin khuyến mãi áp dụng cho đơn hàng
+     *
+     * @return string|null
+     */
+    public function getAppliedPromotionAttribute()
+    {
+        if (!$this->service) {
+            return null;
+        }
+
+        return $this->service->getPromotionValueAttribute($this->promotion_code);
     }
 
     /**
