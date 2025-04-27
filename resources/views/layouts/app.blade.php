@@ -279,6 +279,23 @@
             margin-top: 0.5rem;
         }
 
+        /* Content wrapper styles */
+        .content-wrapper {
+            padding-top: 160px; /* Mặc định cho desktop */
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding-top: 140px; /* Điều chỉnh cho tablet */
+            }
+        }
+
+        @media (max-width: 640px) {
+            .content-wrapper {
+                padding-top: 120px; /* Điều chỉnh cho mobile */
+            }
+        }
+
         /* Footer styles */
         .footer {
             background: rgba(255, 255, 255, 0.9);
@@ -352,7 +369,10 @@
     <div id="app">
         @include('partials.navigation')
 
-        @yield('content')
+        <!-- Thêm padding-top để tránh nội dung bị che khuất bởi header cố định -->
+        <div class="content-wrapper">
+            @yield('content')
+        </div>
 
         <!-- Service Promotion Popup -->
         @include('components.service-popup')

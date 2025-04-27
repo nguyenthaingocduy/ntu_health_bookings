@@ -1,5 +1,5 @@
 <!-- Main Navigation -->
-<nav class="bg-white w-full left-0 right-0 top-0 z-40 font-sans transition-all duration-300 shadow-md">
+<nav class="bg-white w-full fixed left-0 right-0 top-0 z-40 font-sans transition-all duration-300 shadow-md">
 
     {{-- fixed = luôn luôn cố định vị trí theo viewport (không phụ thuộc cuộn trang).
     sticky = chỉ cố định sau khi lướt đến vị trí đó (trước đó thì scroll bình thường). --}}
@@ -221,6 +221,18 @@
     -webkit-backdrop-filter: blur(8px);
 }
 
+/* CSS cho header cố định */
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+}
+
 nav.scrolled {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
@@ -237,6 +249,13 @@ nav.scrolled .container {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+}
+
+/* Responsive padding cho nội dung */
+@media (max-width: 768px) {
+    body {
+        padding-top: 120px; /* Điều chỉnh cho mobile */
+    }
 }
 
 /* Fix z-index issues */
