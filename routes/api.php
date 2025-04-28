@@ -35,25 +35,115 @@ Route::get('/time-slots', [TimeSlotController::class, 'getAllTimeSlots']);
 Route::get('/customers/search', [\App\Http\Controllers\Api\CustomerController::class, 'search']);
 
 // Promotions API
-Route::get('/active-promotions', [\App\Http\Controllers\Api\PromotionController::class, 'getActivePromotions']);
+Route::get('/active-promotions', function() {
+    // Get all active promotions with associated services
+    $promotions = \App\Models\Promotion::where('is_active', true)
+        ->where('start_date', '<=', now())
+        ->where('end_date', '>=', now())
+        ->with('services')
+        ->orderBy('created_at', 'desc') // Get newest promotions first
+        ->get();
+
+    // Log for debugging
+    \Illuminate\Support\Facades\Log::info('Active promotions found: ' . $promotions->count());
+
+    $formattedPromotions = $promotions->map(function($promotion) {
+        // Get all services for this promotion
+        $services = $promotion->services;
+
+        // Format discount value for display
+        $formattedDiscountValue = '';
+        if ($promotion->discount_type === 'percentage') {
+            $formattedDiscountValue = $promotion->discount_value . '%';
+        } else if ($promotion->discount_type === 'fixed') {
+            $formattedDiscountValue = number_format($promotion->discount_value, 0, ',', '.') . 'đ';
+        }
+
+        // Format the main promotion data
+        $result = [
+            'id' => $promotion->id,
+            'name' => $promotion->title, // Use title field as name
+            'description' => $promotion->description,
+            'discount_type' => $promotion->discount_type,
+            'discount_value' => $promotion->discount_value,
+            'formatted_discount_value' => $formattedDiscountValue,
+            'start_date' => $promotion->start_date,
+            'end_date' => $promotion->end_date,
+            'code' => $promotion->code,
+            'usage_limit' => $promotion->usage_limit,
+            'usage_count' => $promotion->usage_count,
+            'minimum_purchase' => $promotion->minimum_purchase,
+        ];
+
+        // If promotion has services, include the first service for display
+        if ($services->isNotEmpty()) {
+            $service = $services->first();
+
+            $result['service'] = [
+                'id' => $service->id,
+                'name' => $service->name,
+                'price' => $service->price,
+                'image_url' => $service->image_url,
+                'description' => $service->description,
+                'category_id' => $service->category_id,
+                'duration' => $service->duration
+            ];
+
+            // Calculate discounted price
+            if ($promotion->discount_type === 'percentage') {
+                $discountedPrice = $service->price - ($service->price * $promotion->discount_value / 100);
+            } else {
+                $discountedPrice = $service->price - $promotion->discount_value;
+            }
+
+            $result['service']['discounted_price'] = max(0, $discountedPrice);
+        }
+
+        // Log for debugging
+        \Illuminate\Support\Facades\Log::info('Formatted promotion: ' . json_encode($result));
+
+        return $result;
+    });
+
+    return response()->json([
+        'promotions' => $formattedPromotions
+    ]);
+});
+
 Route::post('/validate-promotion', [\App\Http\Controllers\Api\PromotionController::class, 'validateCode']);
 
 // Service promotion popup routes
-Route::get('/random-featured-service', function() {
-    // Get a random active service with promotion
-    $service = Service::where('status', 'active')
-        ->whereNotNull('promotion')
+Route::get('/random-promotion', function() {
+    // Get a random active promotion with associated services
+    $promotion = \App\Models\Promotion::where('is_active', true)
+        ->where('start_date', '<=', now())
+        ->where('end_date', '>=', now())
+        ->with('services')
         ->inRandomOrder()
         ->first();
 
-    // If no service with promotion is found, get any random active service
-    if (!$service) {
+    // If no promotion is found, get a random active service
+    if (!$promotion || $promotion->services->isEmpty()) {
         $service = Service::where('status', 'active')
             ->inRandomOrder()
             ->first();
+
+        return response()->json([
+            'type' => 'service',
+            'data' => $service
+        ]);
     }
 
-    return response()->json($service);
+    // Get a random service from the promotion
+    $service = $promotion->services->random();
+
+    return response()->json([
+        'type' => 'promotion',
+        'data' => [
+            'promotion' => $promotion,
+            'service' => $service
+        ]
+    ]);
 });
 
 // Handle promotion signup

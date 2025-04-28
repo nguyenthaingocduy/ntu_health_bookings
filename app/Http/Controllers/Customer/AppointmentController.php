@@ -86,6 +86,18 @@ class AppointmentController extends Controller
                 // Tăng số lượng đặt chỗ cho khung giờ này
                 $timeSlot->increment('booked_count');
 
+                // Lấy mã khuyến mãi (nếu có)
+                $promotionCode = $request->promotion_code;
+
+                // Log thông tin đặt lịch
+                \Illuminate\Support\Facades\Log::info('Thông tin đặt lịch', [
+                    'customer_id' => Auth::id(),
+                    'service_id' => $request->service_id,
+                    'date_appointments' => $request->date_appointments,
+                    'time_appointments_id' => $request->time_appointments_id,
+                    'promotion_code' => $promotionCode
+                ]);
+
                 $appointment = Appointment::create([
                     'id' => $uuid,
                     'customer_id' => Auth::id(),
@@ -96,7 +108,7 @@ class AppointmentController extends Controller
                     'time_appointments_id' => $request->time_appointments_id,
                     'employee_id' => $employeeId, // Gán nhân viên tạm thời
                     'notes' => $request->notes,
-                    'promotion_code' => $request->promotion_code, // Lưu mã khuyến mãi bổ sung
+                    'promotion_code' => $promotionCode, // Lưu mã khuyến mãi bổ sung
                 ]);
 
                 DB::commit();

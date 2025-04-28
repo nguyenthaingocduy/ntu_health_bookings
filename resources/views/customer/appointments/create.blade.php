@@ -608,7 +608,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Thêm input ẩn để lưu mã khuyến mãi
                 const hiddenInput = document.createElement('input');
                 hiddenInput.type = 'hidden';
-                hiddenInput.name = 'applied_promotion_code';
+                hiddenInput.name = 'promotion_code';
                 hiddenInput.value = code;
                 document.querySelector('form').appendChild(hiddenInput);
 

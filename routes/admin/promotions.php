@@ -19,6 +19,10 @@ Route::group([], function () {
     Route::put('/promotions/{id}/active', [PromotionController::class, 'toggleActive'])->name('promotions.toggle-active');
     Route::put('/promotions/{id}/reset-usage', [PromotionController::class, 'resetUsageCount'])->name('promotions.reset-usage');
 
+    // Promotion services management
+    Route::get('/promotions/{id}/services', [PromotionController::class, 'services'])->name('promotions.services');
+    Route::put('/promotions/{id}/services', [PromotionController::class, 'updateServices'])->name('promotions.update-services');
+
     // Validate promotion code
     Route::post('/promotions/validate-code', [PromotionController::class, 'validateCode'])->name('promotions.validate-code');
 });

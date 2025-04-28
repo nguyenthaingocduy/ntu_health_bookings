@@ -105,7 +105,22 @@ class Appointment extends Model
             return 0;
         }
 
-        return $this->service->calculatePriceWithPromotion($this->promotion_code);
+        // Đảm bảo mã khuyến mãi được xử lý đúng cách
+        $promotionCode = !empty($this->promotion_code) ? strtoupper($this->promotion_code) : null;
+
+        // Tính giá sau khuyến mãi
+        $finalPrice = $this->service->calculatePriceWithPromotion($promotionCode);
+
+        // Log để debug
+        \Illuminate\Support\Facades\Log::info('Tính giá sau khuyến mãi', [
+            'appointment_id' => $this->id,
+            'service_id' => $this->service_id,
+            'service_price' => $this->service->price,
+            'promotion_code' => $promotionCode,
+            'final_price' => $finalPrice
+        ]);
+
+        return $finalPrice;
     }
 
     /**
@@ -135,7 +150,21 @@ class Appointment extends Model
             return null;
         }
 
-        return $this->service->getPromotionValueAttribute($this->promotion_code);
+        // Đảm bảo mã khuyến mãi được xử lý đúng cách
+        $promotionCode = !empty($this->promotion_code) ? strtoupper($this->promotion_code) : null;
+
+        // Tính phần trăm giảm giá
+        $originalPrice = $this->service->price;
+        $finalPrice = $this->final_price;
+
+        if ($originalPrice > 0 && $finalPrice < $originalPrice) {
+            $discountPercent = round(($originalPrice - $finalPrice) / $originalPrice * 100);
+            return $discountPercent . '%';
+        }
+
+        // Nếu không tính được phần trăm, sử dụng giá trị từ service
+        $promotionValue = $this->service->getPromotionValueAttribute($promotionCode);
+        return $promotionValue ?: 'Khuyến mãi';
     }
 
     /**

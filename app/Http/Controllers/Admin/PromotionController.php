@@ -22,10 +22,10 @@ class PromotionController extends Controller
         $promotions = Promotion::with('creator')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-        
+
         return view('admin.promotions.index', compact('promotions'));
     }
-    
+
     /**
      * Show the form for creating a new promotion.
      *
@@ -34,10 +34,10 @@ class PromotionController extends Controller
     public function create()
     {
         $services = Service::where('status', 'active')->get();
-        
+
         return view('admin.promotions.create', compact('services'));
     }
-    
+
     /**
      * Store a newly created promotion in storage.
      *
@@ -58,14 +58,16 @@ class PromotionController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
             'is_active' => 'boolean',
             'usage_limit' => 'nullable|integer|min:1',
+            'services' => 'nullable|array',
+            'services.*' => 'exists:services,id',
         ]);
-        
+
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
-        
+
         try {
             $promotion = Promotion::create([
                 'id' => Str::uuid(),
@@ -83,7 +85,12 @@ class PromotionController extends Controller
                 'usage_count' => 0,
                 'created_by' => Auth::id(),
             ]);
-            
+
+            // Liên kết với các dịch vụ nếu có
+            if ($request->has('services')) {
+                $promotion->services()->attach($request->services);
+            }
+
             return redirect()->route('admin.promotions.show', $promotion->id)
                 ->with('success', 'Khuyến mãi đã được tạo thành công.');
         } catch (\Exception $e) {
@@ -92,7 +99,7 @@ class PromotionController extends Controller
                 ->withInput();
         }
     }
-    
+
     /**
      * Display the specified promotion.
      *
@@ -102,10 +109,10 @@ class PromotionController extends Controller
     public function show($id)
     {
         $promotion = Promotion::with('creator')->findOrFail($id);
-        
+
         return view('admin.promotions.show', compact('promotion'));
     }
-    
+
     /**
      * Show the form for editing the specified promotion.
      *
@@ -116,10 +123,10 @@ class PromotionController extends Controller
     {
         $promotion = Promotion::findOrFail($id);
         $services = Service::where('status', 'active')->get();
-        
+
         return view('admin.promotions.edit', compact('promotion', 'services'));
     }
-    
+
     /**
      * Update the specified promotion in storage.
      *
@@ -130,7 +137,7 @@ class PromotionController extends Controller
     public function update(Request $request, $id)
     {
         $promotion = Promotion::findOrFail($id);
-        
+
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'code' => 'required|string|max:50|unique:promotions,code,' . $promotion->id,
@@ -143,14 +150,16 @@ class PromotionController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
             'is_active' => 'boolean',
             'usage_limit' => 'nullable|integer|min:' . $promotion->usage_count,
+            'services' => 'nullable|array',
+            'services.*' => 'exists:services,id',
         ]);
-        
+
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
-        
+
         try {
             $promotion->update([
                 'title' => $request->title,
@@ -165,7 +174,14 @@ class PromotionController extends Controller
                 'is_active' => $request->is_active ?? true,
                 'usage_limit' => $request->usage_limit,
             ]);
-            
+
+            // Cập nhật liên kết với các dịch vụ
+            if ($request->has('services')) {
+                $promotion->services()->sync($request->services);
+            } else {
+                $promotion->services()->detach();
+            }
+
             return redirect()->route('admin.promotions.show', $promotion->id)
                 ->with('success', 'Khuyến mãi đã được cập nhật thành công.');
         } catch (\Exception $e) {
@@ -174,7 +190,7 @@ class PromotionController extends Controller
                 ->withInput();
         }
     }
-    
+
     /**
      * Remove the specified promotion from storage.
      *
@@ -184,10 +200,10 @@ class PromotionController extends Controller
     public function destroy($id)
     {
         $promotion = Promotion::findOrFail($id);
-        
+
         try {
             $promotion->delete();
-            
+
             return redirect()->route('admin.promotions.index')
                 ->with('success', 'Khuyến mãi đã được xóa thành công.');
         } catch (\Exception $e) {
@@ -195,7 +211,7 @@ class PromotionController extends Controller
                 ->with('error', 'Đã xảy ra lỗi khi xóa khuyến mãi: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Toggle the active status of the specified promotion.
      *
@@ -205,12 +221,12 @@ class PromotionController extends Controller
     public function toggleActive($id)
     {
         $promotion = Promotion::findOrFail($id);
-        
+
         try {
             $promotion->update([
                 'is_active' => !$promotion->is_active,
             ]);
-            
+
             return redirect()->route('admin.promotions.show', $promotion->id)
                 ->with('success', 'Trạng thái kích hoạt của khuyến mãi đã được cập nhật thành công.');
         } catch (\Exception $e) {
@@ -218,7 +234,7 @@ class PromotionController extends Controller
                 ->with('error', 'Đã xảy ra lỗi khi cập nhật trạng thái kích hoạt của khuyến mãi: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Reset the usage count of the specified promotion.
      *
@@ -228,12 +244,12 @@ class PromotionController extends Controller
     public function resetUsageCount($id)
     {
         $promotion = Promotion::findOrFail($id);
-        
+
         try {
             $promotion->update([
                 'usage_count' => 0,
             ]);
-            
+
             return redirect()->route('admin.promotions.show', $promotion->id)
                 ->with('success', 'Số lần sử dụng của khuyến mãi đã được đặt lại thành công.');
         } catch (\Exception $e) {
@@ -241,20 +257,73 @@ class PromotionController extends Controller
                 ->with('error', 'Đã xảy ra lỗi khi đặt lại số lần sử dụng của khuyến mãi: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Validate a promotion code.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    /**
+     * Hiển thị danh sách dịch vụ được áp dụng khuyến mãi
+     *
+     * @param  string  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function services($id)
+    {
+        $promotion = Promotion::with('services')->findOrFail($id);
+        $allServices = Service::where('status', 'active')->get();
+
+        return view('admin.promotions.services', compact('promotion', 'allServices'));
+    }
+
+    /**
+     * Cập nhật danh sách dịch vụ được áp dụng khuyến mãi
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function updateServices(Request $request, $id)
+    {
+        $promotion = Promotion::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'services' => 'nullable|array',
+            'services.*' => 'exists:services,id',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        try {
+            // Cập nhật liên kết với các dịch vụ
+            if ($request->has('services')) {
+                $promotion->services()->sync($request->services);
+            } else {
+                $promotion->services()->detach();
+            }
+
+            return redirect()->route('admin.promotions.services', $promotion->id)
+                ->with('success', 'Danh sách dịch vụ áp dụng khuyến mãi đã được cập nhật thành công.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Đã xảy ra lỗi khi cập nhật danh sách dịch vụ: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
     public function validateCode(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'code' => 'required|string|max:50',
             'amount' => 'required|numeric|min:0',
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -262,35 +331,35 @@ class PromotionController extends Controller
                 'errors' => $validator->errors(),
             ], 422);
         }
-        
+
         $code = strtoupper($request->code);
         $amount = $request->amount;
-        
+
         $promotion = Promotion::where('code', $code)->first();
-        
+
         if (!$promotion) {
             return response()->json([
                 'success' => false,
                 'message' => 'Mã khuyến mãi không tồn tại.',
             ]);
         }
-        
+
         if (!$promotion->is_valid) {
             return response()->json([
                 'success' => false,
                 'message' => 'Mã khuyến mãi không hợp lệ hoặc đã hết hạn.',
             ]);
         }
-        
+
         if ($amount < $promotion->minimum_purchase) {
             return response()->json([
                 'success' => false,
                 'message' => 'Giá trị đơn hàng không đủ để áp dụng mã khuyến mãi này. Tối thiểu: ' . number_format($promotion->minimum_purchase, 0, ',', '.') . ' VNĐ',
             ]);
         }
-        
+
         $discount = $promotion->calculateDiscount($amount);
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Mã khuyến mãi hợp lệ.',

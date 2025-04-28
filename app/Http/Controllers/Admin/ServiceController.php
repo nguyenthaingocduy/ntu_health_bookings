@@ -65,7 +65,6 @@ class ServiceController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'duration' => 'required|integer|min:1',
-            'promotion' => 'nullable|numeric|min:0|max:100',
             'category_id' => 'required|exists:categories,id',
             'clinic_id' => 'required|exists:clinics,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -79,7 +78,7 @@ class ServiceController extends Controller
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $filename = time() . '_' . $image->getClientOriginalName();
-            $path = $image->storeAs('services', $filename, 'public');
+            $image->storeAs('services', $filename, 'public');
             $validated['image_url'] = '/storage/services/' . $filename;
         }
 
@@ -109,7 +108,6 @@ class ServiceController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'duration' => 'required|integer|min:1',
-            'promotion' => 'nullable|numeric|min:0|max:100',
             'category_id' => 'required|exists:categories,id',
             'clinic_id' => 'required|exists:clinics,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -132,7 +130,7 @@ class ServiceController extends Controller
             // Lưu hình ảnh mới
             $image = $request->file('image');
             $filename = time() . '_' . $image->getClientOriginalName();
-            $path = $image->storeAs('services', $filename, 'public');
+            $image->storeAs('services', $filename, 'public');
             $validated['image_url'] = '/storage/services/' . $filename;
         }
 

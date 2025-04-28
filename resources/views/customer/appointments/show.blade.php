@@ -62,13 +62,22 @@
                             @if(isset($appointment->service->price))
                             <div>
                                 <p class="text-gray-600">Giá</p>
-                                @if($appointment->service->hasActivePromotion() || $appointment->promotion_code)
+                                @php
+                                    // Debug để xem giá trị của các biến
+                                    $hasActivePromotion = $appointment->service->hasActivePromotion();
+                                    $promotionCode = $appointment->promotion_code;
+                                    $finalPrice = $appointment->final_price;
+                                    $originalPrice = $appointment->service->price;
+                                    $appliedPromotion = $appointment->applied_promotion;
+                                @endphp
+
+                                @if($hasActivePromotion || $promotionCode)
                                 <div>
-                                    <p class="font-semibold text-pink-500 text-xl">{{ $appointment->formatted_final_price }}</p>
-                                    <p class="text-gray-500 line-through text-base font-medium">{{ number_format($appointment->service->price) }}đ</p>
+                                    <p class="font-semibold text-pink-500 text-xl">{{ number_format($finalPrice) }}đ</p>
+                                    <p class="text-gray-500 line-through text-base font-medium">{{ number_format($originalPrice) }}đ</p>
                                     <p class="mt-1">
                                         <span class="bg-pink-100 text-pink-800 text-sm font-semibold px-2 py-1 rounded-full">
-                                            Giảm {{ $appointment->applied_promotion }}
+                                            Giảm {{ $appliedPromotion }}
                                         </span>
                                     </p>
 
@@ -76,24 +85,23 @@
                                         $details = $appointment->service->getPromotionDetailsAttribute($appointment->promotion_code);
                                         $discountInfo = [];
 
-                                        if (is_array($details) && isset($details['direct'])) {
-                                            // Giảm giá trực tiếp
-                                            $discountInfo[] = "Giảm giá hệ thống: <span class=\"font-semibold\">{$details['direct']['discount_value']}</span>";
-                                        } elseif (is_array($details) && isset($details['discount_value']) && isset($details['is_direct']) && $details['is_direct']) {
-                                            // Giảm giá trực tiếp (một loại)
-                                            $discountInfo[] = "Giảm giá hệ thống: <span class=\"font-semibold\">{$details['discount_value']}</span>";
+                                        // Kiểm tra các khuyến mãi từ dịch vụ
+                                        if (is_array($details)) {
+                                            // Nếu có nhiều khuyến mãi
+                                            foreach ($details as $key => $detail) {
+                                                if (strpos($key, 'service_promotion_') === 0) {
+                                                    $discountInfo[] = "Khuyến mãi dịch vụ: <span class=\"font-semibold\">{$detail['discount_value']}</span>";
+                                                } elseif ($key === 'additional_promotion') {
+                                                    $discountInfo[] = "Mã khuyến mãi: <span class=\"font-semibold\">{$detail['discount_value']}</span>";
+                                                }
+                                            }
+                                        } elseif (is_array($details) && isset($details['discount_value'])) {
+                                            // Nếu chỉ có một khuyến mãi
+                                            $discountInfo[] = "Khuyến mãi: <span class=\"font-semibold\">{$details['discount_value']}</span>";
                                         }
 
-                                        if (is_array($details) && isset($details['service_promotion'])) {
-                                            // Mã khuyến mãi của dịch vụ
-                                            $discountInfo[] = "Mã khuyến mãi dịch vụ: <span class=\"font-semibold\">{$details['service_promotion']['discount_value']}</span>";
-                                        }
-
-                                        if (is_array($details) && isset($details['additional_promotion'])) {
-                                            // Mã khuyến mãi bổ sung
-                                            $discountInfo[] = "Mã khuyến mãi bổ sung: <span class=\"font-semibold\">{$details['additional_promotion']['discount_value']}</span>";
-                                        } elseif ($appointment->promotion_code && !is_array($details)) {
-                                            // Mã khuyến mãi bổ sung (nếu có)
+                                        // Nếu có mã khuyến mãi nhưng không có thông tin chi tiết
+                                        if (empty($discountInfo) && $appointment->promotion_code) {
                                             $discountInfo[] = "Mã khuyến mãi: <span class=\"font-semibold\">{$appointment->promotion_code}</span>";
                                         }
 

@@ -233,6 +233,213 @@
             }
         }
 
+        /* Popup Styles */
+        #popupContent.minimized {
+            width: auto !important;
+            max-width: 300px !important;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        #popupContent {
+            transition: all 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        #servicePromotionPopup {
+            z-index: 1000;
+        }
+
+        /* Custom scrollbar for popup */
+        #popupContent::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #popupContent::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        #popupContent::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        #popupContent::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* New Promotion Popup Styles */
+        #promotionPopup {
+            z-index: 1100;
+        }
+
+        /* When popup is shown, disable scrolling on body */
+        body.popup-active {
+            overflow: hidden;
+        }
+
+        #promotionContent {
+            max-height: 80vh;
+            height: auto;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            animation: fadeInScale 0.5s ease-out;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        #promotionContent::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #promotionContent::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        #promotionContent::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        #salonName {
+            font-family: 'Arial', sans-serif;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        #promotionDetails h3 {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 0.75rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        #promotionDetails p {
+            font-size: 1.125rem;
+            line-height: 1.5;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        #promotionDetails .promotion-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        #promotionDetails .promotion-item:hover {
+            transform: translateX(5px);
+        }
+
+        #promotionDetails .promotion-bullet {
+            color: #FFD700;
+            margin-right: 0.75rem;
+            font-size: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Highlight for promotion codes */
+        #promotionDetails .text-yellow-300 {
+            color: #FFD700 !important;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Highlight for promotion names in list */
+        #promotionDetails ul li {
+            margin-bottom: 0.25rem;
+            padding-left: 0.5rem;
+            border-left: 2px solid #FFD700;
+        }
+
+        /* Animation for discount badges */
+        @keyframes pulse-scale {
+            0% { transform: scale(1) rotate(-2deg); }
+            50% { transform: scale(1.05) rotate(-2deg); }
+            100% { transform: scale(1) rotate(-2deg); }
+        }
+
+        /* Animation for promotion name box */
+        @keyframes border-pulse {
+            0% { border-color: #FFD700; }
+            50% { border-color: #FF69B4; }
+            100% { border-color: #FFD700; }
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 105, 180, 0.4); }
+            100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+        }
+
+        #promotionDetails span.inline-block {
+            animation: pulse-scale 2s infinite ease-in-out, glow 3s infinite ease-in-out;
+        }
+
+        /* New animation for popup */
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Animate the CTA section */
+        #promotionDetails div.mt-6 {
+            animation: borderPulse 3s infinite ease-in-out;
+        }
+
+        @keyframes borderPulse {
+            0% { border-color: #FFD700; }
+            50% { border-color: #FF69B4; }
+            100% { border-color: #FFD700; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-in-out forwards;
+            opacity: 0;
+        }
+
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+
         /* Thêm CSS để làm nổi bật user menu và avatar */
         #user-menu-button {
             cursor: pointer;
@@ -377,6 +584,9 @@
         <!-- Service Promotion Popup -->
         @include('components.service-popup')
 
+        <!-- New Promotion Popup -->
+        @include('components.promotion-popup')
+
         <!-- Footer -->
         <footer class="footer">
             <div class="container mx-auto px-6">
@@ -419,6 +629,8 @@
     @stack('scripts')
     <!-- Service Popup JS -->
     <script src="{{ asset('js/service-popup.js') }}"></script>
+    <!-- Promotion Popup JS -->
+    <script src="{{ asset('js/promotion-popup.js') }}"></script>
     <!-- Toastr JS -->
     <script>
         // Script chạy ngay lập tức

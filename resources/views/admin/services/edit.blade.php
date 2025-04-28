@@ -60,19 +60,7 @@
                     @enderror
                 </div>
 
-                <div>
-                    <label for="promotion" class="block text-sm font-medium text-gray-700 mb-2">Giảm giá (%)</label>
-                    <div class="relative">
-                        <input type="number" name="promotion" id="promotion" value="{{ old('promotion', $service->promotion) }}" min="0" max="100"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500">
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                            <span class="text-gray-500 sm:text-sm">%</span>
-                        </div>
-                    </div>
-                    @error('promotion')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+
 
                 <div>
                     <label for="duration" class="block text-sm font-medium text-gray-700 mb-2">Thời gian (phút) <span class="text-red-500">*</span></label>
