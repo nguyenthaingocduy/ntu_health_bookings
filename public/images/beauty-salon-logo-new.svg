@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Circle with flower logo -->
+  <circle cx="30" cy="30" r="30" fill="white"/>
+  
+  <!-- Flower in the circle -->
+  <path d="M30 15 Q35 25 45 25 Q35 30 45 35 Q35 35 30 45 Q25 35 15 35 Q25 30 15 25 Q25 25 30 15Z" fill="#FFC107"/>
+  <circle cx="30" cy="30" r="5" fill="#FF5722"/>
+  
+  <!-- Text "Beauty" in white -->
+  <text x="65" y="38" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">Beauty</text>
+  
+  <!-- Text "Salon" in gray -->
+  <text x="145" y="38" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#9E9E9E">Salon</text>
+</svg>

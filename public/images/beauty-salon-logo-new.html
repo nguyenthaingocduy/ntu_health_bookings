@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Beauty Salon Logo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        .logo-circle {
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .flower {
+            width: 40px;
+            height: 40px;
+            position: relative;
+        }
+        .petal {
+            width: 20px;
+            height: 20px;
+            background-color: #FFC107;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .petal:nth-child(1) {
+            top: -10px;
+            left: 10px;
+        }
+        .petal:nth-child(2) {
+            top: 10px;
+            right: -10px;
+        }
+        .petal:nth-child(3) {
+            bottom: -10px;
+            left: 10px;
+        }
+        .petal:nth-child(4) {
+            top: 10px;
+            left: -10px;
+        }
+        .center {
+            width: 10px;
+            height: 10px;
+            background-color: #FF5722;
+            border-radius: 50%;
+            position: absolute;
+            top: 15px;
+            left: 15px;
+        }
+        .text {
+            margin-left: 10px;
+        }
+        .beauty {
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .salon {
+            color: #9E9E9E;
+            font-family: Arial, sans-serif;
+            font-size: 32px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <div class="logo-circle">
+            <div class="flower">
+                <div class="petal"></div>
+                <div class="petal"></div>
+                <div class="petal"></div>
+                <div class="petal"></div>
+                <div class="center"></div>
+            </div>
+        </div>
+        <div class="text">
+            <span class="beauty">Beauty</span><span class="salon">Salon</span>
+        </div>
+    </div>
+</body>
+</html>

@@ -120,6 +120,27 @@ class AppointmentController extends Controller
                 if ($timeSlot->booked_count > 0) {
                     $timeSlot->decrement('booked_count');
                 }
+
+                // Giảm số lượng sử dụng mã khuyến mãi nếu có
+                if (!empty($appointment->promotion_code)) {
+                    $promotion = \App\Models\Promotion::where('code', strtoupper($appointment->promotion_code))
+                        ->first();
+
+                    if ($promotion && $promotion->usage_count > 0) {
+                        // Giảm số lượng sử dụng đi 1
+                        $promotion->decrement('usage_count');
+
+                        // Log để debug
+                        \Illuminate\Support\Facades\Log::info('Đã giảm số lượng sử dụng mã khuyến mãi khi thay đổi trạng thái lịch hẹn', [
+                            'promotion_id' => $promotion->id,
+                            'promotion_code' => $promotion->code,
+                            'old_usage_count' => $promotion->usage_count + 1,
+                            'new_usage_count' => $promotion->usage_count,
+                            'appointment_id' => $appointment->id,
+                            'new_status' => $newStatus
+                        ]);
+                    }
+                }
             }
 
             $appointment->update([
@@ -173,6 +194,25 @@ class AppointmentController extends Controller
             $timeSlot = Time::findOrFail($appointment->time_appointments_id);
             if ($timeSlot->booked_count > 0) {
                 $timeSlot->decrement('booked_count');
+            }
+
+            // Giảm số lượng sử dụng mã khuyến mãi nếu có
+            if (!empty($appointment->promotion_code)) {
+                $promotion = \App\Models\Promotion::where('code', strtoupper($appointment->promotion_code))
+                    ->first();
+
+                if ($promotion && $promotion->usage_count > 0) {
+                    // Giảm số lượng sử dụng đi 1
+                    $promotion->decrement('usage_count');
+
+                    // Log để debug
+                    \Illuminate\Support\Facades\Log::info('Đã giảm số lượng sử dụng mã khuyến mãi khi admin hủy lịch', [
+                        'promotion_id' => $promotion->id,
+                        'promotion_code' => $promotion->code,
+                        'old_usage_count' => $promotion->usage_count + 1,
+                        'new_usage_count' => $promotion->usage_count
+                    ]);
+                }
             }
 
             $appointment->update(['status' => 'cancelled']);

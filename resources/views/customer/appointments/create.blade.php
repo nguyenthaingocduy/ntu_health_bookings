@@ -102,7 +102,14 @@
                                     <p class="text-gray-600 text-sm mb-2">{{ Str::limit($service->descriptive, 80) }}</p>
                                     <div class="flex items-center justify-between">
                                         @if(isset($service->price))
-                                        <span class="text-pink-500 font-semibold">{{ number_format($service->price) }}đ</span>
+                                        <div>
+                                            @if($service->hasActivePromotion())
+                                            <span class="text-pink-500 font-semibold">{{ $service->formatted_discounted_price }}</span>
+                                            <span class="text-gray-500 line-through text-sm ml-2">{{ number_format($service->price) }}đ</span>
+                                            @else
+                                            <span class="text-pink-500 font-semibold">{{ number_format($service->price) }}đ</span>
+                                            @endif
+                                        </div>
                                         @endif
                                         @if(isset($service->duration))
                                         <span class="text-gray-500">{{ $service->duration }} phút</span>
@@ -602,7 +609,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 showPromotionMessage(`
                     <div class="text-green-600 font-semibold">Mã khuyến mãi hợp lệ!</div>
                     <div class="mt-1">Giảm giá: <span class="font-semibold">${discountAmount}</span></div>
-                    <div>Giá sau khuyến mãi: <span class="font-semibold">${newPrice}</span></div>
+                    <div>Giá sau khuyến mãi: <span class="font-semibold text-pink-600 text-lg">${newPrice}</span></div>
+                    <div class="mt-2 p-2 bg-green-50 border border-green-100 rounded-lg">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Mã khuyến mãi sẽ được áp dụng khi đặt lịch</span>
+                        </div>
+                    </div>
                 `, 'success');
 
                 // Thêm input ẩn để lưu mã khuyến mãi

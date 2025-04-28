@@ -10,6 +10,7 @@ use App\Models\TimeSlot;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AppointmentController extends Controller
 {
@@ -23,7 +24,7 @@ class AppointmentController extends Controller
         $appointments = Appointment::with(['customer', 'service', 'timeSlot'])
             ->orderBy('appointment_date', 'desc')
             ->paginate(10);
-            
+
         return view('le-tan.appointments.index', compact('appointments'));
     }
 
@@ -37,7 +38,7 @@ class AppointmentController extends Controller
         $customers = Customer::all();
         $services = Service::where('status', 'active')->get();
         $timeSlots = TimeSlot::all();
-        
+
         return view('le-tan.appointments.create', compact('customers', 'services', 'timeSlots'));
     }
 
@@ -62,7 +63,7 @@ class AppointmentController extends Controller
             ->where('time_slot_id', $request->time_slot_id)
             ->where('status', '!=', 'cancelled')
             ->count();
-            
+
         $timeSlot = TimeSlot::find($request->time_slot_id);
         if ($existingAppointments >= $timeSlot->capacity) {
             return back()->with('error', 'Khung giờ này đã đầy. Vui lòng chọn khung giờ khác.');
@@ -92,7 +93,7 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::with(['customer', 'service', 'timeSlot', 'employee'])
             ->findOrFail($id);
-            
+
         return view('le-tan.appointments.show', compact('appointment'));
     }
 
@@ -108,7 +109,7 @@ class AppointmentController extends Controller
         $customers = Customer::all();
         $services = Service::where('status', 'active')->get();
         $timeSlots = TimeSlot::all();
-        
+
         return view('le-tan.appointments.edit', compact('appointment', 'customers', 'services', 'timeSlots'));
     }
 
@@ -130,18 +131,18 @@ class AppointmentController extends Controller
         ]);
 
         $appointment = Appointment::findOrFail($id);
-        
+
         // Nếu thay đổi ngày hoặc khung giờ, kiểm tra xem khung giờ đã đầy chưa
-        if ($appointment->appointment_date->format('Y-m-d') != $request->appointment_date || 
+        if ($appointment->appointment_date->format('Y-m-d') != $request->appointment_date ||
             $appointment->time_slot_id != $request->time_slot_id) {
-            
+
             $appointmentDate = Carbon::parse($request->appointment_date);
             $existingAppointments = Appointment::where('appointment_date', $appointmentDate->format('Y-m-d'))
                 ->where('time_slot_id', $request->time_slot_id)
                 ->where('status', '!=', 'cancelled')
                 ->where('id', '!=', $id)
                 ->count();
-                
+
             $timeSlot = TimeSlot::find($request->time_slot_id);
             if ($existingAppointments >= $timeSlot->capacity) {
                 return back()->with('error', 'Khung giờ này đã đầy. Vui lòng chọn khung giờ khác.');
@@ -170,11 +171,44 @@ class AppointmentController extends Controller
     public function cancel($id)
     {
         $appointment = Appointment::findOrFail($id);
-        $appointment->status = 'cancelled';
-        $appointment->updated_by = Auth::id();
-        $appointment->save();
 
-        return redirect()->route('le-tan.appointments.index')
-            ->with('success', 'Lịch hẹn đã được hủy thành công.');
+        // Bắt đầu transaction
+        \Illuminate\Support\Facades\DB::beginTransaction();
+
+        try {
+            // Giảm số lượng sử dụng mã khuyến mãi nếu có
+            if (!empty($appointment->promotion_code)) {
+                $promotion = \App\Models\Promotion::where('code', strtoupper($appointment->promotion_code))
+                    ->first();
+
+                if ($promotion && $promotion->usage_count > 0) {
+                    // Giảm số lượng sử dụng đi 1
+                    $promotion->decrement('usage_count');
+
+                    // Log để debug
+                    \Illuminate\Support\Facades\Log::info('Đã giảm số lượng sử dụng mã khuyến mãi khi lễ tân hủy lịch', [
+                        'promotion_id' => $promotion->id,
+                        'promotion_code' => $promotion->code,
+                        'old_usage_count' => $promotion->usage_count + 1,
+                        'new_usage_count' => $promotion->usage_count,
+                        'appointment_id' => $appointment->id
+                    ]);
+                }
+            }
+
+            $appointment->status = 'cancelled';
+            $appointment->updated_by = Auth::id();
+            $appointment->save();
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            return redirect()->route('le-tan.appointments.index')
+                ->with('success', 'Lịch hẹn đã được hủy thành công.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+
+            return redirect()->back()
+                ->with('error', 'Đã xảy ra lỗi khi hủy lịch hẹn: ' . $e->getMessage());
+        }
     }
 }

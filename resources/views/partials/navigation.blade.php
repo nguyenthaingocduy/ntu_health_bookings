@@ -1,10 +1,10 @@
 <!-- Main Navigation -->
-<nav class="bg-white w-full fixed left-0 right-0 top-0 z-40 font-sans transition-all duration-300 shadow-md">
+<nav class="bg-x w-full fixed left-0 right-0 top-0 z-40 font-sans transition-all duration-300 shadow-md">
 
     {{-- fixed = luôn luôn cố định vị trí theo viewport (không phụ thuộc cuộn trang).
     sticky = chỉ cố định sau khi lướt đến vị trí đó (trước đó thì scroll bình thường). --}}
     <!-- Top Header with Gradient -->
-    <div class="bg-gradient-to-r from-pink-500 to-purple-600 py-2 px-4 sm:px-6 lg:px-8">
+    <div class="text-gray-700 rounded-md  hover:bg-pink-50 hover:text-pink-600 transition whitespace-nowrap text-sm  flex items-center justify-center py-2 px-4 sm:px-6 lg:px-8">
         <div class="container mx-auto flex justify-end items-center space-x-4 text-black text-sm">
             <div class="flex items-center">
                 <i class="fas fa-phone-alt mr-1.5"></i>
@@ -186,7 +186,7 @@
 
         <!-- Mobile Menu -->
         <div class="md:hidden py-3 overflow-x-auto flex space-x-3 scrollbar-hide">
-            <a href="{{ route('home') }}" class="flex-shrink-0 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-black rounded-md shadow-sm hover:shadow-md transition whitespace-nowrap text-sm font-medium flex items-center justify-center">
+            <a href="{{ route('home') }}" class="flex-shrink-0 px-4 py-2 bg-white from-pink-500 ttext-gray-700 rounded-md shadow-sm hover:bg-pink-50 hover:text-pink-600 transition whitespace-nowrap text-sm font-medium flex items-center justify-center">
                 <i class="fas fa-home mr-1.5 text-pink-500 m-2"></i> Trang chủ
             </a>
             <a href="{{ route('services.index') }}" class="flex-shrink-0 px-4 py-2 bg-white text-gray-700 rounded-md shadow-sm hover:bg-pink-50 hover:text-pink-600 transition whitespace-nowrap text-sm font-medium flex items-center justify-center">

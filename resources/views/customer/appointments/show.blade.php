@@ -66,13 +66,39 @@
                                     // Debug để xem giá trị của các biến
                                     $hasActivePromotion = $appointment->service->hasActivePromotion();
                                     $promotionCode = $appointment->promotion_code;
-                                    $finalPrice = $appointment->final_price;
+
+                                    // Nếu final_price đã được lưu trong cơ sở dữ liệu, sử dụng giá trị đó
+                                    // Nếu không, tính toán lại giá sau khuyến mãi
+                                    if ($appointment->final_price) {
+                                        $finalPrice = $appointment->final_price;
+                                    } else {
+                                        $finalPrice = $appointment->service->calculatePriceWithPromotion($promotionCode);
+
+                                        // Cập nhật giá sau khuyến mãi vào cơ sở dữ liệu
+                                        try {
+                                            $appointment->final_price = $finalPrice;
+                                            $appointment->save();
+                                        } catch (\Exception $e) {
+                                            \Illuminate\Support\Facades\Log::error('Không thể cập nhật giá sau khuyến mãi: ' . $e->getMessage());
+                                        }
+                                    }
+
                                     $originalPrice = $appointment->service->price;
                                     $appliedPromotion = $appointment->applied_promotion;
+
+                                    // Log để debug
+                                    \Illuminate\Support\Facades\Log::info('Thông tin giá trong trang chi tiết lịch hẹn', [
+                                        'appointment_id' => $appointment->id,
+                                        'hasActivePromotion' => $hasActivePromotion,
+                                        'promotionCode' => $promotionCode,
+                                        'finalPrice' => $finalPrice,
+                                        'originalPrice' => $originalPrice,
+                                        'appliedPromotion' => $appliedPromotion
+                                    ]);
                                 @endphp
 
-                                @if($hasActivePromotion || $promotionCode)
                                 <div>
+                                    @if($finalPrice < $originalPrice)
                                     <p class="font-semibold text-pink-500 text-xl">{{ number_format($finalPrice) }}đ</p>
                                     <p class="text-gray-500 line-through text-base font-medium">{{ number_format($originalPrice) }}đ</p>
                                     <p class="mt-1">
@@ -105,8 +131,8 @@
                                             $discountInfo[] = "Mã khuyến mãi: <span class=\"font-semibold\">{$appointment->promotion_code}</span>";
                                         }
 
-                                        $totalSavings = $appointment->service->price - $appointment->final_price;
-                                        $savingsPercent = round(($totalSavings / $appointment->service->price) * 100, 1);
+                                        $totalSavings = $originalPrice - $finalPrice;
+                                        $savingsPercent = round(($totalSavings / $originalPrice) * 100, 1);
                                     @endphp
 
                                     <div class="mt-2 bg-gray-50 p-2 rounded-md text-xs">
@@ -126,10 +152,10 @@
                                         </div>
                                         @endforeach
                                     </div>
+                                    @else
+                                    <p class="font-semibold text-pink-500">{{ number_format($originalPrice) }}đ</p>
+                                    @endif
                                 </div>
-                                @else
-                                <p class="font-semibold text-pink-500">{{ number_format($appointment->service->price) }}đ</p>
-                                @endif
                             </div>
                             @endif
 

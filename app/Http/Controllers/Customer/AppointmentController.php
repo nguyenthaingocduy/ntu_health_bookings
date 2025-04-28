@@ -89,13 +89,21 @@ class AppointmentController extends Controller
                 // Lấy mã khuyến mãi (nếu có)
                 $promotionCode = $request->promotion_code;
 
+                // Lấy thông tin dịch vụ
+                $service = Service::findOrFail($request->service_id);
+
+                // Tính giá sau khuyến mãi
+                $finalPrice = $service->calculatePriceWithPromotion($promotionCode);
+
                 // Log thông tin đặt lịch
                 \Illuminate\Support\Facades\Log::info('Thông tin đặt lịch', [
                     'customer_id' => Auth::id(),
                     'service_id' => $request->service_id,
                     'date_appointments' => $request->date_appointments,
                     'time_appointments_id' => $request->time_appointments_id,
-                    'promotion_code' => $promotionCode
+                    'promotion_code' => $promotionCode,
+                    'original_price' => $service->price,
+                    'final_price' => $finalPrice
                 ]);
 
                 $appointment = Appointment::create([
@@ -109,7 +117,30 @@ class AppointmentController extends Controller
                     'employee_id' => $employeeId, // Gán nhân viên tạm thời
                     'notes' => $request->notes,
                     'promotion_code' => $promotionCode, // Lưu mã khuyến mãi bổ sung
+                    'final_price' => $finalPrice, // Lưu giá sau khuyến mãi
                 ]);
+
+                // Cập nhật số lượng sử dụng mã khuyến mãi nếu có
+                if (!empty($promotionCode)) {
+                    $promotion = \App\Models\Promotion::where('code', strtoupper($promotionCode))
+                        ->where('is_active', true)
+                        ->where('start_date', '<=', now())
+                        ->where('end_date', '>=', now())
+                        ->first();
+
+                    if ($promotion) {
+                        // Tăng số lượng sử dụng lên 1
+                        $promotion->increment('usage_count');
+
+                        // Log để debug
+                        \Illuminate\Support\Facades\Log::info('Đã cập nhật số lượng sử dụng mã khuyến mãi', [
+                            'promotion_id' => $promotion->id,
+                            'promotion_code' => $promotion->code,
+                            'old_usage_count' => $promotion->usage_count - 1,
+                            'new_usage_count' => $promotion->usage_count
+                        ]);
+                    }
+                }
 
                 DB::commit();
             } catch (\Exception $e) {
@@ -229,6 +260,25 @@ class AppointmentController extends Controller
             $timeSlot = Time::findOrFail($appointment->time_appointments_id);
             if ($timeSlot->booked_count > 0) {
                 $timeSlot->decrement('booked_count');
+            }
+
+            // Giảm số lượng sử dụng mã khuyến mãi nếu có
+            if (!empty($appointment->promotion_code)) {
+                $promotion = \App\Models\Promotion::where('code', strtoupper($appointment->promotion_code))
+                    ->first();
+
+                if ($promotion && $promotion->usage_count > 0) {
+                    // Giảm số lượng sử dụng đi 1
+                    $promotion->decrement('usage_count');
+
+                    // Log để debug
+                    \Illuminate\Support\Facades\Log::info('Đã giảm số lượng sử dụng mã khuyến mãi khi hủy lịch', [
+                        'promotion_id' => $promotion->id,
+                        'promotion_code' => $promotion->code,
+                        'old_usage_count' => $promotion->usage_count + 1,
+                        'new_usage_count' => $promotion->usage_count
+                    ]);
+                }
             }
 
             $appointment->update(['status' => 'cancelled']);
