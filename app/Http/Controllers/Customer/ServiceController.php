@@ -14,18 +14,60 @@ class ServiceController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function index() // <--- Thêm phương thức này vào
+    public function index(Request $request)
     {
-        // Lấy danh sách dịch vụ (chỉ lấy các dịch vụ đang hoạt động và phân trang)
-        $services = Service::with('category')
-                          ->where('status', 'active')
-                          ->paginate(10); // Sử dụng paginate để phân trang (10 dịch vụ/trang)
+        // Khởi tạo query builder
+        $query = Service::with('category')->where('status', 'active');
+
+        // Áp dụng bộ lọc danh mục nếu có
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->category);
+        }
+
+        // Áp dụng tìm kiếm nếu có
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Áp dụng sắp xếp nếu có
+        if ($request->filled('sort')) {
+            switch ($request->sort) {
+                case 'price_asc':
+                    $query->orderBy('price', 'asc');
+                    break;
+                case 'price_desc':
+                    $query->orderBy('price', 'desc');
+                    break;
+                case 'name':
+                default:
+                    $query->orderBy('name', 'asc');
+                    break;
+            }
+        } else {
+            // Mặc định sắp xếp theo tên
+            $query->orderBy('name', 'asc');
+        }
+
+        // Kiểm tra xem có yêu cầu hiển thị tất cả không
+        if ($request->has('all') && $request->all == 'true') {
+            // Lấy tất cả dịch vụ không phân trang
+            $services = $query->get();
+            $showAll = true;
+        } else {
+            // Phân trang với 12 dịch vụ mỗi trang
+            $services = $query->paginate(12);
+            $showAll = false;
+        }
 
         // Lấy danh sách danh mục
         $categories = \App\Models\Category::withCount('services')->get();
 
         // Trả về view để hiển thị danh sách dịch vụ
-        return view('services.index', compact('services', 'categories'));
+        return view('services.index', compact('services', 'categories', 'showAll'));
     }
     public function show($id)
     {

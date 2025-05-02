@@ -9,7 +9,7 @@
     <div class="absolute inset-0">
         <img src="{{ asset('images\clinics\1745049992.jpg') }}" alt="Hero background" class="w-full h-full object-cover opacity-50">
     </div>
-    
+
     <div class="relative container mx-auto px-6 py-32">
         <div class="max-w-3xl">
             <h1 class="text-5xl font-bold mb-6">Chào mừng đến với Beauty Spa</h1>
@@ -25,7 +25,7 @@
 <section class="py-16 bg-white">
     <div class="container mx-auto px-6">
         <h2 class="text-3xl font-bold text-center mb-12">Dịch vụ nổi bật</h2>
-        
+
         {{-- <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             @foreach($featuredServices as $service)
             <div class="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -93,9 +93,9 @@
             @endforeach
         </div>
 
-        
+
         <div class="text-center mt-12">
-            <a href="{{ route('services.index') }}" class="inline-block bg-white text-pink-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-50 transition shadow-md border border-pink-100">
+            <a href="{{ route('services.index', ['all' => 'true']) }}" class="inline-block bg-white text-pink-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-50 transition shadow-md border border-pink-100">
                 Xem tất cả dịch vụ
             </a>
         </div>
@@ -106,7 +106,7 @@
 <section class="py-16 bg-gray-100">
     <div class="container mx-auto px-6">
         <h2 class="text-3xl font-bold text-center mb-12">Tại sao chọn Beauty Spa?</h2>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div class="text-center">
                 <div class="w-16 h-16 mx-auto mb-4 bg-pink-500 rounded-full flex items-center justify-center">
@@ -115,7 +115,7 @@
                 <h3 class="text-xl font-semibold mb-2">Chuyên gia giàu kinh nghiệm</h3>
                 <p class="text-gray-600">Đội ngũ bác sĩ và chuyên viên của chúng tôi được đào tạo chuyên sâu và có nhiều năm kinh nghiệm.</p>
             </div>
-            
+
             <div class="text-center">
                 <div class="w-16 h-16 mx-auto mb-4 bg-pink-500 rounded-full flex items-center justify-center">
                     <i class="fas fa-spa text-2xl text-white"></i>
@@ -123,7 +123,7 @@
                 <h3 class="text-xl font-semibold mb-2">Dịch vụ chất lượng cao</h3>
                 <p class="text-gray-600">Chúng tôi sử dụng các sản phẩm và thiết bị hiện đại nhất để đảm bảo kết quả tốt nhất cho khách hàng.</p>
             </div>
-            
+
             <div class="text-center">
                 <div class="w-16 h-16 mx-auto mb-4 bg-pink-500 rounded-full flex items-center justify-center">
                     <i class="fas fa-heart text-2xl text-white"></i>
@@ -139,7 +139,7 @@
 <section class="py-16 bg-white">
     <div class="container mx-auto px-6">
         <h2 class="text-3xl font-bold text-center mb-12">Khách hàng nói gì về chúng tôi</h2>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             @foreach($testimonials as $testimonial)
             <div class="bg-gray-100 p-6 rounded-lg">

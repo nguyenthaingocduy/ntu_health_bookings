@@ -43,6 +43,16 @@
             <button type="submit" class="bg-pink-500 text-white px-6 py-2 rounded-lg hover:bg-pink-600 transition">
                 <i class="fas fa-search mr-2"></i>Tìm kiếm
             </button>
+
+            @if(request()->has('all') && request()->all == 'true')
+                <a href="{{ route('services.index', request()->except('all')) }}" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition">
+                    <i class="fas fa-list mr-2"></i>Hiển thị phân trang
+                </a>
+            @else
+                <a href="{{ route('services.index', array_merge(request()->all(), ['all' => 'true'])) }}" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition">
+                    <i class="fas fa-th-large mr-2"></i>Xem tất cả dịch vụ
+                </a>
+            @endif
         </form>
     </div>
 </section>
@@ -105,9 +115,15 @@
             </div>
 
             <!-- Pagination -->
+            @if(!isset($showAll) || !$showAll)
             <div class="mt-8">
                 {{ $services->withQueryString()->links() }}
             </div>
+            @else
+            <div class="mt-8 text-center">
+                <p class="text-gray-600">Hiển thị tất cả {{ $services->count() }} dịch vụ</p>
+            </div>
+            @endif
         @endif
     </div>
 </section>
