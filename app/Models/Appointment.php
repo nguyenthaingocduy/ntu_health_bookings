@@ -102,8 +102,14 @@ class Appointment extends Model
      */
     public function getFinalPriceAttribute()
     {
-        // Nếu đã có giá trong cơ sở dữ liệu, sử dụng giá đó
-        if ($this->attributes['final_price'] ?? null) {
+        // Nếu đã có giá trong cơ sở dữ liệu và khác 0, sử dụng giá đó
+        if (isset($this->attributes['final_price']) && $this->attributes['final_price'] > 0) {
+            // Log để debug
+            \Illuminate\Support\Facades\Log::info('Sử dụng giá từ cơ sở dữ liệu', [
+                'appointment_id' => $this->id,
+                'final_price' => $this->attributes['final_price']
+            ]);
+
             return $this->attributes['final_price'];
         }
 

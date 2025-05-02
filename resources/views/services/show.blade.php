@@ -53,43 +53,68 @@
                 @endif
 
                 <div class="mb-6">
-                    @if($service->hasActivePromotion())
+                    @php
+                        // Lấy mã khuyến mãi từ query string nếu có
+                        $promotionCode = request()->query('promotion_code');
+
+                        // Tính giá sau khuyến mãi nếu có mã khuyến mãi
+                        if ($promotionCode) {
+                            $discountedPrice = $service->calculatePriceWithPromotion($promotionCode);
+                            $hasDiscount = $discountedPrice < $service->price;
+                        } else {
+                            $hasDiscount = $service->hasActivePromotion();
+                            $discountedPrice = $hasDiscount ? $service->discounted_price : $service->price;
+                        }
+
+                        // Lấy thông tin chi tiết về khuyến mãi
+                        $details = $service->getPromotionDetailsAttribute($promotionCode);
+                        $discountInfo = [];
+
+                        if (is_array($details)) {
+                            // Xử lý nhiều loại khuyến mãi
+                            foreach ($details as $key => $detail) {
+                                if (strpos($key, 'service_promotion_') === 0) {
+                                    $discountInfo[] = "Khuyến mãi dịch vụ: <span class=\"font-semibold\">{$detail['discount_value']}</span>";
+                                } elseif ($key === 'additional_promotion') {
+                                    $discountInfo[] = "Mã khuyến mãi: <span class=\"font-semibold\">{$detail['discount_value']}</span>";
+                                } elseif (isset($detail['discount_value'])) {
+                                    $discountInfo[] = "Giảm giá: <span class=\"font-semibold\">{$detail['discount_value']}</span>";
+                                }
+                            }
+                        } elseif (is_array($details) && isset($details['discount_value'])) {
+                            // Xử lý một loại khuyến mãi
+                            $discountInfo[] = "Giảm giá: <span class=\"font-semibold\">{$details['discount_value']}</span>";
+                        }
+
+                        // Nếu có mã khuyến mãi nhưng không có thông tin chi tiết
+                        if (empty($discountInfo) && $promotionCode) {
+                            $promotion = \App\Models\Promotion::where('code', $promotionCode)
+                                ->where('is_active', true)
+                                ->where('start_date', '<=', now())
+                                ->where('end_date', '>=', now())
+                                ->first();
+
+                            if ($promotion) {
+                                $discountInfo[] = "Mã khuyến mãi: <span class=\"font-semibold\">{$promotion->formatted_discount_value}</span>";
+                            }
+                        }
+
+                        // Tính tiết kiệm
+                        if ($hasDiscount) {
+                            $totalSavings = $service->price - $discountedPrice;
+                            $savingsPercent = round(($totalSavings / $service->price) * 100, 1);
+                        }
+                    @endphp
+
+                    @if($hasDiscount)
                     <div class="flex items-center mb-2">
                         <div class="flex flex-col">
-                            <span class="text-3xl font-bold text-pink-500">{{ $service->formatted_discounted_price }}</span>
+                            <span class="text-3xl font-bold text-pink-500">{{ number_format($discountedPrice) }}đ</span>
                             <span class="text-gray-500 line-through text-lg font-medium">{{ number_format($service->price) }}đ</span>
                         </div>
                         <span class="text-gray-500 ml-4">/{{ $service->duration }} phút</span>
                     </div>
                     <div class="bg-green-50 rounded-md p-3 text-sm border border-green-100">
-                        @php
-                            $details = $service->promotion_details;
-                            $discountPercent = 0;
-                            $discountInfo = [];
-
-                            if (is_array($details) && isset($details['direct'])) {
-                                // Giảm giá trực tiếp
-                                $directDiscount = str_replace('%', '', $details['direct']['discount_value']);
-                                $discountPercent += (float)$directDiscount;
-                                $discountInfo[] = "Giảm giá hệ thống: <span class=\"font-semibold\">{$details['direct']['discount_value']}</span>";
-                            } elseif (is_array($details) && isset($details['discount_value'])) {
-                                // Giảm giá trực tiếp (một loại)
-                                $directDiscount = str_replace('%', '', $details['discount_value']);
-                                $discountPercent += (float)$directDiscount;
-                                $discountInfo[] = "Giảm giá hệ thống: <span class=\"font-semibold\">{$details['discount_value']}</span>";
-                            }
-
-                            if (is_array($details) && isset($details['service_promotion'])) {
-                                // Mã khuyến mãi của dịch vụ
-                                $promoDiscount = str_replace('%', '', $details['service_promotion']['discount_value']);
-                                $discountPercent += (float)$promoDiscount;
-                                $discountInfo[] = "Mã khuyến mãi: <span class=\"font-semibold\">{$details['service_promotion']['discount_value']}</span>";
-                            }
-
-                            $totalSavings = $service->price - $service->discounted_price;
-                            $savingsPercent = round(($totalSavings / $service->price) * 100, 1);
-                        @endphp
-
                         <div class="flex items-center text-green-700 font-medium">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -105,6 +130,17 @@
                             <span>{!! $info !!}</span>
                         </div>
                         @endforeach
+
+                        @if($promotionCode)
+                        <div class="mt-3 pt-2 border-t border-green-100">
+                            <div class="flex items-center text-pink-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>Đã áp dụng mã: <span class="font-mono font-bold">{{ $promotionCode }}</span></span>
+                            </div>
+                        </div>
+                        @endif
                     </div>
                     @else
                     <div class="flex items-center">

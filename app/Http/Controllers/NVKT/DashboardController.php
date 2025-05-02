@@ -32,10 +32,28 @@ class DashboardController extends Controller
         $professionalNotesCount = ProfessionalNote::where('created_by', Auth::id())->count();
 
         // Lấy danh sách lịch hẹn hôm nay
-        $todayAppointments = Appointment::with(['customer', 'service', 'timeSlot'])
+        $todayAppointments = Appointment::with(['customer', 'service', 'timeAppointment'])
             ->whereDate('date_appointments', Carbon::today())
             ->where('employee_id', Auth::id())
-            ->orderBy('time_slot_id')
+            ->orderBy('time_appointments_id')
+            ->get();
+
+        // Lấy danh sách lịch hẹn sắp tới (trong 7 ngày tới)
+        $upcomingAppointments = Appointment::with(['customer', 'service', 'timeAppointment'])
+            ->whereDate('date_appointments', '>', Carbon::today())
+            ->whereDate('date_appointments', '<=', Carbon::today()->addDays(7))
+            ->where('employee_id', Auth::id())
+            ->orderBy('date_appointments')
+            ->orderBy('time_appointments_id')
+            ->get();
+
+        // Lấy danh sách lịch hẹn cần chú ý (đang chờ xử lý hoặc đang tiến hành)
+        $pendingAppointments = Appointment::with(['customer', 'service', 'timeAppointment'])
+            ->whereIn('status', ['pending', 'confirmed', 'in_progress'])
+            ->where('employee_id', Auth::id())
+            ->orderBy('date_appointments')
+            ->orderBy('time_appointments_id')
+            ->limit(5)
             ->get();
 
         // Lấy ghi chú gần đây
@@ -45,12 +63,25 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Lấy danh sách khách hàng thường xuyên (có nhiều lịch hẹn nhất)
+        $regularCustomers = Appointment::with('customer')
+            ->where('employee_id', Auth::id())
+            ->select('customer_id')
+            ->selectRaw('COUNT(*) as appointment_count')
+            ->groupBy('customer_id')
+            ->orderByDesc('appointment_count')
+            ->limit(5)
+            ->get();
+
         return view('nvkt.dashboard', compact(
             'todayAppointmentsCount',
             'completedSessionsCount',
             'professionalNotesCount',
             'todayAppointments',
-            'recentNotes'
+            'upcomingAppointments',
+            'pendingAppointments',
+            'recentNotes',
+            'regularCustomers'
         ));
     }
 }

@@ -15,12 +15,20 @@
         <div class="max-w-4xl mx-auto">
             <!-- Hiển thị mã khuyến mãi dịch vụ -->
             <div class="mb-8 bg-gradient-to-r from-pink-50 to-pink-100 rounded-lg p-6 border border-pink-200 shadow-sm">
-                <h3 class="text-xl font-bold text-pink-700 flex items-center mb-4">
-                    <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm2.5 3a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm2.45 4a2.5 2.5 0 10-4.9 0h4.9zM12 9a1 1 0 100 2h5a1 1 0 100-2h-5zm-8 4a1 1 0 100 2h8a1 1 0 100-2H4z" clip-rule="evenodd"></path>
-                    </svg>
-                    Mã khuyến mãi đang áp dụng
-                </h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-pink-700 flex items-center">
+                        <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm2.5 3a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm2.45 4a2.5 2.5 0 10-4.9 0h4.9zM12 9a1 1 0 100 2h5a1 1 0 100-2h-5zm-8 4a1 1 0 100 2h8a1 1 0 100-2H4z" clip-rule="evenodd"></path>
+                        </svg>
+                        Mã khuyến mãi đang áp dụng
+                    </h3>
+                    <button onclick="fetchActivePromotions()" class="text-pink-500 hover:text-pink-700 flex items-center text-sm">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Làm mới
+                    </button>
+                </div>
                 <div id="promotions-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="flex justify-center items-center h-24">
                         <div class="animate-pulse flex space-x-4">
@@ -383,11 +391,15 @@ function selectTimeSlot(slotId) {
             buttonHighlighted: slotBtn ? slotBtn.classList.contains('bg-pink-500') : false
         });
 
-        // Kiểm tra nút Submit
-        checkSubmitButtonStatus();
+        // Kích hoạt sự kiện change để các listener khác biết rằng đã chọn thời gian
+        radio.dispatchEvent(new Event('change'));
 
-        // Thêm alert để debug
-        // alert('Đã chọn thời gian: ' + slotId);
+        // Kiểm tra nút Submit
+        if (typeof checkSubmitButtonStatus === 'function') {
+            checkSubmitButtonStatus();
+        } else if (typeof checkSubmitButton === 'function') {
+            checkSubmitButton();
+        }
     } catch (error) {
         console.error('Lỗi khi chọn thời gian:', error);
     }
@@ -458,6 +470,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const applyPromotionButton = document.getElementById('apply-promotion');
     const promotionMessage = document.getElementById('promotion-message');
 
+    // Biến để theo dõi số lần thử lại
+    window.promotionRetryCount = 0;
+    window.maxPromotionRetries = 3;
+
     // Thiết lập ngày tối thiểu là ngày hôm nay thay vì ngày mai
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
@@ -471,11 +487,12 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('- Set min to: ' + dateInput.min);
 
     // Lấy radio button được chọn ban đầu (nếu có)
-    let selectedServiceId = null;
+    window.selectedServiceId = null;
     const checkedRadio = document.querySelector('input[name="service_id"]:checked');
     if (checkedRadio) {
-        selectedServiceId = checkedRadio.value;
-        updateServiceDisplay(selectedServiceId);
+        window.selectedServiceId = checkedRadio.value;
+        console.log('Dịch vụ đã chọn ban đầu:', window.selectedServiceId);
+        updateServiceDisplay(window.selectedServiceId);
 
         // Cuộn đến dịch vụ đã chọn
         setTimeout(() => {
@@ -484,6 +501,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }, 500);
+    } else {
+        console.log('Không có dịch vụ nào được chọn ban đầu');
     }
 
     // Lấy mốc thời gian được chọn (nếu có)
@@ -513,12 +532,16 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[name="service_id"]').forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.checked) {
-                selectedServiceId = this.value;
-                updateServiceDisplay(selectedServiceId);
+                window.selectedServiceId = this.value;
+                console.log('Dịch vụ đã chọn (từ sự kiện change):', window.selectedServiceId);
+                updateServiceDisplay(window.selectedServiceId);
 
                 // Nếu đã chọn ngày, cập nhật các khung giờ
                 if (dateInput.value) {
-                    fetchAvailableTimeSlots(selectedServiceId, dateInput.value);
+                    console.log('Đã chọn ngày, gọi fetchAvailableTimeSlots');
+                    fetchAvailableTimeSlots(window.selectedServiceId, dateInput.value);
+                } else {
+                    console.log('Chưa chọn ngày, không gọi fetchAvailableTimeSlots');
                 }
             }
         });
@@ -563,7 +586,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedDate = this.value;
         console.log('Ngày đã chọn:', selectedDate);
 
-        if (!selectedServiceId) {
+        if (!window.selectedServiceId) {
+            console.log('Chưa chọn dịch vụ, hiển thị thông báo');
             timeSlotContainer.innerHTML = `
                 <div class="col-span-3 text-yellow-600 p-4 rounded-lg border border-yellow-200 bg-yellow-50">
                     <i class="fas fa-exclamation-triangle mr-2"></i>
@@ -585,6 +609,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('- Difference (days):', Math.floor((selectedDateObj - today) / (1000 * 60 * 60 * 24)));
 
         if (selectedDateObj < today) {
+            console.log('Ngày trong quá khứ, hiển thị thông báo');
             timeSlotContainer.innerHTML = `
                 <div class="col-span-3 text-red-500 p-4 rounded-lg border border-red-200 bg-red-50">
                     <i class="fas fa-exclamation-circle mr-2"></i>
@@ -594,105 +619,151 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        fetchAvailableTimeSlots(selectedServiceId, selectedDate);
+        console.log('Gọi fetchAvailableTimeSlots với serviceId:', window.selectedServiceId, 'và date:', selectedDate);
+        fetchAvailableTimeSlots(window.selectedServiceId, selectedDate);
     });
 
     // Hàm lấy các khung giờ có sẵn
     function fetchAvailableTimeSlots(serviceId, date) {
-        // Hiển thị loading
-        timeSlotContainer.innerHTML = `
-            <div class="col-span-3 text-gray-500 flex items-center justify-center py-4">
-                <div class="loading-spinner mr-3"></div> Đang kiểm tra khung giờ khả dụng...
-            </div>
-        `;
+        try {
+            console.log('Bắt đầu fetchAvailableTimeSlots với:', { serviceId, date });
 
-        // Gọi API để lấy khung giờ - sử dụng API cũ
-        const apiUrl = `/api/check-available-slots?service_id=${serviceId}&date=${date}`;
-        console.log('Gọi API:', apiUrl);
+            if (!serviceId) {
+                console.error('Không có serviceId được cung cấp');
+                timeSlotContainer.innerHTML = `
+                    <div class="col-span-3 text-yellow-600 p-4 rounded-lg border border-yellow-200 bg-yellow-50">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Vui lòng chọn dịch vụ trước khi chọn ngày.
+                    </div>
+                `;
+                return;
+            }
 
-        fetch(apiUrl)
-            .then(response => {
-                console.log('API status:', response.status);
-                if (!response.ok) {
-                    throw new Error('Lỗi kết nối: ' + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Dữ liệu từ API:', data);
+            if (!date) {
+                console.error('Không có date được cung cấp');
+                timeSlotContainer.innerHTML = `
+                    <div class="col-span-3 text-yellow-600 p-4 rounded-lg border border-yellow-200 bg-yellow-50">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Vui lòng chọn ngày.
+                    </div>
+                `;
+                return;
+            }
 
-                if (data.success && data.available_slots && data.available_slots.length > 0) {
-                    // Hiển thị các khung giờ khả dụng
-                    timeSlotContainer.innerHTML = `
-                        <div class="col-span-3 mb-4">
-                            <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded-md">
-                                <div class="flex">
-                                    <div class="flex-shrink-0">
-                                        <svg class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+            // Hiển thị loading
+            timeSlotContainer.innerHTML = `
+                <div class="col-span-3 text-gray-500 flex items-center justify-center py-4">
+                    <div class="loading-spinner mr-3"></div> Đang kiểm tra khung giờ khả dụng...
+                </div>
+            `;
+
+            // Gọi API để lấy khung giờ
+            const apiUrl = `/api/check-available-slots?service_id=${serviceId}&date=${date}&customer_id={{ Auth::id() }}`;
+            console.log('Gọi API:', apiUrl);
+
+            fetch(apiUrl)
+                .then(response => {
+                    console.log('API status:', response.status);
+                    if (!response.ok) {
+                        throw new Error('Lỗi kết nối: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Dữ liệu từ API:', data);
+
+                    // Kiểm tra xem data có tồn tại không
+                    if (!data) {
+                        throw new Error('Không nhận được dữ liệu từ API');
+                    }
+
+                    if (data.success && data.available_slots && data.available_slots.length > 0) {
+                        // Hiển thị các khung giờ khả dụng
+                        timeSlotContainer.innerHTML = `
+                            <div class="col-span-3 mb-3">
+                                <div class="bg-blue-50 border border-blue-200 text-blue-700 p-2 rounded-md">
+                                    <div class="flex items-center text-xs">
+                                        <svg class="h-2 w-2 text-blue-500 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                                         </svg>
-                                    </div>
-                                    <div class="ml-3">
-                                        <p class="text-sm font-medium">
-                                            Mỗi khung giờ chỉ phục vụ một dịch vụ duy nhất. Nếu khung giờ đã được đặt cho dịch vụ khác, bạn sẽ không thể chọn khung giờ đó.
-                                        </p>
+                                        <span> Mỗi khách hàng chỉ đặt được 1 dịch vụ/khung giờ.</span>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
-
-                    data.available_slots.forEach(slot => {
-                        const availableText = slot.available_slots > 0
-                            ? `<span class="text-xs text-green-600 block mt-1">${slot.available_slots}/${slot.capacity} chỗ trống</span>`
-                            : '<span class="text-xs text-red-600 block mt-1">Đã đầy</span>';
-
-                        const timeSlotHTML = `
-                            <div class="time-slot-wrapper mb-2">
-                                <button type="button"
-                                     class="w-full text-center px-4 py-2 border rounded-lg cursor-pointer hover:border-pink-500 transition time-slot-btn block"
-                                     id="time-slot-btn-${slot.id}"
-                                     onclick="selectTimeSlot(${slot.id})">
-                                    ${slot.time}
-                                    ${availableText}
-                                </button>
-                                <input type="radio" name="time_appointments_id" id="time-input-${slot.id}" value="${slot.id}" class="hidden time-radio" required>
-                            </div>
                         `;
 
-                        timeSlotContainer.insertAdjacentHTML('beforeend', timeSlotHTML);
-                    });
+                        // Thêm từng khung giờ vào container
+                        data.available_slots.forEach(slot => {
+                            try {
+                                const availableText = slot.available_slots > 0
+                                    ? `<span class="text-xs text-green-600 block mt-1">${slot.available_slots}/${slot.capacity} chỗ trống</span>`
+                                    : '<span class="text-xs text-red-600 block mt-1">Đã đầy</span>';
 
-                    // Thêm sự kiện click trực tiếp cho các button thời gian
-                    document.querySelectorAll('.time-slot-btn').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            // Lấy ID từ ID của button (time-slot-btn-123 -> 123)
-                            const slotId = this.id.replace('time-slot-btn-', '');
-                            console.log('Click trực tiếp vào button thời gian:', slotId);
+                                const timeSlotHTML = `
+                                    <div class="time-slot-wrapper mb-2">
+                                        <button type="button"
+                                            class="w-full text-center px-4 py-2 border rounded-lg cursor-pointer hover:border-pink-500 transition time-slot-btn block"
+                                            id="time-slot-btn-${slot.id}"
+                                            onclick="selectTimeSlot(${slot.id})">
+                                            ${slot.time}
+                                            ${availableText}
+                                        </button>
+                                        <input type="radio" name="time_appointments_id" id="time-input-${slot.id}" value="${slot.id}" class="hidden time-radio" required>
+                                    </div>
+                                `;
 
-                            // Gọi hàm chọn thời gian
-                            selectTimeSlot(slotId);
+                                timeSlotContainer.insertAdjacentHTML('beforeend', timeSlotHTML);
+                            } catch (slotError) {
+                                console.error('Lỗi khi xử lý khung giờ:', slotError, slot);
+                            }
                         });
-                    });
-                } else {
-                    // Không có khung giờ khả dụng
+
+                        // Thêm sự kiện click trực tiếp cho các button thời gian
+                        document.querySelectorAll('.time-slot-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                try {
+                                    // Lấy ID từ ID của button (time-slot-btn-123 -> 123)
+                                    const slotId = this.id.replace('time-slot-btn-', '');
+                                    console.log('Click trực tiếp vào button thời gian:', slotId);
+
+                                    // Gọi hàm chọn thời gian
+                                    selectTimeSlot(slotId);
+                                } catch (btnError) {
+                                    console.error('Lỗi khi xử lý click button thời gian:', btnError);
+                                }
+                            });
+                        });
+
+                        console.log('Đã hiển thị', data.available_slots.length, 'khung giờ');
+                    } else {
+                        // Không có khung giờ khả dụng
+                        timeSlotContainer.innerHTML = `
+                            <div class="col-span-3 text-red-500 p-4 rounded-lg border border-red-200 bg-red-50">
+                                <i class="fas fa-times-circle mr-2"></i>
+                                Không có khung giờ nào khả dụng cho ngày này. Vui lòng chọn ngày khác.
+                            </div>
+                        `;
+                        console.log('Không có khung giờ khả dụng');
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi khi gọi API:', error);
                     timeSlotContainer.innerHTML = `
                         <div class="col-span-3 text-red-500 p-4 rounded-lg border border-red-200 bg-red-50">
-                            <i class="fas fa-times-circle mr-2"></i>
-                            Không có khung giờ nào khả dụng cho ngày này. Vui lòng chọn ngày khác.
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            Đã xảy ra lỗi khi kiểm tra khung giờ: ${error.message}. Vui lòng thử lại sau.
                         </div>
                     `;
-                }
-            })
-            .catch(error => {
-                console.error('Lỗi:', error);
-                timeSlotContainer.innerHTML = `
-                    <div class="col-span-3 text-red-500 p-4 rounded-lg border border-red-200 bg-red-50">
-                        <i class="fas fa-exclamation-circle mr-2"></i>
-                        Đã xảy ra lỗi khi kiểm tra khung giờ: ${error.message}. Vui lòng thử lại sau.
-                    </div>
-                `;
-            });
+                });
+        } catch (error) {
+            console.error('Lỗi tổng thể trong fetchAvailableTimeSlots:', error);
+            timeSlotContainer.innerHTML = `
+                <div class="col-span-3 text-red-500 p-4 rounded-lg border border-red-200 bg-red-50">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    Đã xảy ra lỗi: ${error.message}. Vui lòng thử lại sau.
+                </div>
+            `;
+        }
     }
 
     // Kiểm tra và cập nhật trạng thái nút Submit
@@ -808,8 +879,26 @@ document.addEventListener('DOMContentLoaded', function() {
         // Lấy container khuyến mãi ở đầu trang
         const topPromotionsContainer = document.getElementById('promotions-container');
 
-        fetch('/api/active-promotions')
+        // Tăng số lần thử
+        window.promotionRetryCount++;
+
+        // Hiển thị trạng thái đang tải
+        topPromotionsContainer.innerHTML = `
+            <div class="col-span-2 bg-white rounded-lg p-4 border border-pink-200 shadow-sm">
+                <div class="text-center py-4">
+                    <div class="loading-spinner mx-auto mb-3"></div>
+                    <p class="text-gray-600">Đang tải thông tin khuyến mãi${window.promotionRetryCount > 1 ? ` (lần thử ${window.promotionRetryCount})` : ''}...</p>
+                </div>
+            </div>
+        `;
+
+        // Sử dụng đường dẫn tuyệt đối
+        const apiUrl = '{{ url("/api/active-promotions") }}';
+        console.log('Gọi API khuyến mãi:', apiUrl, '- Lần thử:', window.promotionRetryCount);
+
+        fetch(apiUrl)
             .then(response => {
+                console.log('API status:', response.status);
                 if (!response.ok) {
                     throw new Error('Lỗi kết nối: ' + response.status);
                 }
@@ -832,72 +921,91 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Thêm các khuyến mãi vào cả hai container
                     data.promotions.forEach(promotion => {
-                        const discountText = promotion.discount_type === 'percentage'
-                            ? `${promotion.discount_value}%`
-                            : `${new Intl.NumberFormat('vi-VN').format(promotion.discount_value)}đ`;
+                        try {
+                            // Kiểm tra xem promotion có tồn tại và có các thuộc tính cần thiết không
+                            if (!promotion || !promotion.id) {
+                                console.error('Promotion data is invalid:', promotion);
+                                return; // Skip this promotion
+                            }
 
-                        const minimumText = promotion.minimum_purchase > 0
-                            ? `<span class="text-xs text-gray-600">Áp dụng cho đơn hàng từ ${new Intl.NumberFormat('vi-VN').format(promotion.minimum_purchase)}đ</span>`
-                            : '';
+                            const discountText = promotion.discount_type === 'percentage'
+                                ? `${promotion.discount_value}%`
+                                : `${new Intl.NumberFormat('vi-VN').format(promotion.discount_value)}đ`;
 
-                        const validUntil = new Date(promotion.end_date);
-                        const formattedDate = new Intl.DateTimeFormat('vi-VN', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                        }).format(validUntil);
+                            const minimumText = promotion.minimum_purchase > 0
+                                ? `<span class="text-xs text-gray-600">Áp dụng cho đơn hàng từ ${new Intl.NumberFormat('vi-VN').format(promotion.minimum_purchase)}đ</span>`
+                                : '';
 
-                        // HTML cho container trong form
-                        const formPromotionHTML = `
-                            <div class="bg-white rounded-lg p-3 border border-pink-100 shadow-sm">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <div class="font-semibold text-pink-600">${promotion.title || promotion.name || 'Khuyến mãi'}</div>
-                                        <div class="text-sm text-gray-600">Mã: <span class="font-mono font-semibold">${promotion.code}</span></div>
-                                        <div class="text-sm font-semibold text-green-600">Giảm ${discountText}</div>
-                                        ${minimumText}
-                                    </div>
-                                    <div class="text-right">
-                                        <div class="text-xs text-gray-500">Có hiệu lực đến</div>
-                                        <div class="text-sm font-medium">${formattedDate}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
+                            // Kiểm tra end_date có tồn tại không
+                            let formattedDate = 'Không xác định';
+                            if (promotion.end_date) {
+                                try {
+                                    const validUntil = new Date(promotion.end_date);
+                                    formattedDate = new Intl.DateTimeFormat('vi-VN', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric'
+                                    }).format(validUntil);
+                                } catch (dateError) {
+                                    console.error('Error formatting date:', dateError);
+                                }
+                            }
 
-                        // HTML cho container ở đầu trang
-                        const topPromotionHTML = `
-                            <div class="bg-white rounded-lg p-4 border border-pink-200 shadow-sm hover:shadow-md transition">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <h5 class="font-bold text-gray-800 text-lg">${promotion.title || promotion.name || 'Khuyến mãi'}</h5>
-                                        <p class="text-gray-600 mt-1">${promotion.description || 'Ưu đãi đặc biệt'}</p>
-                                    </div>
-                                    <div class="bg-pink-500 text-white px-3 py-1 rounded-full font-bold">
-                                        ${discountText}
-                                    </div>
-                                </div>
-                                <div class="mt-3 flex justify-between items-center">
-                                    <div class="text-sm">
-                                        Mã: <span class="font-mono font-bold text-pink-600 text-lg">${promotion.code}</span>
-                                    </div>
-                                    <div class="text-sm text-gray-500">
-                                        Hạn sử dụng: ${formattedDate}
+                            // HTML cho container trong form
+                            const formPromotionHTML = `
+                                <div class="bg-white rounded-lg p-3 border border-pink-100 shadow-sm">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <div class="font-semibold text-pink-600">${promotion.title || promotion.name || 'Khuyến mãi'}</div>
+                                            <div class="text-sm text-gray-600">Mã: <span class="font-mono font-semibold">${promotion.code || ''}</span></div>
+                                            <div class="text-sm font-semibold text-green-600">Giảm ${discountText}</div>
+                                            ${minimumText}
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-xs text-gray-500">Có hiệu lực đến</div>
+                                            <div class="text-sm font-medium">${formattedDate}</div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="mt-2 text-xs text-gray-500">
-                                    ${promotion.minimum_purchase > 0 ? 'Áp dụng cho đơn hàng từ ' + new Intl.NumberFormat('vi-VN').format(promotion.minimum_purchase) + 'đ' : 'Áp dụng cho tất cả đơn hàng'}
+                            `;
+
+                            // HTML cho container ở đầu trang
+                            const topPromotionHTML = `
+                                <div class="bg-white rounded-lg p-4 border border-pink-200 shadow-sm hover:shadow-md transition">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h5 class="font-bold text-gray-800 text-lg">${promotion.title || promotion.name || 'Khuyến mãi'}</h5>
+                                            <p class="text-gray-600 mt-1">${promotion.description || 'Ưu đãi đặc biệt'}</p>
+                                        </div>
+                                        <div class="bg-pink-500 text-white px-3 py-1 rounded-full font-bold">
+                                            ${discountText}
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 flex justify-between items-center">
+                                        <div class="text-sm">
+                                            Mã: <span class="font-mono font-bold text-pink-600 text-lg">${promotion.code || ''}</span>
+                                        </div>
+                                        <div class="text-sm text-gray-500">
+                                            Hạn sử dụng: ${formattedDate}
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 text-xs text-gray-500">
+                                        ${promotion.minimum_purchase > 0 ? 'Áp dụng cho đơn hàng từ ' + new Intl.NumberFormat('vi-VN').format(promotion.minimum_purchase) + 'đ' : 'Áp dụng cho tất cả đơn hàng'}
+                                    </div>
                                 </div>
-                            </div>
-                        `;
+                            `;
 
-                        // Thêm vào container trong form
-                        promotionsList.insertAdjacentHTML('beforeend', formPromotionHTML);
+                            // Thêm vào container trong form
+                            promotionsList.insertAdjacentHTML('beforeend', formPromotionHTML);
 
-                        // Thêm vào container ở đầu trang
-                        topPromotionsContainer.insertAdjacentHTML('beforeend', topPromotionHTML);
+                            // Thêm vào container ở đầu trang
+                            topPromotionsContainer.insertAdjacentHTML('beforeend', topPromotionHTML);
+                        } catch (error) {
+                            console.error('Error processing promotion:', error, promotion);
+                        }
                     });
-                } else {
+                }
+                else {
                     // Ẩn container khuyến mãi trong form nếu không có khuyến mãi nào
                     activePromotionsContainer.classList.add('hidden');
 
@@ -919,18 +1027,38 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Lỗi khi lấy khuyến mãi:', error);
                 activePromotionsContainer.classList.add('hidden');
 
-                // Hiển thị thông báo lỗi ở đầu trang
-                topPromotionsContainer.innerHTML = `
-                    <div class="col-span-2 bg-white rounded-lg p-4 border border-red-200 shadow-sm">
-                        <div class="text-center py-4">
-                            <svg class="w-12 h-12 text-red-300 mx-auto mb-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                            </svg>
-                            <p class="text-red-600">Không thể tải thông tin khuyến mãi</p>
-                            <p class="text-sm text-gray-500 mt-1">Vui lòng làm mới trang để thử lại</p>
+                // Nếu chưa vượt quá số lần thử lại tối đa, tự động thử lại sau 2 giây
+                if (window.promotionRetryCount < window.maxPromotionRetries) {
+                    // Hiển thị thông báo đang thử lại
+                    topPromotionsContainer.innerHTML = `
+                        <div class="col-span-2 bg-white rounded-lg p-4 border border-yellow-200 shadow-sm">
+                            <div class="text-center py-4">
+                                <div class="loading-spinner mx-auto mb-3"></div>
+                                <p class="text-yellow-600">Đang thử lại (${window.promotionRetryCount}/${window.maxPromotionRetries})...</p>
+                                <p class="text-sm text-gray-500 mt-1">Lỗi trước đó: ${error.message || 'Không xác định'}</p>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+
+                    // Thử lại sau 2 giây
+                    setTimeout(fetchActivePromotions, 2000);
+                } else {
+                    // Đã vượt quá số lần thử lại, hiển thị thông báo lỗi
+                    topPromotionsContainer.innerHTML = `
+                        <div class="col-span-2 bg-white rounded-lg p-4 border border-red-200 shadow-sm">
+                            <div class="text-center py-4">
+                                <svg class="w-12 h-12 text-red-300 mx-auto mb-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                                <p class="text-red-600">Không thể tải thông tin khuyến mãi</p>
+                                <p class="text-sm text-gray-500 mt-1 mb-3">Lỗi: ${error.message || 'Không xác định'}</p>
+                                <button onclick="window.promotionRetryCount = 0; fetchActivePromotions()" class="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition">
+                                    Thử lại
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
             });
     }
 
@@ -938,8 +1066,15 @@ document.addEventListener('DOMContentLoaded', function() {
     checkSubmitButton();
 
     // Nếu đã có cả dịch vụ và ngày được chọn khi trang load, kiểm tra khung giờ
-    if (selectedServiceId && dateInput.value) {
-        fetchAvailableTimeSlots(selectedServiceId, dateInput.value);
+    if (window.selectedServiceId && dateInput.value) {
+        console.log('Trang vừa load, đã có cả dịch vụ và ngày, gọi fetchAvailableTimeSlots');
+        console.log('- selectedServiceId:', window.selectedServiceId);
+        console.log('- date:', dateInput.value);
+        fetchAvailableTimeSlots(window.selectedServiceId, dateInput.value);
+    } else {
+        console.log('Trang vừa load, chưa đủ thông tin để gọi fetchAvailableTimeSlots');
+        console.log('- selectedServiceId:', window.selectedServiceId);
+        console.log('- date:', dateInput.value);
     }
 });
 </script>

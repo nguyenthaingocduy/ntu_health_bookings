@@ -197,10 +197,50 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500 mb-2">Mô tả dịch vụ</h4>
+                            <div class="bg-gray-50 rounded-lg p-4 h-full">
+                                <p class="text-sm text-gray-700">{{ $appointment->service->description }}</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500 mb-2">Thông tin chi tiết</h4>
+                            <div class="bg-gray-50 rounded-lg p-4 h-full">
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-500">Loại dịch vụ:</span>
+                                        <span class="text-sm font-medium text-gray-900">{{ $appointment->service->category ? $appointment->service->category->name : 'Không phân loại' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-500">Thời gian thực hiện:</span>
+                                        <span class="text-sm font-medium text-gray-900">{{ $appointment->service->duration }} phút</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-500">Giá gốc:</span>
+                                        <span class="text-sm font-medium text-gray-900">{{ number_format($appointment->service->price, 0, ',', '.') }} VNĐ</span>
+                                    </div>
+                                    @if($appointment->promotion_code)
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-500">Mã khuyến mãi:</span>
+                                        <span class="text-sm font-medium text-green-600">{{ $appointment->promotion_code }}</span>
+                                    </div>
+                                    @endif
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-500">Giá cuối cùng:</span>
+                                        <span class="text-sm font-medium text-pink-600">{{ number_format($appointment->final_price, 0, ',', '.') }} VNĐ</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mt-4">
-                        <h4 class="text-sm font-medium text-gray-500 mb-2">Mô tả dịch vụ</h4>
+                        <h4 class="text-sm font-medium text-gray-500 mb-2">Hướng dẫn thực hiện</h4>
                         <div class="bg-gray-50 rounded-lg p-4">
-                            <p class="text-sm text-gray-700">{{ $appointment->service->description }}</p>
+                            <p class="text-sm text-gray-700">{{ $appointment->service->instructions ?? 'Không có hướng dẫn cụ thể cho dịch vụ này.' }}</p>
                         </div>
                     </div>
                 </div>
@@ -267,6 +307,90 @@
                             Xem chi tiết khách hàng
                         </a>
                     </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md overflow-hidden mt-6">
+                <div class="bg-gradient-to-r from-purple-50 to-purple-100 px-6 py-4 border-b border-gray-200">
+                    <h3 class="font-semibold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-purple-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
+                        </svg>
+                        Ghi chú chuyên môn
+                    </h3>
+                </div>
+                <div class="p-6">
+                    @if(isset($appointment->professionalNotes) && count($appointment->professionalNotes) > 0)
+                        <div class="space-y-4">
+                            @foreach($appointment->professionalNotes as $note)
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <div class="flex justify-between items-start">
+                                        <h4 class="text-sm font-medium text-gray-900">{{ $note->title }}</h4>
+                                        <span class="text-xs text-gray-500">{{ $note->created_at->format('d/m/Y H:i') }}</span>
+                                    </div>
+                                    <p class="mt-2 text-sm text-gray-700">{{ $note->content }}</p>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-4">
+                            <p class="text-sm text-gray-500">Chưa có ghi chú chuyên môn nào</p>
+                        </div>
+                    @endif
+
+                    <div class="mt-4">
+                        <a href="{{ route('nvkt.notes.create', ['customer_id' => $appointment->customer_id, 'appointment_id' => $appointment->id]) }}" class="block w-full bg-purple-50 text-purple-600 text-center px-4 py-2 rounded-lg hover:bg-purple-100 transition-colors duration-150">
+                            Thêm ghi chú chuyên môn
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md overflow-hidden mt-6">
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-gray-200">
+                    <h3 class="font-semibold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                        </svg>
+                        Lịch sử dịch vụ
+                    </h3>
+                </div>
+                <div class="p-6">
+                    @php
+                        $pastAppointments = \App\Models\Appointment::where('customer_id', $appointment->customer_id)
+                            ->where('id', '!=', $appointment->id)
+                            ->where('status', 'completed')
+                            ->orderBy('date_appointments', 'desc')
+                            ->limit(5)
+                            ->get();
+                    @endphp
+
+                    @if(count($pastAppointments) > 0)
+                        <div class="space-y-4">
+                            @foreach($pastAppointments as $pastAppointment)
+                                <div class="bg-gray-50 rounded-lg p-3">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h4 class="text-sm font-medium text-gray-900">{{ $pastAppointment->service->name }}</h4>
+                                            <p class="text-xs text-gray-500">{{ $pastAppointment->date_appointments->format('d/m/Y') }} - {{ $pastAppointment->timeAppointment ? $pastAppointment->timeAppointment->started_time : 'N/A' }}</p>
+                                        </div>
+                                        <a href="{{ route('nvkt.sessions.show', $pastAppointment->id) }}" class="text-xs text-blue-600 hover:text-blue-800">Xem chi tiết</a>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="mt-4">
+                            <a href="{{ route('nvkt.customers.service-history', $appointment->customer_id) }}" class="block w-full bg-blue-50 text-blue-600 text-center px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors duration-150">
+                                Xem toàn bộ lịch sử
+                            </a>
+                        </div>
+                    @else
+                        <div class="text-center py-4">
+                            <p class="text-sm text-gray-500">Khách hàng chưa có lịch sử dịch vụ nào</p>
+                        </div>
+                    @endif
                 </div>
             </div>
 

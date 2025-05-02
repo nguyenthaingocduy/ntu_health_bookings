@@ -50,6 +50,7 @@
                                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-700">Ngày đặt</th>
                                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-700">Ngày hẹn</th>
                                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-700">Giờ hẹn</th>
+                                <th class="px-6 py-4 text-left text-sm font-medium text-gray-700">Nhân viên</th>
                                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-700">Trạng thái</th>
                                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-700">Hành động</th>
                             </tr>
@@ -76,6 +77,22 @@
                                             {{ \Carbon\Carbon::parse($appointment->timeAppointment->started_time)->format('H:i') }}
                                         @else
                                             <span class="text-gray-400">--</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-700">
+                                        @if($appointment->employee)
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-6 w-6">
+                                                    <img class="h-6 w-6 rounded-full"
+                                                        src="https://ui-avatars.com/api/?name={{ $appointment->employee->first_name }}&background=0D8ABC&color=fff&size=128"
+                                                        alt="{{ $appointment->employee->first_name }}">
+                                                </div>
+                                                <div class="ml-2">
+                                                    <div class="text-xs">{{ $appointment->employee->first_name }} {{ $appointment->employee->last_name }}</div>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <span class="text-xs text-gray-500">Chưa phân công</span>
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 text-sm">

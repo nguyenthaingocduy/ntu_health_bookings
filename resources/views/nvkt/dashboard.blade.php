@@ -84,7 +84,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
             <div class="bg-gradient-to-r from-indigo-50 to-indigo-100 px-6 py-4 border-b border-gray-200">
                 <h3 class="font-semibold text-gray-800 flex items-center">
@@ -118,7 +118,7 @@
                                 @foreach($todayAppointments as $appointment)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $appointment->timeSlot->start_time }} - {{ $appointment->timeSlot->end_time }}</div>
+                                        <div class="text-sm text-gray-900">{{ $appointment->timeAppointment ? $appointment->timeAppointment->started_time : 'N/A' }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $appointment->customer->full_name }}</div>
@@ -146,6 +146,145 @@
                     <a href="{{ route('nvkt.schedule') }}" class="block w-full text-center px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors duration-150">
                         Xem toàn bộ lịch làm việc
                     </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+            <div class="bg-gradient-to-r from-amber-50 to-amber-100 px-6 py-4 border-b border-gray-200">
+                <h3 class="font-semibold text-gray-800 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-amber-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                    </svg>
+                    Lịch hẹn cần chú ý
+                </h3>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Ngày & Giờ
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Khách hàng
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Trạng thái
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Thao tác
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @if(isset($pendingAppointments) && count($pendingAppointments) > 0)
+                                @foreach($pendingAppointments as $appointment)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">{{ $appointment->date_appointments->format('d/m/Y') }}</div>
+                                        <div class="text-sm text-gray-500">{{ $appointment->timeAppointment ? $appointment->timeAppointment->started_time : 'N/A' }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">{{ $appointment->customer->full_name }}</div>
+                                        <div class="text-sm text-gray-500">{{ $appointment->service->name }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @php
+                                            $statusClass = [
+                                                'pending' => 'bg-yellow-100 text-yellow-800',
+                                                'confirmed' => 'bg-blue-100 text-blue-800',
+                                                'in_progress' => 'bg-indigo-100 text-indigo-800',
+                                            ][$appointment->status] ?? 'bg-gray-100 text-gray-800';
+
+                                            $statusText = [
+                                                'pending' => 'Chờ xác nhận',
+                                                'confirmed' => 'Đã xác nhận',
+                                                'in_progress' => 'Đang tiến hành',
+                                            ][$appointment->status] ?? 'Không xác định';
+                                        @endphp
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClass }}">
+                                            {{ $statusText }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <a href="{{ route('nvkt.sessions.show', $appointment->id) }}" class="text-indigo-600 hover:text-indigo-900">Chi tiết</a>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        Không có lịch hẹn cần chú ý
+                                    </td>
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+            <div class="bg-gradient-to-r from-green-50 to-green-100 px-6 py-4 border-b border-gray-200">
+                <h3 class="font-semibold text-gray-800 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                    </svg>
+                    Lịch hẹn sắp tới
+                </h3>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Ngày & Giờ
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Khách hàng
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Dịch vụ
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Thao tác
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @if(isset($upcomingAppointments) && count($upcomingAppointments) > 0)
+                                @foreach($upcomingAppointments as $appointment)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">{{ $appointment->date_appointments->format('d/m/Y') }}</div>
+                                        <div class="text-sm text-gray-500">{{ $appointment->timeAppointment ? $appointment->timeAppointment->started_time : 'N/A' }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">{{ $appointment->customer->full_name }}</div>
+                                        <div class="text-sm text-gray-500">{{ $appointment->customer->phone }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ $appointment->service->name }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <a href="{{ route('nvkt.sessions.show', $appointment->id) }}" class="text-indigo-600 hover:text-indigo-900">Chi tiết</a>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        Không có lịch hẹn sắp tới
+                                    </td>
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

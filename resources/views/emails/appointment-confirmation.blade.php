@@ -65,6 +65,13 @@
             <p><strong>Dịch vụ:</strong> {{ $service_name }}</p>
             <p><strong>Ngày hẹn:</strong> {{ \Carbon\Carbon::parse($appointment_date)->format('d/m/Y') }}</p>
             <p><strong>Giờ hẹn:</strong> {{ $appointment_time }}</p>
+            <p><strong>Nhân viên phục vụ:</strong>
+                @if($appointment->employee)
+                    {{ $appointment->employee->first_name }} {{ $appointment->employee->last_name }}
+                @else
+                    Chưa phân công
+                @endif
+            </p>
             <p><strong>Trạng thái:</strong>
                 @if($appointment->status == 'pending')
                     Chờ xác nhận

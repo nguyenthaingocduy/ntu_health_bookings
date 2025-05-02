@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Service; // <-- Thêm dòng này để import Model Service
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
 class ServiceController extends Controller
@@ -28,8 +29,26 @@ class ServiceController extends Controller
     }
     public function show($id)
     {
+        // Lấy mã khuyến mãi từ query string nếu có
+        $promotionCode = request()->query('promotion_code');
+
         // Sử dụng with('category') để tải kèm dữ liệu category
         $service = Service::with('category')->findOrFail($id);
+
+        // Tính giá sau khuyến mãi nếu có mã khuyến mãi
+        if ($promotionCode) {
+            // Tính giá sau khuyến mãi
+            $discountedPrice = $service->calculatePriceWithPromotion($promotionCode);
+
+            // Log để debug
+            \Illuminate\Support\Facades\Log::info('Tính giá với mã khuyến mãi trong ServiceController', [
+                'service_id' => $service->id,
+                'service_name' => $service->name,
+                'original_price' => $service->price,
+                'promotion_code' => $promotionCode,
+                'discounted_price' => $discountedPrice
+            ]);
+        }
 
         // Lấy các dịch vụ liên quan (cùng danh mục hoặc cùng phòng khám)
         $relatedServices = Service::where('id', '!=', $id)
