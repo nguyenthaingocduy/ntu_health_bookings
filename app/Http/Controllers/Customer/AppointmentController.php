@@ -30,9 +30,9 @@ class AppointmentController extends Controller
 
     public function create(Request $request, $serviceId = null)
     {
-        $service = null;
+        $selectedService = null;
         if ($serviceId) {
-            $service = Service::findOrFail($serviceId);
+            $selectedService = Service::findOrFail($serviceId);
         }
 
         $services = Service::where('status', 'active')
@@ -44,7 +44,7 @@ class AppointmentController extends Controller
         // Lấy mã khuyến mãi bổ sung (nếu có)
         $promotionCode = $request->input('promotion_code');
 
-        return view('customer.appointments.create', compact('services', 'times', 'service', 'promotionCode'));
+        return view('customer.appointments.create', compact('services', 'times', 'selectedService', 'promotionCode'));
     }
 
     public function store(Request $request)
@@ -93,7 +93,15 @@ class AppointmentController extends Controller
                 $service = Service::findOrFail($request->service_id);
 
                 // Tính giá sau khuyến mãi
-                $finalPrice = $service->calculatePriceWithPromotion($promotionCode);
+                $originalPrice = $service->price;
+                $finalPrice = $originalPrice;
+
+                if (!empty($promotionCode)) {
+                    $finalPrice = $service->calculatePriceWithPromotion($promotionCode);
+                } else if ($service->hasActivePromotion()) {
+                    // Nếu không có mã khuyến mãi nhưng dịch vụ có khuyến mãi
+                    $finalPrice = $service->getDiscountedPriceAttribute();
+                }
 
                 // Log thông tin đặt lịch
                 \Illuminate\Support\Facades\Log::info('Thông tin đặt lịch', [
@@ -102,8 +110,10 @@ class AppointmentController extends Controller
                     'date_appointments' => $request->date_appointments,
                     'time_appointments_id' => $request->time_appointments_id,
                     'promotion_code' => $promotionCode,
-                    'original_price' => $service->price,
-                    'final_price' => $finalPrice
+                    'original_price' => $originalPrice,
+                    'final_price' => $finalPrice,
+                    'discount_amount' => $originalPrice - $finalPrice,
+                    'discount_percent' => $originalPrice > 0 ? round(($originalPrice - $finalPrice) / $originalPrice * 100, 2) : 0
                 ]);
 
                 $appointment = Appointment::create([
@@ -291,5 +301,48 @@ class AppointmentController extends Controller
 
         return redirect()->route('customer.appointments.index')
             ->with('success', 'Hủy lịch hẹn thành công.');
+    }
+
+    /**
+     * Xóa lịch hẹn khỏi lịch sử
+     */
+    public function destroy($id)
+    {
+        $appointment = Appointment::where('customer_id', Auth::id())
+            ->findOrFail($id);
+
+        // Chỉ cho phép xóa lịch hẹn đã hoàn thành, đã hủy, hoặc đã tồn tại lâu (ví dụ: 30 ngày)
+        $canDelete = in_array($appointment->status, ['completed', 'cancelled']);
+        $isOld = $appointment->created_at->diffInDays(now()) >= 30;
+
+        if (!$canDelete && !$isOld) {
+            return back()->with('error', 'Chỉ có thể xóa lịch hẹn đã hoàn thành, đã hủy, hoặc đã tồn tại lâu hơn 30 ngày.');
+        }
+
+        try {
+            // Ghi log trước khi xóa
+            Log::info('Xóa lịch hẹn khỏi lịch sử', [
+                'appointment_id' => $appointment->id,
+                'customer_id' => Auth::id(),
+                'service_id' => $appointment->service_id,
+                'status' => $appointment->status,
+                'date_appointments' => $appointment->date_appointments,
+                'created_at' => $appointment->created_at
+            ]);
+
+            // Xóa lịch hẹn
+            $appointment->delete();
+
+            return redirect()->route('customer.appointments.index')
+                ->with('success', 'Đã xóa lịch hẹn khỏi lịch sử của bạn.');
+
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi xóa lịch hẹn: ' . $e->getMessage(), [
+                'appointment_id' => $appointment->id,
+                'customer_id' => Auth::id()
+            ]);
+
+            return back()->with('error', 'Đã xảy ra lỗi khi xóa lịch hẹn: ' . $e->getMessage());
+        }
     }
 }

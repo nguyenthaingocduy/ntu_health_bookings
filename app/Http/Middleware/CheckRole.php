@@ -71,7 +71,7 @@ class CheckRole
             } elseif ($roleName === 'receptionist') {
                 return redirect()->route('receptionist.dashboard')->with('error', $errorMessage);
             } elseif ($roleName === 'technician') {
-                return redirect()->route('technician.dashboard')->with('error', $errorMessage);
+                return redirect()->route('nvkt.dashboard')->with('error', $errorMessage);
             } else {
                 return redirect()->route('customer.dashboard')->with('error', $errorMessage);
             }

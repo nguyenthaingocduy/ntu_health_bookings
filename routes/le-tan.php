@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['auth', 'user.role:Receptionist'])->prefix('le-tan')->name('le-tan.')->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserRole::class.':Receptionist'])->prefix('le-tan')->name('le-tan.')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

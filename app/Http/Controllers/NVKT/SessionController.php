@@ -19,9 +19,9 @@ class SessionController extends Controller
         $completedSessions = Appointment::with(['customer', 'service', 'timeSlot'])
             ->where('employee_id', Auth::id())
             ->where('status', 'completed')
-            ->orderBy('appointment_date', 'desc')
+            ->orderBy('date_appointments', 'desc')
             ->paginate(10);
-            
+
         return view('nvkt.sessions.completed', compact('completedSessions'));
     }
 
@@ -33,11 +33,16 @@ class SessionController extends Controller
      */
     public function show($id)
     {
-        $session = Appointment::with(['customer', 'service', 'timeSlot', 'professionalNotes'])
-            ->where('employee_id', Auth::id())
+        $appointment = Appointment::with(['customer', 'service', 'timeAppointment', 'professionalNotes'])
             ->findOrFail($id);
-            
-        return view('nvkt.sessions.show', compact('session'));
+
+        // Kiểm tra quyền truy cập - chỉ cho phép nhân viên được phân công hoặc admin
+        if ($appointment->employee_id != Auth::id()) {
+            return redirect()->route('nvkt.dashboard')
+                ->with('error', 'Bạn không có quyền xem phiên làm việc này.');
+        }
+
+        return view('nvkt.sessions.show', compact('appointment'));
     }
 
     /**

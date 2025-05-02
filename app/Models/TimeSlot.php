@@ -47,7 +47,7 @@ class TimeSlot extends Model
 
         // Check if we've reached the maximum number of appointments for this slot
         $appointmentsCount = $this->appointments()
-            ->whereDate('appointment_date', $date->toDateString())
+            ->whereDate('date_appointments', $date->toDateString())
             ->whereIn('status', ['pending', 'confirmed'])
             ->count();
 

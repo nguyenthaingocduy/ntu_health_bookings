@@ -38,7 +38,7 @@
 
             <!-- Right Image -->
             <div class="md:w-2/5 relative hidden md:block">
-                <img id="promotionImage" src="https://img.freepik.com/free-photo/beautiful-woman-having-facial-treatment-spa_23-2148852089.jpg" alt="Beauty Treatment" class="h-full w-full object-cover">
+                <img id="promotionImage" src="" alt="Beauty Treatment" class="h-full w-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-r from-pink-600 to-transparent opacity-60"></div>
             </div>
         </div>

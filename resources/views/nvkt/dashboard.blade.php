@@ -1,4 +1,4 @@
-@extends('layouts.nvkt')
+@extends('layouts.nvkt-new')
 
 @section('title', 'Trang chủ Kỹ thuật viên')
 

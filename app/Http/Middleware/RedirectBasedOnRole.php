@@ -20,21 +20,21 @@ class RedirectBasedOnRole
     {
         if (Auth::check()) {
             $user = Auth::user();
-            
+
             // Chuyển hướng dựa trên vai trò
             if ($user->isAdmin()) {
                 return redirect()->route('admin.dashboard');
             } elseif ($user->isReceptionist()) {
                 return redirect()->route('receptionist.dashboard');
             } elseif ($user->isTechnician()) {
-                return redirect()->route('technician.dashboard');
+                return redirect()->route('nvkt.dashboard');
             } elseif ($user->isStaff()) {
                 return redirect()->route('staff.dashboard');
             } elseif ($user->isCustomer()) {
                 return redirect()->route('customer.dashboard');
             }
         }
-        
+
         return $next($request);
     }
 }

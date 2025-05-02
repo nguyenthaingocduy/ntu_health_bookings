@@ -24,7 +24,7 @@
                 <p>{{ session('success') }}</p>
             </div>
         @endif
-        
+
         @if(session('error'))
             <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
                 <p>{{ session('error') }}</p>
@@ -103,18 +103,35 @@
                                     </td>
                                     <td class="px-6 py-4 text-sm font-medium">
                                         <div class="flex gap-2">
-                                            <a href="{{ route('customer.appointments.show', $appointment->id) }}" 
+                                            <a href="{{ route('customer.appointments.show', $appointment->id) }}"
                                                 class="text-blue-600 hover:text-blue-800" title="Xem chi tiết">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            
+
                                             @if(in_array($appointment->status, ['pending', 'confirmed']))
-                                                <form action="{{ route('customer.appointments.cancel', $appointment->id) }}" 
+                                                <form action="{{ route('customer.appointments.cancel', $appointment->id) }}"
                                                     method="POST" class="inline"
                                                     onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?');">
                                                     @csrf
                                                     <button type="submit" class="text-red-600 hover:text-red-800" title="Hủy lịch hẹn">
                                                         <i class="fas fa-times-circle"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+
+                                            @php
+                                                $canDelete = in_array($appointment->status, ['completed', 'cancelled']);
+                                                $isOld = $appointment->created_at->diffInDays(now()) >= 30;
+                                            @endphp
+
+                                            @if($canDelete || $isOld)
+                                                <form action="{{ route('customer.appointments.destroy', $appointment->id) }}"
+                                                    method="POST" class="inline"
+                                                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa lịch hẹn này khỏi lịch sử? Hành động này không thể hoàn tác.');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-gray-600 hover:text-gray-800" title="Xóa khỏi lịch sử">
+                                                        <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </form>
                                             @endif
@@ -125,7 +142,7 @@
                         </tbody>
                     </table>
                 </div>
-                
+
                 <div class="p-4">
                     {{ $appointments->links() }}
                 </div>
@@ -133,4 +150,4 @@
         </div>
     </div>
 </section>
-@endsection 
+@endsection

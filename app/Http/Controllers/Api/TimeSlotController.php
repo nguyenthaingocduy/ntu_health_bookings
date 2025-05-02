@@ -116,18 +116,45 @@ class TimeSlotController extends Controller
                 $query->where('id', '!=', $request->exclude_appointment_id);
             }
 
-            $bookedTimeSlots = $query->pluck('time_appointments_id')->toArray();
+            // Lấy danh sách các khung giờ đã được đặt và dịch vụ tương ứng
+            $bookedAppointments = $query->select('time_appointments_id', 'service_id')->get();
+
+            // Tạo mảng chứa các khung giờ đã được đặt
+            $bookedTimeSlots = $bookedAppointments->pluck('time_appointments_id')->toArray();
+
+            // Tạo mảng chứa thông tin về khung giờ đã được đặt cho dịch vụ nào
+            $bookedTimeSlotServices = [];
+            foreach ($bookedAppointments as $appointment) {
+                $bookedTimeSlotServices[$appointment->time_appointments_id] = $appointment->service_id;
+            }
 
             Log::info('Các time slots đã đặt: ' . count($bookedTimeSlots), [
-                'slot_ids' => $bookedTimeSlots
+                'slot_ids' => $bookedTimeSlots,
+                'booked_time_slot_services' => $bookedTimeSlotServices
             ]);
 
             // Lọc ra các khung giờ còn trống và nếu là ngày hôm nay, chỉ lấy các giờ trong tương lai
-            $availableSlots = $allTimeSlots->filter(function($timeSlot) use ($isToday, $currentTime) {
+            $availableSlots = $allTimeSlots->filter(function($timeSlot) use ($isToday, $currentTime, $bookedTimeSlots, $bookedTimeSlotServices, $request) {
                 // Kiểm tra nếu khung giờ đã đầy
                 if ($timeSlot->isFull()) {
                     Log::info("Khung giờ {$timeSlot->id} đã đầy", ['time' => $timeSlot->started_time, 'booked' => $timeSlot->booked_count, 'capacity' => $timeSlot->capacity]);
                     return false;
+                }
+
+                // Kiểm tra xem khung giờ này đã được đặt cho dịch vụ khác chưa
+                if (in_array($timeSlot->id, $bookedTimeSlots)) {
+                    // Nếu khung giờ đã được đặt, kiểm tra xem có phải cho cùng dịch vụ không
+                    $bookedServiceId = $bookedTimeSlotServices[$timeSlot->id] ?? null;
+
+                    // Nếu đã có dịch vụ khác đặt trong khung giờ này, không cho phép đặt thêm
+                    if ($bookedServiceId !== null && $bookedServiceId != $request->service_id) {
+                        Log::info("Khung giờ {$timeSlot->id} đã được đặt cho dịch vụ khác", [
+                            'time' => $timeSlot->started_time,
+                            'booked_service_id' => $bookedServiceId,
+                            'requested_service_id' => $request->service_id
+                        ]);
+                        return false;
+                    }
                 }
 
                 // Nếu là ngày hôm nay, kiểm tra xem khung giờ có nằm trong tương lai không
@@ -178,6 +205,7 @@ class TimeSlotController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Lấy danh sách khung giờ khả dụng thành công',
+                'note' => 'Mỗi khung giờ chỉ phục vụ một dịch vụ duy nhất',
                 'available_slots' => $availableSlots,
                 'total_slots' => $availableSlots->count(),
                 'date_requested' => $request->date,
@@ -190,7 +218,10 @@ class TimeSlotController extends Controller
                     'total_time_slots' => $allTimeSlots->count(),
                     'booked_slots_count' => count($bookedTimeSlots),
                     'available_slots_count' => $availableSlots->count(),
-                    'booked_slot_ids' => $bookedTimeSlots
+                    'booked_slot_ids' => $bookedTimeSlots,
+                    'booked_time_slot_services' => $bookedTimeSlotServices,
+                    'requested_service_id' => $request->service_id,
+                    'one_service_per_time_slot' => true
                 ]
             ]);
         } catch (\Exception $e) {

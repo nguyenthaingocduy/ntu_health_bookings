@@ -135,7 +135,7 @@ class LoginController extends Controller
                             'role' => $roleName
                         ]);
                     }
-                    return redirect()->route('technician.dashboard');
+                    return redirect()->route('nvkt.dashboard');
                 }
             }
 

@@ -64,6 +64,7 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
     Route::get('/appointments/{id}', [AppointmentController::class, 'show'])->name('appointments.show');
     Route::post('/appointments/{id}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
 
     Route::get('/clinics/{clinicId}/services', [ServiceController::class, 'byClinic'])->name('services.by-clinic');
 });

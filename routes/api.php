@@ -62,7 +62,8 @@ Route::get('/active-promotions', function() {
         // Format the main promotion data
         $result = [
             'id' => $promotion->id,
-            'name' => $promotion->title, // Use title field as name
+            'title' => $promotion->title, // Ensure title is included
+            'name' => $promotion->title, // Keep name for backward compatibility
             'description' => $promotion->description,
             'discount_type' => $promotion->discount_type,
             'discount_value' => $promotion->discount_value,

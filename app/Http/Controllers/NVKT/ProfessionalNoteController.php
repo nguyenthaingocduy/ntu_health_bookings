@@ -22,7 +22,7 @@ class ProfessionalNoteController extends Controller
             ->where('created_by', Auth::id())
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-            
+
         return view('nvkt.notes.index', compact('notes'));
     }
 
@@ -38,14 +38,16 @@ class ProfessionalNoteController extends Controller
             })
             ->orderBy('first_name')
             ->get();
-            
+
         $appointments = Appointment::with(['customer', 'service'])
             ->where('employee_id', Auth::id())
             ->where('status', 'completed')
-            ->orderBy('appointment_date', 'desc')
+            ->orderBy('date_appointments', 'desc')
             ->get();
-            
-        return view('nvkt.notes.create', compact('customers', 'appointments'));
+
+        $services = \App\Models\Service::orderBy('name')->get();
+
+        return view('nvkt.notes.create', compact('customers', 'appointments', 'services'));
     }
 
     /**
@@ -83,10 +85,10 @@ class ProfessionalNoteController extends Controller
      */
     public function show($id)
     {
-        $note = ProfessionalNote::with(['customer', 'appointment', 'appointment.service'])
+        $note = ProfessionalNote::with(['customer', 'appointment', 'appointment.service', 'service'])
             ->where('created_by', Auth::id())
             ->findOrFail($id);
-            
+
         return view('nvkt.notes.show', compact('note'));
     }
 
@@ -99,20 +101,22 @@ class ProfessionalNoteController extends Controller
     public function edit($id)
     {
         $note = ProfessionalNote::where('created_by', Auth::id())->findOrFail($id);
-        
+
         $customers = User::whereHas('role', function($query) {
                 $query->where('name', 'Customer');
             })
             ->orderBy('first_name')
             ->get();
-            
+
         $appointments = Appointment::with(['customer', 'service'])
             ->where('employee_id', Auth::id())
             ->where('status', 'completed')
-            ->orderBy('appointment_date', 'desc')
+            ->orderBy('date_appointments', 'desc')
             ->get();
-            
-        return view('nvkt.notes.edit', compact('note', 'customers', 'appointments'));
+
+        $services = \App\Models\Service::orderBy('name')->get();
+
+        return view('nvkt.notes.edit', compact('note', 'customers', 'appointments', 'services'));
     }
 
     /**

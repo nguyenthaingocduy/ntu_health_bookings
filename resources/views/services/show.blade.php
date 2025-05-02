@@ -141,7 +141,7 @@
                 <!-- Booking Form -->
                 <div class="bg-gray-100 rounded-lg p-6 mb-8">
                     {{-- <h3 class="text-xl font-semibold mb-4">Đặt lịch ngay</h3> --}}
-                    <a href="{{ route('customer.appointments.create', ['service' => $service->id]) }}" class="w-full bg-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-pink-600 transition block text-center">
+                    <a href="{{ route('customer.appointments.create', $service->id) }}" class="w-full bg-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-pink-600 transition block text-center">
                         Đặt lịch ngay
                     </a>
                 </div>
@@ -366,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
 
                     <div class="mt-4 text-center">
-                        <a href="{{ route('customer.appointments.create', ['service' => $service->id]) }}?promotion_code=${code}"
+                        <a href="{{ route('customer.appointments.create', $service->id) }}?promotion_code=${code}"
                            class="inline-block bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600 transition font-semibold w-full">
                             <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>

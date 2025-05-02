@@ -59,7 +59,7 @@ class RedirectIfAuthenticated
                         } elseif ($roleName === 'receptionist') {
                             return redirect()->route('receptionist.dashboard');
                         } elseif ($roleName === 'technician') {
-                            return redirect()->route('technician.dashboard');
+                            return redirect()->route('nvkt.dashboard');
                         } else {
                             return redirect()->route('customer.dashboard');
                         }

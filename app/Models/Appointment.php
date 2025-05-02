@@ -25,7 +25,8 @@ class Appointment extends Model
         'check_out_time',
         'is_completed',
         'cancellation_reason',
-        'promotion_code'
+        'promotion_code',
+        'final_price'
     ];
 
     protected $casts = [
@@ -101,6 +102,11 @@ class Appointment extends Model
      */
     public function getFinalPriceAttribute()
     {
+        // Nếu đã có giá trong cơ sở dữ liệu, sử dụng giá đó
+        if ($this->attributes['final_price'] ?? null) {
+            return $this->attributes['final_price'];
+        }
+
         if (!$this->service) {
             return 0;
         }
@@ -117,8 +123,16 @@ class Appointment extends Model
             'service_id' => $this->service_id,
             'service_price' => $this->service->price,
             'promotion_code' => $promotionCode,
-            'final_price' => $finalPrice
+            'final_price' => $finalPrice,
+            'from_database' => false
         ]);
+
+        // Cập nhật giá vào cơ sở dữ liệu
+        try {
+            $this->update(['final_price' => $finalPrice]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Không thể cập nhật giá sau khuyến mãi: ' . $e->getMessage());
+        }
 
         return $finalPrice;
     }
@@ -157,6 +171,14 @@ class Appointment extends Model
         $originalPrice = $this->service->price;
         $finalPrice = $this->final_price;
 
+        // Log để debug
+        \Illuminate\Support\Facades\Log::info('Tính phần trăm giảm giá', [
+            'appointment_id' => $this->id,
+            'original_price' => $originalPrice,
+            'final_price' => $finalPrice,
+            'promotion_code' => $promotionCode
+        ]);
+
         if ($originalPrice > 0 && $finalPrice < $originalPrice) {
             $discountPercent = round(($originalPrice - $finalPrice) / $originalPrice * 100);
             return $discountPercent . '%';
@@ -164,6 +186,18 @@ class Appointment extends Model
 
         // Nếu không tính được phần trăm, sử dụng giá trị từ service
         $promotionValue = $this->service->getPromotionValueAttribute($promotionCode);
+
+        // Nếu vẫn không có giá trị khuyến mãi nhưng có mã khuyến mãi
+        if (empty($promotionValue) && !empty($promotionCode)) {
+            // Tìm thông tin khuyến mãi từ cơ sở dữ liệu
+            $promotion = \App\Models\Promotion::where('code', $promotionCode)
+                ->first();
+
+            if ($promotion) {
+                return $promotion->formatted_discount_value;
+            }
+        }
+
         return $promotionValue ?: 'Khuyến mãi';
     }
 

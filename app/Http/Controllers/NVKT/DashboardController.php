@@ -19,7 +19,7 @@ class DashboardController extends Controller
     public function index()
     {
         // Lấy số lượng lịch hẹn hôm nay
-        $todayAppointmentsCount = Appointment::whereDate('appointment_date', Carbon::today())
+        $todayAppointmentsCount = Appointment::whereDate('date_appointments', Carbon::today())
             ->where('employee_id', Auth::id())
             ->count();
 
@@ -33,7 +33,7 @@ class DashboardController extends Controller
 
         // Lấy danh sách lịch hẹn hôm nay
         $todayAppointments = Appointment::with(['customer', 'service', 'timeSlot'])
-            ->whereDate('appointment_date', Carbon::today())
+            ->whereDate('date_appointments', Carbon::today())
             ->where('employee_id', Auth::id())
             ->orderBy('time_slot_id')
             ->get();

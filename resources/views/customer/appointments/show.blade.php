@@ -67,11 +67,12 @@
                                     $hasActivePromotion = $appointment->service->hasActivePromotion();
                                     $promotionCode = $appointment->promotion_code;
 
-                                    // Nếu final_price đã được lưu trong cơ sở dữ liệu, sử dụng giá trị đó
-                                    // Nếu không, tính toán lại giá sau khuyến mãi
-                                    if ($appointment->final_price) {
-                                        $finalPrice = $appointment->final_price;
-                                    } else {
+                                    // Lấy giá gốc và giá sau khuyến mãi
+                                    $originalPrice = $appointment->service->price;
+                                    $finalPrice = $appointment->final_price;
+
+                                    // Nếu không có giá sau khuyến mãi, tính toán lại
+                                    if (!$finalPrice) {
                                         $finalPrice = $appointment->service->calculatePriceWithPromotion($promotionCode);
 
                                         // Cập nhật giá sau khuyến mãi vào cơ sở dữ liệu
@@ -83,7 +84,7 @@
                                         }
                                     }
 
-                                    $originalPrice = $appointment->service->price;
+                                    // Lấy thông tin khuyến mãi
                                     $appliedPromotion = $appointment->applied_promotion;
 
                                     // Log để debug
@@ -93,7 +94,8 @@
                                         'promotionCode' => $promotionCode,
                                         'finalPrice' => $finalPrice,
                                         'originalPrice' => $originalPrice,
-                                        'appliedPromotion' => $appliedPromotion
+                                        'appliedPromotion' => $appliedPromotion,
+                                        'has_discount' => ($finalPrice < $originalPrice)
                                     ]);
                                 @endphp
 
@@ -235,18 +237,44 @@
                 </div>
 
                 <!-- Hành động -->
-                @if(in_array($appointment->status, ['pending', 'confirmed']))
                 <div class="mt-8 border-t pt-6">
                     <h3 class="font-semibold mb-4">Hành động</h3>
-                    <form action="{{ route('customer.appointments.cancel', $appointment->id) }}" method="POST" class="inline"
-                        onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?');">
-                        @csrf
-                        <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
-                            <i class="fas fa-times-circle mr-2"></i> Hủy lịch hẹn
-                        </button>
-                    </form>
+
+                    <div class="flex flex-wrap gap-3">
+                        @if(in_array($appointment->status, ['pending', 'confirmed']))
+                            <form action="{{ route('customer.appointments.cancel', $appointment->id) }}" method="POST" class="inline"
+                                onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?');">
+                                @csrf
+                                <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+                                    <i class="fas fa-times-circle mr-2"></i> Hủy lịch hẹn
+                                </button>
+                            </form>
+                        @endif
+
+                        @php
+                            $canDelete = in_array($appointment->status, ['completed', 'cancelled']);
+                            $isOld = $appointment->created_at->diffInDays(now()) >= 30;
+                        @endphp
+
+                        @if($canDelete || $isOld)
+                            <form action="{{ route('customer.appointments.destroy', $appointment->id) }}" method="POST" class="inline"
+                                onsubmit="return confirm('Bạn có chắc chắn muốn xóa lịch hẹn này khỏi lịch sử? Hành động này không thể hoàn tác.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">
+                                    <i class="fas fa-trash-alt mr-2"></i> Xóa khỏi lịch sử
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+
+                    @if(!in_array($appointment->status, ['pending', 'confirmed']) && !$canDelete && !$isOld)
+                        <p class="text-gray-500 italic">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Lịch hẹn này chỉ có thể được xóa khỏi lịch sử khi đã hoàn thành, đã hủy, hoặc đã tồn tại lâu hơn 30 ngày.
+                        </p>
+                    @endif
                 </div>
-                @endif
             </div>
         </div>
     </div>
