@@ -1,0 +1,202 @@
+@extends('layouts.le-tan')
+
+@section('title', 'Chi tiết lịch hẹn')
+
+@section('header', 'Chi tiết lịch hẹn')
+
+@section('content')
+<div class="container mx-auto px-6 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Chi tiết lịch hẹn</h1>
+            <p class="text-sm text-gray-500 mt-1">Xem thông tin chi tiết về lịch hẹn</p>
+        </div>
+        <div class="flex space-x-2">
+            <a href="{{ route('le-tan.appointments.index') }}" class="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-150">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Quay lại
+            </a>
+            @if($appointment->status == 'pending' || $appointment->status == 'confirmed')
+            <a href="{{ route('le-tan.appointments.edit', $appointment->id) }}" class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-150">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Chỉnh sửa
+            </a>
+            @endif
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-6">
+            <div class="border-b border-gray-200 pb-6 mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Lịch hẹn #{{ $appointment->appointment_code ?? 'N/A' }}</h2>
+                        <p class="text-sm text-gray-500 mt-1">Ngày tạo: {{ $appointment->created_at->format('d/m/Y H:i') }}</p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        @if($appointment->status == 'pending')
+                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                Chờ xác nhận
+                            </span>
+                        @elseif($appointment->status == 'confirmed')
+                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                Đã xác nhận
+                            </span>
+                        @elseif($appointment->status == 'completed')
+                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                Đã hoàn thành
+                            </span>
+                        @elseif($appointment->status == 'cancelled')
+                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                Đã hủy
+                            </span>
+                        @elseif($appointment->status == 'no-show')
+                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                Không đến
+                            </span>
+                        @else
+                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                {{ $appointment->status }}
+                            </span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Thông tin khách hàng</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-sm font-medium text-gray-900">{{ $appointment->customer->full_name ?? 'N/A' }}</p>
+                        <p class="text-sm text-gray-600">Email: {{ $appointment->customer->email ?? 'N/A' }}</p>
+                        <p class="text-sm text-gray-600">Điện thoại: {{ $appointment->customer->phone ?? 'N/A' }}</p>
+                        <p class="text-sm text-gray-600">Địa chỉ: {{ $appointment->customer->address ?? 'N/A' }}</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Thông tin lịch hẹn</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="grid grid-cols-2 gap-2">
+                            <p class="text-sm font-medium text-gray-600">Ngày hẹn:</p>
+                            <p class="text-sm text-gray-900">{{ $appointment->date_appointments ? $appointment->date_appointments->format('d/m/Y') : 'N/A' }}</p>
+
+                            <p class="text-sm font-medium text-gray-600">Giờ hẹn:</p>
+                            <p class="text-sm text-gray-900">
+                                @if($appointment->timeSlot)
+                                    {{ $appointment->timeSlot->start_time->format('H:i') }} - {{ $appointment->timeSlot->end_time->format('H:i') }}
+                                @else
+                                    N/A
+                                @endif
+                            </p>
+
+                            <p class="text-sm font-medium text-gray-600">Dịch vụ:</p>
+                            <p class="text-sm text-gray-900">{{ $appointment->service->name ?? 'N/A' }}</p>
+
+                            <p class="text-sm font-medium text-gray-600">Giá dịch vụ:</p>
+                            <p class="text-sm text-gray-900">{{ number_format($appointment->service->price ?? 0, 0, ',', '.') }} VNĐ</p>
+
+                            <p class="text-sm font-medium text-gray-600">Nhân viên phụ trách:</p>
+                            <p class="text-sm text-gray-900">{{ $appointment->employee->full_name ?? 'Chưa phân công' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if($appointment->notes)
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Ghi chú</h3>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="text-sm text-gray-900">{{ $appointment->notes }}</p>
+                </div>
+            </div>
+            @endif
+
+            @if($appointment->status == 'pending')
+            <div class="flex justify-end space-x-4 mt-6">
+                <form action="{{ route('le-tan.appointments.confirm', $appointment->id) }}" method="POST">
+                    @csrf
+                    @method('POST')
+
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Xác nhận lịch hẹn
+                    </button>
+                </form>
+
+                <button onclick="confirmCancel('{{ $appointment->id }}')" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Hủy lịch hẹn
+                </button>
+                <form id="cancel-form-{{ $appointment->id }}" action="{{ route('le-tan.appointments.cancel', $appointment->id) }}" method="POST" class="hidden">
+                    @csrf
+                    @method('PUT')
+                </form>
+            </div>
+            @endif
+
+            @if($appointment->status == 'confirmed')
+            <div class="flex justify-end space-x-4 mt-6">
+                <form action="{{ route('le-tan.appointments.update', $appointment->id) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="customer_id" value="{{ $appointment->customer_id }}">
+                    <input type="hidden" name="service_id" value="{{ $appointment->service_id }}">
+                    <input type="hidden" name="appointment_date" value="{{ $appointment->date_appointments ? $appointment->date_appointments->format('Y-m-d') : date('Y-m-d') }}">
+                    <input type="hidden" name="time_slot_id" value="{{ $appointment->time_slot_id }}">
+                    <input type="hidden" name="status" value="completed">
+                    <input type="hidden" name="notes" value="{{ $appointment->notes }}">
+
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Hoàn thành lịch hẹn
+                    </button>
+                </form>
+
+                <button onclick="confirmCancel('{{ $appointment->id }}')" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Hủy lịch hẹn
+                </button>
+                <form id="cancel-form-{{ $appointment->id }}" action="{{ route('le-tan.appointments.cancel', $appointment->id) }}" method="POST" class="hidden">
+                    @csrf
+                    @method('PUT')
+                </form>
+            </div>
+            @endif
+
+            @if($appointment->status == 'completed' && !$appointment->payment)
+            <div class="flex justify-end space-x-4 mt-6">
+                <a href="{{ route('le-tan.payments.create') }}" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    Tạo thanh toán
+                </a>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+@section('scripts')
+<script>
+    function confirmCancel(id) {
+        if (confirm('Bạn có chắc chắn muốn hủy lịch hẹn này không?')) {
+            document.getElementById('cancel-form-' + id).submit();
+        }
+    }
+</script>
+@endsection
+@endsection

@@ -127,7 +127,7 @@ class LoginController extends Controller
                             'role' => $roleName
                         ]);
                     }
-                    return redirect()->route('receptionist.dashboard');
+                    return redirect()->route('le-tan.dashboard');
                 } elseif ($roleName === 'technician') {
                     if (config('app.debug')) {
                         Log::info('Redirecting technician user to technician dashboard', [

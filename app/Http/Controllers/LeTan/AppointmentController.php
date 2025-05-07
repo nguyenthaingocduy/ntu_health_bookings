@@ -4,7 +4,7 @@ namespace App\Http\Controllers\LeTan;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
-use App\Models\Customer;
+use App\Models\User;
 use App\Models\Service;
 use App\Models\TimeSlot;
 use Carbon\Carbon;
@@ -22,7 +22,7 @@ class AppointmentController extends Controller
     public function index()
     {
         $appointments = Appointment::with(['customer', 'service', 'timeSlot'])
-            ->orderBy('appointment_date', 'desc')
+            ->orderBy('date_appointments', 'desc')
             ->paginate(10);
 
         return view('le-tan.appointments.index', compact('appointments'));
@@ -35,7 +35,9 @@ class AppointmentController extends Controller
      */
     public function create()
     {
-        $customers = Customer::all();
+        $customers = User::whereHas('role', function($query) {
+            $query->where('name', 'Customer');
+        })->get();
         $services = Service::where('status', 'active')->get();
         $timeSlots = TimeSlot::all();
 
@@ -59,7 +61,7 @@ class AppointmentController extends Controller
 
         // Kiểm tra xem khung giờ đã đầy chưa
         $appointmentDate = Carbon::parse($request->appointment_date);
-        $existingAppointments = Appointment::where('appointment_date', $appointmentDate->format('Y-m-d'))
+        $existingAppointments = Appointment::where('date_appointments', $appointmentDate->format('Y-m-d'))
             ->where('time_slot_id', $request->time_slot_id)
             ->where('status', '!=', 'cancelled')
             ->count();
@@ -72,7 +74,7 @@ class AppointmentController extends Controller
         $appointment = new Appointment();
         $appointment->customer_id = $request->customer_id;
         $appointment->service_id = $request->service_id;
-        $appointment->appointment_date = $appointmentDate;
+        $appointment->date_appointments = $appointmentDate;
         $appointment->time_slot_id = $request->time_slot_id;
         $appointment->status = 'pending';
         $appointment->notes = $request->notes;
@@ -106,7 +108,9 @@ class AppointmentController extends Controller
     public function edit($id)
     {
         $appointment = Appointment::findOrFail($id);
-        $customers = Customer::all();
+        $customers = User::whereHas('role', function($query) {
+            $query->where('name', 'Customer');
+        })->get();
         $services = Service::where('status', 'active')->get();
         $timeSlots = TimeSlot::all();
 
@@ -133,11 +137,11 @@ class AppointmentController extends Controller
         $appointment = Appointment::findOrFail($id);
 
         // Nếu thay đổi ngày hoặc khung giờ, kiểm tra xem khung giờ đã đầy chưa
-        if ($appointment->appointment_date->format('Y-m-d') != $request->appointment_date ||
+        if ($appointment->date_appointments->format('Y-m-d') != $request->appointment_date ||
             $appointment->time_slot_id != $request->time_slot_id) {
 
             $appointmentDate = Carbon::parse($request->appointment_date);
-            $existingAppointments = Appointment::where('appointment_date', $appointmentDate->format('Y-m-d'))
+            $existingAppointments = Appointment::where('date_appointments', $appointmentDate->format('Y-m-d'))
                 ->where('time_slot_id', $request->time_slot_id)
                 ->where('status', '!=', 'cancelled')
                 ->where('id', '!=', $id)
@@ -151,7 +155,7 @@ class AppointmentController extends Controller
 
         $appointment->customer_id = $request->customer_id;
         $appointment->service_id = $request->service_id;
-        $appointment->appointment_date = Carbon::parse($request->appointment_date);
+        $appointment->date_appointments = Carbon::parse($request->appointment_date);
         $appointment->time_slot_id = $request->time_slot_id;
         $appointment->status = $request->status;
         $appointment->notes = $request->notes;
@@ -160,6 +164,29 @@ class AppointmentController extends Controller
 
         return redirect()->route('le-tan.appointments.index')
             ->with('success', 'Lịch hẹn đã được cập nhật thành công.');
+    }
+
+    /**
+     * Xác nhận lịch hẹn
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function confirm($id)
+    {
+        $appointment = Appointment::findOrFail($id);
+
+        try {
+            $appointment->status = 'confirmed';
+            $appointment->updated_by = Auth::id();
+            $appointment->save();
+
+            return redirect()->route('le-tan.appointments.index')
+                ->with('success', 'Lịch hẹn đã được xác nhận thành công.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Đã xảy ra lỗi khi xác nhận lịch hẹn: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -173,7 +200,7 @@ class AppointmentController extends Controller
         $appointment = Appointment::findOrFail($id);
 
         // Bắt đầu transaction
-        \Illuminate\Support\Facades\DB::beginTransaction();
+        DB::beginTransaction();
 
         try {
             // Giảm số lượng sử dụng mã khuyến mãi nếu có
@@ -196,16 +223,18 @@ class AppointmentController extends Controller
                 }
             }
 
+            // Cập nhật trạng thái lịch hẹn
             $appointment->status = 'cancelled';
             $appointment->updated_by = Auth::id();
+            $appointment->cancellation_reason = 'Hủy bởi lễ tân';
             $appointment->save();
 
-            \Illuminate\Support\Facades\DB::commit();
+            DB::commit();
 
             return redirect()->route('le-tan.appointments.index')
                 ->with('success', 'Lịch hẹn đã được hủy thành công.');
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\DB::rollBack();
+            DB::rollBack();
 
             return redirect()->back()
                 ->with('error', 'Đã xảy ra lỗi khi hủy lịch hẹn: ' . $e->getMessage());

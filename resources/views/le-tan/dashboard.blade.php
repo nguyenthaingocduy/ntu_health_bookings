@@ -32,7 +32,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <x-dashboard.stat-card
             title="Lịch hẹn hôm nay"
             value="{{ $todayAppointmentsCount ?? 0 }}"
@@ -60,7 +60,35 @@
         </x-dashboard.stat-card>
 
         <x-dashboard.stat-card
-            title="Thanh toán"
+            title="Tư vấn đang chờ"
+            value="{{ $pendingConsultationsCount ?? 0 }}"
+            color="indigo"
+            icon='<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path>
+            </svg>'
+            link="{{ route('le-tan.consultations.index') }}"
+            linkText="Xem tư vấn"
+        >
+            Tư vấn dịch vụ
+        </x-dashboard.stat-card>
+
+        <x-dashboard.stat-card
+            title="Nhắc nhở đang chờ"
+            value="{{ $pendingRemindersCount ?? 0 }}"
+            color="yellow"
+            icon='<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
+            </svg>'
+            link="{{ route('le-tan.reminders.index') }}"
+            linkText="Xem nhắc nhở"
+        >
+            Nhắc lịch hẹn
+        </x-dashboard.stat-card>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <x-dashboard.stat-card
+            title="Thanh toán hôm nay"
             value="{{ $todayPaymentsCount ?? 0 }}"
             color="green"
             icon='<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -69,11 +97,37 @@
             link="{{ route('le-tan.payments.index') }}"
             linkText="Xem thanh toán"
         >
-            Thanh toán hôm nay
+            Thanh toán
+        </x-dashboard.stat-card>
+
+        <x-dashboard.stat-card
+            title="Hóa đơn tháng này"
+            value="{{ $monthlyInvoicesCount ?? 0 }}"
+            color="purple"
+            icon='<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+            </svg>'
+            link="{{ route('le-tan.invoices.index') }}"
+            linkText="Xem hóa đơn"
+        >
+            Hóa đơn
+        </x-dashboard.stat-card>
+
+        <x-dashboard.stat-card
+            title="Doanh thu tháng này"
+            value="{{ number_format($monthlyRevenue ?? 0, 0, ',', '.') }} VNĐ"
+            color="red"
+            icon='<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path>
+            </svg>'
+            link="{{ route('le-tan.payments.index') }}"
+            linkText="Xem chi tiết"
+        >
+            Doanh thu
         </x-dashboard.stat-card>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <x-dashboard.data-table
             title="Lịch hẹn sắp tới"
             color="pink"
@@ -114,8 +168,8 @@
                                     <div class="text-sm text-gray-900">{{ $appointment->service->name }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ $appointment->appointment_date->format('d/m/Y') }}</div>
-                                    <div class="text-sm text-gray-500">{{ $appointment->timeSlot->start_time }} - {{ $appointment->timeSlot->end_time }}</div>
+                                    <div class="text-sm text-gray-900">{{ $appointment->date_appointments ? $appointment->date_appointments->format('d/m/Y') : 'N/A' }}</div>
+                                    <div class="text-sm text-gray-500">{{ $appointment->timeSlot ? $appointment->timeSlot->start_time . ' - ' . $appointment->timeSlot->end_time : 'N/A' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     @can('appointments.view')
@@ -136,6 +190,180 @@
             </div>
         </x-dashboard.data-table>
 
+        <x-dashboard.data-table
+            title="Nhắc nhở lịch hẹn sắp tới"
+            color="yellow"
+            icon='<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
+            </svg>'
+            link="{{ route('le-tan.reminders.index') }}"
+            linkText="Xem tất cả nhắc nhở"
+            emptyText="Không có nhắc nhở lịch hẹn sắp tới"
+        >
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Khách hàng
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Lịch hẹn
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Ngày nhắc
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Thao tác
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @if(isset($upcomingReminders) && count($upcomingReminders) > 0)
+                            @foreach($upcomingReminders as $reminder)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">{{ $reminder->appointment && $reminder->appointment->customer ? $reminder->appointment->customer->full_name : 'N/A' }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ $reminder->appointment && $reminder->appointment->service ? $reminder->appointment->service->name : 'N/A' }}</div>
+                                    <div class="text-sm text-gray-500">{{ $reminder->appointment && $reminder->appointment->date_appointments ? $reminder->appointment->date_appointments->format('d/m/Y') : 'N/A' }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ $reminder->reminder_date->format('d/m/Y H:i') }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="{{ route('le-tan.reminders.show', $reminder->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Chi tiết</a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
+                                    Không có nhắc nhở lịch hẹn sắp tới
+                                </td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </x-dashboard.data-table>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <x-dashboard.data-table
+            title="Tư vấn dịch vụ gần đây"
+            color="indigo"
+            icon='<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path>
+            </svg>'
+            link="{{ route('le-tan.consultations.index') }}"
+            linkText="Xem tất cả tư vấn"
+            emptyText="Không có tư vấn dịch vụ gần đây"
+        >
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Khách hàng
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Dịch vụ
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Trạng thái
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Thao tác
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @if(isset($recentConsultations) && count($recentConsultations) > 0)
+                            @foreach($recentConsultations as $consultation)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">{{ $consultation->customer ? $consultation->customer->full_name : 'N/A' }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ $consultation->service ? $consultation->service->name : 'N/A' }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
+                                        @if($consultation->status == 'pending') bg-yellow-100 text-yellow-800
+                                        @elseif($consultation->status == 'converted') bg-green-100 text-green-800
+                                        @else bg-red-100 text-red-800 @endif">
+                                        @if($consultation->status == 'pending') Đang chờ
+                                        @elseif($consultation->status == 'converted') Đã chuyển đổi
+                                        @else Đã hủy @endif
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="{{ route('le-tan.consultations.show', $consultation->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Chi tiết</a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
+                                    Không có tư vấn dịch vụ gần đây
+                                </td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </x-dashboard.data-table>
+
+        <x-dashboard.data-table
+            title="Dịch vụ được đặt nhiều nhất"
+            color="green"
+            icon='<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>'
+            link="{{ route('le-tan.services.index') }}"
+            linkText="Xem tất cả dịch vụ"
+            emptyText="Không có dữ liệu dịch vụ"
+        >
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Tên dịch vụ
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Số lượt đặt
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @if(isset($topServices) && count($topServices) > 0)
+                            @foreach($topServices as $service)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">{{ $service->name }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right">
+                                    <div class="text-sm font-medium text-gray-900">{{ $service->appointment_count }}</div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="2" class="px-6 py-4 text-center text-sm text-gray-500">
+                                    Không có dữ liệu dịch vụ
+                                </td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </x-dashboard.data-table>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6">
         <x-dashboard.data-table
             title="Thông báo gần đây"
             color="blue"

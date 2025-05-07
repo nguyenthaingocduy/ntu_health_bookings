@@ -25,11 +25,11 @@ class RedirectBasedOnRole
             if ($user->isAdmin()) {
                 return redirect()->route('admin.dashboard');
             } elseif ($user->isReceptionist()) {
-                return redirect()->route('receptionist.dashboard');
+                return redirect()->route('le-tan.dashboard');
             } elseif ($user->isTechnician()) {
                 return redirect()->route('nvkt.dashboard');
             } elseif ($user->isStaff()) {
-                return redirect()->route('staff.dashboard');
+                return redirect()->route('le-tan.dashboard');
             } elseif ($user->isCustomer()) {
                 return redirect()->route('customer.dashboard');
             }

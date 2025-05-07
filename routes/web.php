@@ -89,10 +89,10 @@ Route::redirect('/staff', '/le-tan/dashboard');
 // Route mặc định sau khi đăng nhập
 Route::get('/home', [HomeController::class, 'index'])->name('dashboard.home');
 
-// Route chuyển hướng dựa trên vai trò
+// Route chuyển hướng đến trang chủ
 Route::get('/dashboard', function() {
-    return redirect()->route('home');
-})->middleware(['auth', 'redirect.role'])->name('dashboard');
+    return redirect('/');
+})->name('dashboard');
 
 // API routes for time slots and services
 Route::prefix('api')->group(function () {

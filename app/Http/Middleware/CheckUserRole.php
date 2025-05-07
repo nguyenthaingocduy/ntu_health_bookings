@@ -21,17 +21,20 @@ class CheckUserRole
         }
 
         $user = Auth::user();
-        
+
+        // Lấy vai trò từ bảng roles
+        $userRole = \App\Models\Role::find($user->role_id);
+
         // Admin có thể truy cập tất cả các trang
-        if ($user->role && strtolower($user->role->name) === 'admin') {
+        if ($userRole && strtolower($userRole->name) === 'admin') {
             return $next($request);
         }
-        
+
         // Kiểm tra vai trò của người dùng
-        if (!$user->role || strtolower($user->role->name) !== strtolower($role)) {
-            return redirect()->route('dashboard')->with('error', 'Bạn không có quyền truy cập trang này.');
+        if ($userRole && strtolower($userRole->name) === strtolower($role)) {
+            return $next($request);
         }
-        
-        return $next($request);
+
+        return redirect()->route('dashboard')->with('error', 'Bạn không có quyền truy cập trang này.');
     }
 }

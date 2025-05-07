@@ -23,7 +23,7 @@ class CustomerController extends Controller
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-            
+
         return view('le-tan.customers.index', compact('customers'));
     }
 
@@ -87,10 +87,10 @@ class CustomerController extends Controller
     public function show($id)
     {
         $customer = User::with(['appointments' => function($query) {
-                $query->orderBy('appointment_date', 'desc');
+                $query->orderBy('date_appointments', 'desc');
             }])
             ->findOrFail($id);
-            
+
         return view('le-tan.customers.show', compact('customer'));
     }
 
