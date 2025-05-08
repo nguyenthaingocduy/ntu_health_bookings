@@ -52,8 +52,8 @@ return new class extends Migration
 
         // Tạo lại các khung giờ với khoảng thời gian 1 giờ, chỉ từ thứ 2 đến thứ 6, từ 8h đến 17h
         $timeSlots = [];
-        $days = [1, 2, 3, 4, 5]; // Thứ 2 đến thứ 6
-        $startHours = [8, 9, 10, 11, 13, 14, 15, 16]; // Giờ bắt đầu từ 8h đến 16h, bỏ qua giờ nghỉ trưa (12h)
+        $days = [1, 2, 3, 4, 5,6,7]; // Thứ 2 đến thứ chu nhat
+        $startHours = [8, 9, 10, 11, 13, 14, 15, 16,17,18,19,20]; // Giờ bắt đầu từ 8h đến 20h, bỏ qua giờ nghỉ trưa (12h)
 
         foreach ($days as $day) {
             foreach ($startHours as $hour) {

@@ -149,12 +149,47 @@ class AppointmentController extends Controller
                 // Tính giá sau khuyến mãi
                 $originalPrice = $service->price;
                 $finalPrice = $originalPrice;
+                $discountAmount = 0;
+                $directDiscountPercent = 0;
 
                 if (!empty($promotionCode)) {
                     $finalPrice = $service->calculatePriceWithPromotion($promotionCode);
+
+                    // Lấy thông tin khuyến mãi
+                    $promotion = \App\Models\Promotion::where('code', strtoupper($promotionCode))
+                        ->where('is_active', true)
+                        ->where('start_date', '<=', now())
+                        ->where('end_date', '>=', now())
+                        ->first();
+
+                    if ($promotion) {
+                        if ($promotion->discount_type == 'percentage') {
+                            $directDiscountPercent = $promotion->discount_value;
+                        }
+                    }
                 } else if ($service->hasActivePromotion()) {
                     // Nếu không có mã khuyến mãi nhưng dịch vụ có khuyến mãi
                     $finalPrice = $service->getDiscountedPriceAttribute();
+
+                    // Lấy khuyến mãi đầu tiên của dịch vụ
+                    $servicePromotion = $service->promotions()
+                        ->where('is_active', true)
+                        ->where('start_date', '<=', now())
+                        ->where('end_date', '>=', now())
+                        ->first();
+
+                    if ($servicePromotion && $servicePromotion->discount_type == 'percentage') {
+                        $directDiscountPercent = $servicePromotion->discount_value;
+                    }
+                }
+
+                // Tính số tiền giảm giá
+                $discountAmount = $originalPrice - $finalPrice;
+
+                // Đảm bảo giá trị discount_amount và final_price được tính đúng
+                if ($directDiscountPercent > 0) {
+                    $discountAmount = $originalPrice * ($directDiscountPercent / 100);
+                    $finalPrice = $originalPrice - $discountAmount;
                 }
 
                 // Log thông tin đặt lịch
@@ -166,8 +201,9 @@ class AppointmentController extends Controller
                     'promotion_code' => $promotionCode,
                     'original_price' => $originalPrice,
                     'final_price' => $finalPrice,
-                    'discount_amount' => $originalPrice - $finalPrice,
-                    'discount_percent' => $originalPrice > 0 ? round(($originalPrice - $finalPrice) / $originalPrice * 100, 2) : 0
+                    'discount_amount' => $discountAmount,
+                    'direct_discount_percent' => $directDiscountPercent,
+                    'calculated_discount_percent' => $originalPrice > 0 ? round(($originalPrice - $finalPrice) / $originalPrice * 100, 2) : 0
                 ]);
 
                 // Kiểm tra xem có nhân viên không
@@ -187,6 +223,8 @@ class AppointmentController extends Controller
                     'notes' => $request->notes,
                     'promotion_code' => $promotionCode, // Lưu mã khuyến mãi bổ sung
                     'final_price' => $finalPrice, // Lưu giá sau khuyến mãi
+                    'discount_amount' => $discountAmount, // Lưu số tiền giảm giá
+                    'direct_discount_percent' => $directDiscountPercent, // Lưu phần trăm giảm giá trực tiếp
                 ]);
 
                 // Cập nhật số lượng sử dụng mã khuyến mãi nếu có
@@ -326,6 +364,9 @@ class AppointmentController extends Controller
         if ($appointment->service) {
             // Tính lại giá sau khuyến mãi
             $originalPrice = $appointment->service->price;
+            $finalPrice = $originalPrice;
+            $discountAmount = 0;
+            $directDiscountPercent = 0;
 
             // Nếu có mã khuyến mãi, tính giá với mã khuyến mãi
             if ($appointment->promotion_code) {
@@ -333,36 +374,61 @@ class AppointmentController extends Controller
 
                 // Lấy thông tin khuyến mãi
                 $promotion = \App\Models\Promotion::where('code', $appointment->promotion_code)
-                    ->where('is_active', true)
                     ->first();
 
                 if ($promotion) {
                     // Tính phần trăm giảm giá
-                    $discountPercent = $promotion->discount_type == 'percentage'
+                    $directDiscountPercent = $promotion->discount_type == 'percentage'
                         ? $promotion->discount_value
                         : round(($promotion->discount_value / $originalPrice) * 100);
-
-                    // Lưu phần trăm giảm giá vào appointment
-                    $appointment->direct_discount_percent = $discountPercent;
                 }
 
                 // Tính số tiền giảm
                 $discountAmount = $originalPrice - $finalPrice;
-                $appointment->discount_amount = $discountAmount;
             } else {
                 // Nếu không có mã khuyến mãi, kiểm tra xem dịch vụ có khuyến mãi không
                 if ($appointment->service->hasActivePromotion()) {
                     $finalPrice = $appointment->service->getDiscountedPriceAttribute();
-                } else {
-                    $finalPrice = $originalPrice;
+
+                    // Lấy khuyến mãi đầu tiên của dịch vụ
+                    $servicePromotion = $appointment->service->promotions()
+                        ->where('is_active', true)
+                        ->where('start_date', '<=', now())
+                        ->where('end_date', '>=', now())
+                        ->first();
+
+                    if ($servicePromotion && $servicePromotion->discount_type == 'percentage') {
+                        $directDiscountPercent = $servicePromotion->discount_value;
+                    } else {
+                        // Tính phần trăm giảm giá từ dịch vụ
+                        $directDiscountPercent = round(($originalPrice - $finalPrice) / $originalPrice * 100);
+                    }
+
+                    // Tính số tiền giảm
+                    $discountAmount = $originalPrice - $finalPrice;
                 }
             }
 
+            // Đảm bảo giá trị discount_amount và final_price được tính đúng
+            if ($directDiscountPercent > 0) {
+                $discountAmount = $originalPrice * ($directDiscountPercent / 100);
+                $finalPrice = $originalPrice - $discountAmount;
+            }
+
             // Cập nhật giá sau khuyến mãi vào cơ sở dữ liệu
-            if ($finalPrice != $appointment->final_price) {
+            if ($finalPrice != $appointment->final_price ||
+                $discountAmount != $appointment->discount_amount ||
+                $directDiscountPercent != $appointment->direct_discount_percent) {
                 try {
                     $appointment->final_price = $finalPrice;
+                    $appointment->discount_amount = $discountAmount;
+                    $appointment->direct_discount_percent = $directDiscountPercent;
                     $appointment->save();
+
+                    // Tải lại đối tượng appointment sau khi cập nhật
+                    $appointment = Appointment::with(['service', 'employee', 'customer', 'timeAppointment'])
+                        ->where('customer_id', Auth::id())
+                        ->findOrFail($id);
 
                     // Log để debug
                     \Illuminate\Support\Facades\Log::info('Đã cập nhật giá sau khuyến mãi trong show()', [
@@ -370,8 +436,9 @@ class AppointmentController extends Controller
                         'original_price' => $originalPrice,
                         'final_price' => $finalPrice,
                         'promotion_code' => $appointment->promotion_code,
-                        'direct_discount_percent' => $appointment->direct_discount_percent,
-                        'discount_amount' => $appointment->discount_amount
+                        'direct_discount_percent' => $directDiscountPercent,
+                        'discount_amount' => $discountAmount,
+                        'calculated_discount_percent' => $originalPrice > 0 ? round(($originalPrice - $finalPrice) / $originalPrice * 100, 2) : 0
                     ]);
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::error('Không thể cập nhật giá sau khuyến mãi: ' . $e->getMessage());

@@ -262,7 +262,7 @@
                 </div>
 
                 <div class="text-center mt-10">
-                    <button type="submit" class="bg-pink-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-pink-600 transition disabled:opacity-50" id="submit-button" disabled>
+                    <button type="submit" class="bg-pink-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-pink-600 transition" id="submit-button">
                         Đặt lịch ngay
                     </button>
                     <p class="text-sm text-gray-500 mt-2" id="submit-hint">Vui lòng chọn đủ Dịch vụ, Ngày và Giờ hẹn.</p>
@@ -432,9 +432,13 @@ function checkSubmitButtonStatus() {
     // Cập nhật trạng thái nút Submit
     if (submitButton) {
         submitButton.disabled = !allSelected;
+
+        // Đảm bảo nút không bị vô hiệu hóa bởi CSS
         if (allSelected) {
             submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
             submitButton.classList.add('hover:bg-pink-600');
+            // Đảm bảo thuộc tính disabled được xóa
+            submitButton.removeAttribute('disabled');
         } else {
             submitButton.classList.add('opacity-50', 'cursor-not-allowed');
             submitButton.classList.remove('hover:bg-pink-600');
@@ -454,7 +458,9 @@ function checkSubmitButtonStatus() {
         dateValue: dateInput ? dateInput.value : null,
         timeSelected,
         timeId: timeRadio ? timeRadio.value : null,
-        allSelected
+        allSelected,
+        buttonDisabled: submitButton ? submitButton.disabled : null,
+        buttonHasDisabledAttr: submitButton ? submitButton.hasAttribute('disabled') : null
     });
 }
 
@@ -1064,6 +1070,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Kích hoạt kiểm tra lần đầu
     checkSubmitButton();
+
+    // Thêm sự kiện change cho các radio button thời gian
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.name === 'time_appointments_id') {
+            console.log('Thời gian đã thay đổi:', e.target.value);
+            checkSubmitButtonStatus();
+        }
+    });
+
+    // Thêm sự kiện submit cho form
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const serviceRadio = document.querySelector('input[name="service_id"]:checked');
+        const dateInput = document.getElementById('date_appointments');
+        const timeRadio = document.querySelector('input[name="time_appointments_id"]:checked');
+
+        if (!serviceRadio || !dateInput.value || !timeRadio) {
+            e.preventDefault();
+            alert('Vui lòng chọn đầy đủ dịch vụ, ngày và giờ hẹn.');
+            return false;
+        }
+
+        // Đảm bảo nút submit không bị vô hiệu hóa
+        const submitButton = document.getElementById('submit-button');
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.removeAttribute('disabled');
+        }
+
+        return true;
+    });
 
     // Nếu đã có cả dịch vụ và ngày được chọn khi trang load, kiểm tra khung giờ
     if (window.selectedServiceId && dateInput.value) {

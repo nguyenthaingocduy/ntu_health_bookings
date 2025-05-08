@@ -63,116 +63,54 @@
                             <div>
                                 <p class="text-gray-600">Giá</p>
                                 @php
-                                    // Lấy giá gốc và giá sau khuyến mãi
-                                    $originalPrice = $appointment->service->price;
-
-                                    // Lấy giá sau khuyến mãi từ cơ sở dữ liệu
-                                    $finalPrice = $appointment->final_price;
-
-                                    // Nếu giá sau khuyến mãi bằng giá gốc hoặc không có, kiểm tra lại
-                                    if ($finalPrice >= $originalPrice || !$finalPrice) {
-                                        // Nếu có mã khuyến mãi, tính lại giá với mã khuyến mãi
-                                        if ($appointment->promotion_code) {
-                                            $finalPrice = $appointment->service->calculatePriceWithPromotion($appointment->promotion_code);
-                                        }
-                                        // Nếu dịch vụ có khuyến mãi, lấy giá đã giảm từ dịch vụ
-                                        else if ($appointment->service->hasActivePromotion()) {
-                                            $finalPrice = $appointment->service->getDiscountedPriceAttribute();
-                                        }
-
-                                        // Cập nhật giá vào cơ sở dữ liệu nếu khác với giá hiện tại
-                                        if ($finalPrice != $appointment->final_price) {
-                                            try {
-                                                $appointment->final_price = $finalPrice;
-                                                $appointment->save();
-                                            } catch (\Exception $e) {
-                                                \Illuminate\Support\Facades\Log::error('Không thể cập nhật giá trong view: ' . $e->getMessage());
-                                            }
-                                        }
-                                    }
-
-                                    // Lấy thông tin khuyến mãi
-                                    $appliedPromotion = $appointment->applied_promotion;
-
-                                    // Tính phần trăm giảm giá nếu có
-                                    $discountPercent = 0;
-                                    if ($appointment->direct_discount_percent) {
-                                        $discountPercent = $appointment->direct_discount_percent;
-                                    } else if ($finalPrice < $originalPrice) {
-                                        $discountPercent = round(($originalPrice - $finalPrice) / $originalPrice * 100);
-                                    }
-
                                     // Log để debug
-                                    \Illuminate\Support\Facades\Log::info('Thông tin giá trong trang chi tiết lịch hẹn', [
+                                    \Illuminate\Support\Facades\Log::info('Chi tiết giá trong trang chi tiết lịch hẹn khách hàng', [
                                         'appointment_id' => $appointment->id,
-                                        'finalPrice' => $finalPrice,
-                                        'originalPrice' => $originalPrice,
-                                        'appliedPromotion' => $appliedPromotion,
-                                        'promotion_code' => $appointment->promotion_code,
-                                        'direct_discount_percent' => $appointment->direct_discount_percent,
-                                        'calculated_discount_percent' => $discountPercent,
-                                        'has_discount' => ($finalPrice < $originalPrice)
+                                        'original_price' => $appointment->service->price,
+                                        'final_price' => $appointment->final_price,
+                                        'discount_amount' => $appointment->discount_amount,
+                                        'direct_discount_percent' => $appointment->direct_discount_percent
                                     ]);
                                 @endphp
 
-                                <div>
-                                    @if($finalPrice && $finalPrice < $originalPrice)
-                                        @php
-                                            // Tính tiết kiệm
-                                            $totalSavings = $originalPrice - $finalPrice;
-                                            $savingsPercent = round(($totalSavings / $originalPrice) * 100, 1);
+                                @if($appointment->final_price < $appointment->service->price)
+                                    <p class="font-semibold text-pink-500 text-xl">{{ number_format($appointment->final_price, 0, ',', '.') }}đ</p>
+                                    <p class="text-gray-500 line-through text-base font-medium">{{ number_format($appointment->service->price, 0, ',', '.') }}đ</p>
+                                    <p class="mt-1">
+                                        <span class="bg-pink-100 text-pink-800 text-sm font-semibold px-2 py-1 rounded-full">
+                                            Giảm {{ $appointment->direct_discount_percent ?? round(($appointment->service->price - $appointment->final_price) / $appointment->service->price * 100) }}%
+                                        </span>
+                                    </p>
 
-                                            // Lấy thông tin khuyến mãi nếu có mã
-                                            $discountInfo = [];
-                                            if ($appointment->promotion_code) {
-                                                $promotion = \App\Models\Promotion::where('code', $appointment->promotion_code)
-                                                    ->where('is_active', true)
-                                                    ->first();
-
-                                                if ($promotion) {
-                                                    $discountInfo[] = "Mã khuyến mãi: <span class=\"font-semibold\">{$promotion->formatted_discount_value}</span>";
-                                                }
-                                            }
-                                        @endphp
-
-                                        <p class="font-semibold text-pink-500 text-xl">{{ number_format($finalPrice) }}đ</p>
-                                        <p class="text-gray-500 line-through text-base font-medium">{{ number_format($originalPrice) }}đ</p>
-                                        <p class="mt-1">
-                                            <span class="bg-pink-100 text-pink-800 text-sm font-semibold px-2 py-1 rounded-full">
-                                                Giảm {{ $discountPercent }}%
-                                            </span>
-                                        </p>
-
-                                        <div class="mt-2 bg-gray-50 p-2 rounded-md text-xs">
-                                            <div class="flex items-center text-gray-700">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                                </svg>
-                                                <span>Tiết kiệm: <span class="font-semibold">{{ number_format($totalSavings) }}đ ({{ $savingsPercent }}%)</span></span>
-                                            </div>
-
-                                            @foreach($discountInfo as $info)
-                                            <div class="flex items-center text-gray-700 mt-1">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                                </svg>
-                                                <span>{!! $info !!}</span>
-                                            </div>
-                                            @endforeach
-
-                                            @if($appointment->promotion_code)
-                                            <div class="flex items-center text-gray-700 mt-1">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                                </svg>
-                                                <span>Mã đã áp dụng: <span class="font-mono font-semibold">{{ $appointment->promotion_code }}</span></span>
-                                            </div>
-                                            @endif
+                                    <div class="mt-2 bg-gray-50 p-2 rounded-md text-xs">
+                                        <div class="flex items-center text-gray-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <span>Tiết kiệm: <span class="font-semibold">{{ number_format($appointment->service->price - $appointment->final_price, 0, ',', '.') }}đ ({{ round(($appointment->service->price - $appointment->final_price) / $appointment->service->price * 100, 1) }}%)</span></span>
                                         </div>
-                                    @else
-                                        <p class="font-semibold text-pink-500">{{ number_format($originalPrice) }}đ</p>
-                                    @endif
-                                </div>
+
+                                        @if($appointment->direct_discount_percent > 0)
+                                        <div class="flex items-center text-gray-700 mt-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                            </svg>
+                                            <span>Giảm giá trực tiếp: <span class="font-semibold">{{ $appointment->direct_discount_percent }}%</span></span>
+                                        </div>
+                                        @endif
+
+                                        @if($appointment->promotion_code)
+                                        <div class="flex items-center text-gray-700 mt-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                            </svg>
+                                            <span>Mã đã áp dụng: <span class="font-mono font-semibold">{{ $appointment->promotion_code }}</span></span>
+                                        </div>
+                                        @endif
+                                    </div>
+                                @else
+                                    <p class="font-semibold text-pink-500">{{ number_format($appointment->service->price, 0, ',', '.') }}đ</p>
+                                @endif
                             </div>
                             @endif
 
