@@ -12,14 +12,14 @@
             <p class="text-sm text-gray-500 mt-1">Xem và quản lý thông tin khách hàng</p>
         </div>
         <div class="flex flex-wrap gap-2">
-            @can('customers.create')
-            <a href="{{ route('le-tan.customers.create') }}" class="flex items-center px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors duration-150 shadow-md">
+  
+            <a href="{{ route('le-tan.customers.create') }}" class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-150 shadow-md">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
                 Thêm khách hàng mới
             </a>
-            @endcan
+     
             <a href="{{ route('le-tan.dashboard') }}" class="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-150">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -33,10 +33,10 @@
         <div class="p-6">
             <form action="{{ route('le-tan.customers.index') }}" method="GET" class="flex flex-col md:flex-row gap-4">
                 <div class="flex-grow">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Tìm kiếm theo tên, email, số điện thoại..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Tìm kiếm theo tên, email, số điện thoại..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <button type="submit" class="w-full md:w-auto px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors duration-150">
+                    <button type="submit" class="w-full md:w-auto px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-150">
                         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>

@@ -19,13 +19,13 @@ class ServiceController extends Controller
     public function index(Request $request)
     {
         // Khởi tạo query builder
-        $query = Service::with('category')->where('status', 'active');
-        
+        $query = Service::with('category');
+
         // Áp dụng bộ lọc danh mục nếu có
         if ($request->filled('category')) {
             $query->where('category_id', $request->category);
         }
-        
+
         // Áp dụng tìm kiếm nếu có
         if ($request->filled('search')) {
             $search = $request->search;
@@ -34,7 +34,7 @@ class ServiceController extends Controller
                   ->orWhere('description', 'like', "%{$search}%");
             });
         }
-        
+
         // Áp dụng sắp xếp nếu có
         if ($request->filled('sort')) {
             switch ($request->sort) {
@@ -53,19 +53,19 @@ class ServiceController extends Controller
             // Mặc định sắp xếp theo tên
             $query->orderBy('name', 'asc');
         }
-        
+
         // Lấy danh sách dịch vụ và phân trang
         $services = $query->paginate(12);
-        
+
         // Lấy danh sách danh mục
         $categories = Category::withCount('services')->get();
-        
+
         // Lấy danh sách khuyến mãi đang hoạt động
-        $activePromotions = Promotion::where('status', 'active')
+        $activePromotions = Promotion::where('is_active', true)
             ->where('start_date', '<=', Carbon::now())
             ->where('end_date', '>=', Carbon::now())
             ->get();
-        
+
         return view('le-tan.services.index', compact('services', 'categories', 'activePromotions'));
     }
 
@@ -78,18 +78,17 @@ class ServiceController extends Controller
     public function show($id)
     {
         $service = Service::with(['category', 'promotions' => function($query) {
-            $query->where('status', 'active')
+            $query->where('is_active', true)
                 ->where('start_date', '<=', Carbon::now())
                 ->where('end_date', '>=', Carbon::now());
         }])->findOrFail($id);
-        
+
         // Lấy các dịch vụ liên quan (cùng danh mục)
         $relatedServices = Service::where('category_id', $service->category_id)
             ->where('id', '!=', $service->id)
-            ->where('status', 'active')
             ->limit(4)
             ->get();
-        
+
         return view('le-tan.services.show', compact('service', 'relatedServices'));
     }
 }

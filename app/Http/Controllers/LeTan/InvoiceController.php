@@ -9,8 +9,9 @@ use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller
 {
@@ -35,15 +36,20 @@ class InvoiceController extends Controller
      */
     public function create()
     {
-        $appointments = Appointment::with(['customer', 'service', 'payment'])
-            ->where('status', 'completed')
-            ->whereHas('payment', function($query) {
-                $query->where('payment_status', 'completed');
-            })
-            ->whereDoesntHave('invoice')
-            ->get();
+        try {
+            $appointments = Appointment::with(['customer', 'service', 'payment'])
+                ->where('status', 'completed')
+                ->whereHas('payment', function($query) {
+                    $query->where('payment_status', 'completed');
+                })
+                ->whereDoesntHave('invoice')
+                ->get();
 
-        return view('le-tan.invoices.create', compact('appointments'));
+            return view('le-tan.invoices.create', compact('appointments'));
+        } catch (\Exception $e) {
+            Log::error('Error in InvoiceController@create: ' . $e->getMessage());
+            return back()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -62,21 +68,29 @@ class InvoiceController extends Controller
 
         $appointment = Appointment::with(['service', 'payment', 'customer'])
             ->findOrFail($request->appointment_id);
-        
+
         // Kiểm tra xem lịch hẹn đã có hóa đơn chưa
-        if ($appointment->invoice) {
+        $existingInvoice = Invoice::where('appointment_id', $appointment->id)->first();
+        if ($existingInvoice) {
             return back()->with('error', 'Lịch hẹn này đã có hóa đơn.');
         }
 
         // Tạo mã hóa đơn
         $invoiceNumber = 'INV-' . date('Ymd') . '-' . str_pad(Invoice::count() + 1, 4, '0', STR_PAD_LEFT);
 
+        // Lấy số tiền từ payment
+        $amount = $appointment->payment ? $appointment->payment->amount : 0;
+
         $invoice = new Invoice();
         $invoice->appointment_id = $request->appointment_id;
-        $invoice->customer_id = $appointment->customer_id;
+        $invoice->user_id = $appointment->customer_id; // Sử dụng user_id thay vì customer_id
         $invoice->invoice_number = $invoiceNumber;
-        $invoice->invoice_date = $request->invoice_date;
-        $invoice->amount = $appointment->payment->amount;
+        $invoice->subtotal = $amount; // Sử dụng subtotal thay vì amount
+        $invoice->tax = 0;
+        $invoice->discount = 0;
+        $invoice->total = $amount; // Sử dụng total thay vì amount
+        $invoice->payment_method = 'cash';
+        $invoice->payment_status = 'paid';
         $invoice->notes = $request->notes;
         $invoice->created_by = Auth::id();
         $invoice->save();
@@ -93,7 +107,7 @@ class InvoiceController extends Controller
      */
     public function show($id)
     {
-        $invoice = Invoice::with(['appointment', 'appointment.service', 'customer', 'createdBy'])
+        $invoice = Invoice::with(['appointment', 'appointment.service', 'user', 'creator'])
             ->findOrFail($id);
 
         return view('le-tan.invoices.show', compact('invoice'));
@@ -107,11 +121,11 @@ class InvoiceController extends Controller
      */
     public function print($id)
     {
-        $invoice = Invoice::with(['appointment', 'appointment.service', 'customer', 'createdBy'])
+        $invoice = Invoice::with(['appointment', 'appointment.service', 'user', 'creator'])
             ->findOrFail($id);
 
-        $pdf = PDF::loadView('le-tan.invoices.print', compact('invoice'));
-        
+        $pdf = Pdf::loadView('le-tan.invoices.print', compact('invoice'));
+
         return $pdf->download('hoa-don-' . $invoice->invoice_number . '.pdf');
     }
 }

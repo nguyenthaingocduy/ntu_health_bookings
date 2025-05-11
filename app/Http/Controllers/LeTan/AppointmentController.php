@@ -39,7 +39,15 @@ class AppointmentController extends Controller
             $query->where('name', 'Customer');
         })->get();
         $services = Service::where('status', 'active')->get();
-        $timeSlots = TimeSlot::all();
+
+        // Lấy ngày hiện tại và xác định ngày trong tuần (1-7)
+        $today = now();
+        $dayOfWeek = $today->dayOfWeek == 0 ? 7 : $today->dayOfWeek; // Chuyển đổi 0 (Chủ nhật) thành 7
+
+        // Lấy các khung giờ phù hợp với ngày trong tuần hiện tại
+        $timeSlots = TimeSlot::where('day_of_week', $dayOfWeek)
+            ->orderBy('start_time')
+            ->get();
 
         return view('le-tan.appointments.create', compact('customers', 'services', 'timeSlots'));
     }
@@ -187,7 +195,15 @@ class AppointmentController extends Controller
             $query->where('name', 'Customer');
         })->get();
         $services = Service::where('status', 'active')->get();
-        $timeSlots = TimeSlot::all();
+
+        // Lấy ngày của lịch hẹn và xác định ngày trong tuần (1-7)
+        $appointmentDate = $appointment->date_appointments;
+        $dayOfWeek = $appointmentDate->dayOfWeek == 0 ? 7 : $appointmentDate->dayOfWeek; // Chuyển đổi 0 (Chủ nhật) thành 7
+
+        // Lấy các khung giờ phù hợp với ngày trong tuần của lịch hẹn
+        $timeSlots = TimeSlot::where('day_of_week', $dayOfWeek)
+            ->orderBy('start_time')
+            ->get();
 
         return view('le-tan.appointments.edit', compact('appointment', 'customers', 'services', 'timeSlots'));
     }

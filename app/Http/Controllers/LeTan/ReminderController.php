@@ -5,10 +5,10 @@ namespace App\Http\Controllers\LeTan;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Reminder;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Mail\AppointmentReminder;
 use Carbon\Carbon;
 
@@ -21,11 +21,21 @@ class ReminderController extends Controller
      */
     public function index()
     {
-        $reminders = Reminder::with(['appointment', 'appointment.customer', 'createdBy'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        try {
+            $reminders = Reminder::with(['appointment', 'appointment.customer', 'createdBy'])
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
 
-        return view('le-tan.reminders.index', compact('reminders'));
+            return view('le-tan.reminders.index', compact('reminders'));
+        } catch (\Exception $e) {
+            // Log lỗi
+            Log::error('Error in ReminderController@index: ' . $e->getMessage());
+
+            // Trả về view với danh sách rỗng
+            $reminders = collect([]);
+            return view('le-tan.reminders.index', compact('reminders'))
+                ->with('error', 'Có lỗi xảy ra khi tải danh sách nhắc nhở: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -37,7 +47,7 @@ class ReminderController extends Controller
     {
         $appointments = Appointment::with(['customer', 'service'])
             ->where('status', 'confirmed')
-            ->where('appointment_date', '>=', Carbon::today())
+            ->where('date_appointments', '>=', Carbon::today())
             ->get();
 
         return view('le-tan.reminders.create', compact('appointments'));
@@ -58,14 +68,18 @@ class ReminderController extends Controller
             'reminder_type' => 'required|in:email,sms,both',
         ]);
 
-        $reminder = new Reminder();
-        $reminder->appointment_id = $request->appointment_id;
-        $reminder->reminder_date = $request->reminder_date;
-        $reminder->message = $request->message;
-        $reminder->reminder_type = $request->reminder_type;
-        $reminder->status = 'pending';
-        $reminder->created_by = Auth::id();
-        $reminder->save();
+        try {
+            $reminder = new Reminder();
+            $reminder->appointment_id = $request->appointment_id;
+            $reminder->reminder_date = $request->reminder_date;
+            $reminder->message = $request->message;
+            $reminder->reminder_type = $request->reminder_type;
+            $reminder->status = 'pending';
+            $reminder->created_by = Auth::id();
+            $reminder->save();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+        }
 
         return redirect()->route('le-tan.reminders.index')
             ->with('success', 'Nhắc lịch hẹn đã được tạo thành công.');
@@ -79,10 +93,18 @@ class ReminderController extends Controller
      */
     public function show($id)
     {
-        $reminder = Reminder::with(['appointment', 'appointment.customer', 'appointment.service', 'createdBy'])
-            ->findOrFail($id);
+        try {
+            $reminder = Reminder::with(['appointment', 'appointment.customer', 'appointment.service', 'createdBy'])
+                ->findOrFail($id);
 
-        return view('le-tan.reminders.show', compact('reminder'));
+            return view('le-tan.reminders.show', compact('reminder'));
+        } catch (\Exception $e) {
+            // Log lỗi
+            Log::error('Error in ReminderController@show: ' . $e->getMessage());
+
+            return redirect()->route('le-tan.reminders.index')
+                ->with('error', 'Không tìm thấy nhắc nhở hoặc có lỗi xảy ra: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -96,7 +118,7 @@ class ReminderController extends Controller
         $reminder = Reminder::findOrFail($id);
         $appointments = Appointment::with(['customer', 'service'])
             ->where('status', 'confirmed')
-            ->where('appointment_date', '>=', Carbon::today())
+            ->where('date_appointments', '>=', Carbon::today())
             ->get();
 
         return view('le-tan.reminders.edit', compact('reminder', 'appointments'));
@@ -152,28 +174,41 @@ class ReminderController extends Controller
      */
     public function sendReminder($id)
     {
-        $reminder = Reminder::with(['appointment', 'appointment.customer'])
-            ->findOrFail($id);
+        try {
+            $reminder = Reminder::with(['appointment', 'appointment.customer', 'appointment.service'])
+                ->findOrFail($id);
 
-        $customer = $reminder->appointment->customer;
-        $appointment = $reminder->appointment;
+            $customer = $reminder->appointment->customer;
+            $appointment = $reminder->appointment;
 
-        // Gửi email nhắc lịch hẹn
-        if ($reminder->reminder_type == 'email' || $reminder->reminder_type == 'both') {
-            Mail::to($customer->email)->send(new AppointmentReminder($appointment, $reminder->message));
+            // Gửi email nhắc lịch hẹn
+            if ($reminder->reminder_type == 'email' || $reminder->reminder_type == 'both') {
+                try {
+                    Mail::to($customer->email)->send(new AppointmentReminder($appointment, $reminder->message));
+                } catch (\Exception $e) {
+                    Log::error('Error sending reminder email: ' . $e->getMessage());
+                    return redirect()->back()->with('error', 'Có lỗi khi gửi email: ' . $e->getMessage());
+                }
+            }
+
+            // Gửi SMS nhắc lịch hẹn (nếu có)
+            if ($reminder->reminder_type == 'sms' || $reminder->reminder_type == 'both') {
+                // Implement SMS sending logic here
+                // Hiện tại chỉ log thông báo
+                Log::info('SMS reminder would be sent to: ' . $customer->phone);
+            }
+
+            // Cập nhật trạng thái nhắc lịch hẹn
+            $reminder->status = 'sent';
+            $reminder->sent_at = Carbon::now();
+            $reminder->save();
+
+            return redirect()->route('le-tan.reminders.index')
+                ->with('success', 'Nhắc lịch hẹn đã được gửi thành công.');
+        } catch (\Exception $e) {
+            Log::error('Error in sendReminder: ' . $e->getMessage());
+            return redirect()->route('le-tan.reminders.index')
+                ->with('error', 'Có lỗi xảy ra khi gửi nhắc nhở: ' . $e->getMessage());
         }
-
-        // Gửi SMS nhắc lịch hẹn (nếu có)
-        if ($reminder->reminder_type == 'sms' || $reminder->reminder_type == 'both') {
-            // Implement SMS sending logic here
-        }
-
-        // Cập nhật trạng thái nhắc lịch hẹn
-        $reminder->status = 'sent';
-        $reminder->sent_at = Carbon::now();
-        $reminder->save();
-
-        return redirect()->route('le-tan.reminders.index')
-            ->with('success', 'Nhắc lịch hẹn đã được gửi thành công.');
     }
 }

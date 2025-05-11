@@ -280,7 +280,7 @@ Bảng 3.17. Đặc tả hệ thống của chức năng Quản lý phân quyề
 | Đảm bảo thành công | Thông tin phân quyền được cập nhật thành công trong cơ sở dữ liệu. |
 | Kích hoạt | Admin muốn quản lý phân quyền. |
 | Chuỗi sự kiện chính | 1. Admin truy cập vào trang quản lý phân quyền.<br>2. Hệ thống hiển thị danh sách vai trò (admin, lễ tân, nhân viên kỹ thuật, khách hàng) và các quyền tương ứng.<br>3. Admin có thể thực hiện các thao tác:<br>   a. Xem chi tiết quyền của từng vai trò<br>   b. Thêm vai trò mới<br>   c. Chỉnh sửa quyền của vai trò<br>   d. Xóa vai trò<br>4. Hệ thống cập nhật thông tin phân quyền theo thao tác của admin.<br>Use case chức năng "Quản lý phân quyền" dừng lại. |
-| Chuỗi sự kiện ngoại lệ | 3.b.1. Khi thêm vai trò mới, nếu tên vai trò đã tồn tại trong hệ thống.<br>3.b.1.1. Hệ thống thông báo tên vai trò đã tồn tại và yêu cầu sử dụng tên khác.<br>3.b.1.2. Admin nhập tên khác.<br>3.b.1.3. Use case tiếp tục ở bước 4.<br><br>3.d.1. Khi xóa vai trò, nếu có người dùng đang sử dụng vai trò này.<br>3.d.1.1. Hệ thống thông báo không thể xóa vai trò vì có người dùng đang sử dụng.<br>3.d.1.2. Admin có thể chọn chuyển người dùng sang vai trò khác hoặc hủy thao tác xóa.<br>3.d.1.3. Use case tiếp tục ở bước 4. |
+| Chuỗi sự kiện ngoại lệ | 3.b.1. Khi thêm vai trò mới, nếu tên vai trò đã tồn tại trong hệ thống.<br>3.b.1.1. Hệ thống thông báo tên vai trò đã tồn tại và yêu cầu sử dụng tên khác.<br>3.b.1.2. Admin nhập tên khác.<br>3.b.1.3. Use case tiếp tục ở bước 4.<br><br>3.d.1. Khi xóa vai trò, nếu có người dùng đang sử dụng vai trò này.<br>3.d.1.1. Hệ thống thông báo không thể xóa vai trò vì có người dùng đang sử dụng.<br>3.d.1.2. Admin có thể chọn chuyển người dùng sang vai trò khác hoặc hủy thao tác xóa.<br|
 
 ## Kết luận
 

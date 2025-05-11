@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Time;
+use App\Models\TimeSlot;
 use App\Models\Appointment;
 use Illuminate\Support\Facades\Log;
 
@@ -46,11 +47,28 @@ class TimeSlotController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getAllTimeSlots()
+    public function getAllTimeSlots(Request $request)
     {
-        $timeSlots = Time::orderBy('started_time')->get();
+        if ($request->has('day')) {
+            // Lấy các khung giờ theo ngày trong tuần
+            $dayOfWeek = $request->day;
+            $timeSlots = TimeSlot::where('day_of_week', $dayOfWeek)
+                ->orderBy('start_time')
+                ->get()
+                ->map(function($slot) {
+                    return [
+                        'id' => $slot->id,
+                        'start_time' => $slot->start_time->format('H:i'),
+                        'end_time' => $slot->end_time->format('H:i')
+                    ];
+                });
 
-        return response()->json($timeSlots);
+            return response()->json($timeSlots);
+        } else {
+            // Lấy tất cả các khung giờ từ bảng Time (cũ)
+            $timeSlots = Time::orderBy('started_time')->get();
+            return response()->json($timeSlots);
+        }
     }
 
     /**

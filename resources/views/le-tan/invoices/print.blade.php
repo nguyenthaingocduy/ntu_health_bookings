@@ -142,16 +142,16 @@
         <div class="invoice-info">
             <div class="invoice-info-box">
                 <h2>Thông tin khách hàng</h2>
-                <p><strong>Họ tên:</strong> {{ $invoice->customer->full_name ?? 'N/A' }}</p>
-                <p><strong>Email:</strong> {{ $invoice->customer->email ?? 'N/A' }}</p>
-                <p><strong>Điện thoại:</strong> {{ $invoice->customer->phone ?? 'N/A' }}</p>
-                <p><strong>Địa chỉ:</strong> {{ $invoice->customer->address ?? 'N/A' }}</p>
+                <p><strong>Họ tên:</strong> {{ $invoice->user->full_name ?? 'N/A' }}</p>
+                <p><strong>Email:</strong> {{ $invoice->user->email ?? 'N/A' }}</p>
+                <p><strong>Điện thoại:</strong> {{ $invoice->user->phone ?? 'N/A' }}</p>
+                <p><strong>Địa chỉ:</strong> {{ $invoice->user->address ?? 'N/A' }}</p>
             </div>
             <div class="invoice-info-box">
                 <h2>Thông tin hóa đơn</h2>
                 <p><strong>Mã hóa đơn:</strong> {{ $invoice->invoice_number }}</p>
                 <p><strong>Ngày tạo:</strong> {{ $invoice->created_at->format('d/m/Y H:i') }}</p>
-                <p><strong>Phương thức thanh toán:</strong> 
+                <p><strong>Phương thức thanh toán:</strong>
                     @if($invoice->payment_method == 'cash')
                         Tiền mặt
                     @elseif($invoice->payment_method == 'credit_card')
@@ -162,7 +162,7 @@
                         {{ $invoice->payment_method }}
                     @endif
                 </p>
-                <p><strong>Trạng thái:</strong> 
+                <p><strong>Trạng thái:</strong>
                     @if($invoice->payment_status == 'paid')
                         <span class="status status-paid">Đã thanh toán</span>
                     @elseif($invoice->payment_status == 'pending')
@@ -226,13 +226,13 @@
             <div class="signature-box">
                 <p>Người lập hóa đơn</p>
                 <div class="signature-line">
-                    {{ $invoice->createdBy->full_name ?? 'N/A' }}
+                    {{ $invoice->creator->full_name ?? 'N/A' }}
                 </div>
             </div>
             <div class="signature-box">
                 <p>Khách hàng</p>
                 <div class="signature-line">
-                    {{ $invoice->customer->full_name ?? 'N/A' }}
+                    {{ $invoice->user->full_name ?? 'N/A' }}
                 </div>
             </div>
         </div>

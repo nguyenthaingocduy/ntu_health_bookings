@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Clinic;
 use App\Models\Category;
 use App\Models\Appointment;
+use App\Models\Promotion;
 
 class Service extends Model
 {

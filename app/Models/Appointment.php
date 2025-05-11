@@ -222,5 +222,23 @@ class Appointment extends Model
     {
         return $this->hasOne(Payment::class);
     }
+
+    /**
+     * Get the invoice for the appointment.
+     */
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class);
+    }
+
+    /**
+     * Get the appointment date attribute.
+     *
+     * @return \Illuminate\Support\Carbon|null
+     */
+    public function getAppointmentDateAttribute()
+    {
+        return $this->date_appointments;
+    }
 }
 

@@ -12,14 +12,14 @@
             <p class="text-sm text-gray-500 mt-1">Quản lý các buổi tư vấn dịch vụ cho khách hàng</p>
         </div>
         <div class="flex flex-wrap gap-2">
-            @can('consultations.create')
+           
             <a href="{{ route('le-tan.consultations.create') }}" class="flex items-center px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors duration-150 shadow-md">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
                 Tạo tư vấn mới
             </a>
-            @endcan
+       
         </div>
     </div>
 
@@ -28,7 +28,7 @@
         <form action="{{ route('le-tan.consultations.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
                 <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-                <select id="status" name="status" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                <select id="status" name="status" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <option value="">Tất cả trạng thái</option>
                     <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Đang chờ</option>
                     <option value="converted" {{ request('status') == 'converted' ? 'selected' : '' }}>Đã chuyển đổi</option>
@@ -37,7 +37,7 @@
             </div>
             <div>
                 <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
-                <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="Tên khách hàng, dịch vụ..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="Tên khách hàng, dịch vụ..." class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
             <div class="flex items-end">
                 <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition-colors duration-150">

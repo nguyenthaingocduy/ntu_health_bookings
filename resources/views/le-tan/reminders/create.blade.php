@@ -31,10 +31,10 @@
                         <option value="">Chọn lịch hẹn</option>
                         @foreach($appointments as $appointment)
                         <option value="{{ $appointment->id }}" {{ old('appointment_id') == $appointment->id ? 'selected' : '' }}>
-                            {{ $appointment->customer->first_name }} {{ $appointment->customer->last_name }} - 
-                            {{ $appointment->service->name }} - 
-                            {{ $appointment->appointment_date->format('d/m/Y') }} 
-                            {{ $appointment->timeSlot->start_time }}
+                            {{ $appointment->customer->first_name }} {{ $appointment->customer->last_name }} -
+                            {{ $appointment->service->name }} -
+                            {{ $appointment->date_appointments->format('d/m/Y') }}
+                            {{ $appointment->timeSlot ? $appointment->timeSlot->start_time : ($appointment->timeAppointment ? $appointment->timeAppointment->started_time : '') }}
                         </option>
                         @endforeach
                     </select>
@@ -100,12 +100,12 @@
     document.addEventListener('DOMContentLoaded', function() {
         const appointmentSelect = document.getElementById('appointment_id');
         const messageTextarea = document.getElementById('message');
-        
+
         appointmentSelect.addEventListener('change', function() {
             if (this.value) {
                 const selectedOption = this.options[this.selectedIndex];
                 const appointmentText = selectedOption.text;
-                
+
                 // Parse appointment text to get customer name, service name, date and time
                 const parts = appointmentText.split(' - ');
                 if (parts.length >= 3) {
@@ -114,14 +114,14 @@
                     const dateTimeParts = parts[2].trim().split(' ');
                     const date = dateTimeParts[0];
                     const time = dateTimeParts.length > 1 ? dateTimeParts[1] : '';
-                    
+
                     // Replace placeholders in message
                     let message = messageTextarea.value;
                     message = message.replace(/\[tên khách hàng\]/g, customerName);
                     message = message.replace(/\[tên dịch vụ\]/g, serviceName);
                     message = message.replace(/\[ngày\]/g, date);
                     message = message.replace(/\[giờ\]/g, time);
-                    
+
                     messageTextarea.value = message;
                 }
             }

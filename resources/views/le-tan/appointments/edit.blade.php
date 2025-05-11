@@ -70,7 +70,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                         <label for="appointment_date" class="block text-sm font-medium text-gray-700 mb-2">Ngày hẹn <span class="text-red-500">*</span></label>
-                        <input type="date" id="appointment_date" name="appointment_date" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md @error('appointment_date') border-red-500 @enderror" value="{{ old('appointment_date', $appointment->date_appointments->format('Y-m-d')) }}" min="{{ date('Y-m-d') }}" required>
+                        <input type="date" id="appointment_date" name="appointment_date" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('appointment_date') border-red-500 @enderror" value="{{ old('appointment_date', $appointment->date_appointments->format('Y-m-d')) }}" min="{{ date('Y-m-d') }}" required>
                         @error('appointment_date')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -108,7 +108,7 @@
 
                 <div class="mb-6">
                     <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Ghi chú</label>
-                    <textarea id="notes" name="notes" rows="3" class="shadow-sm focus:ring-pink-500 focus:border-pink-500 mt-1 block w-full sm:text-sm border-gray-300 rounded-md @error('notes') border-red-500 @enderror" placeholder="Nhập ghi chú nếu có">{{ old('notes', $appointment->notes) }}</textarea>
+                    <textarea id="notes" name="notes" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('notes') border-red-500 @enderror" placeholder="Nhập ghi chú nếu có">{{ old('notes', $appointment->notes) }}</textarea>
                     @error('notes')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -169,10 +169,38 @@
     // Khi chọn ngày, kiểm tra và lọc các khung giờ phù hợp
     document.getElementById('appointment_date').addEventListener('change', function() {
         const selectedDate = this.value;
-        const dayOfWeek = new Date(selectedDate).getDay(); // 0 = Chủ nhật, 1 = Thứ 2, ...
+        let dayOfWeek = new Date(selectedDate).getDay(); // 0 = Chủ nhật, 1 = Thứ 2, ...
 
-        // TODO: Gọi API để lấy các khung giờ còn trống cho ngày đã chọn
-        // Hoặc lọc các khung giờ dựa trên ngày trong tuần
+        // Chuyển đổi 0 (Chủ nhật) thành 7 để phù hợp với hệ thống của chúng ta
+        if (dayOfWeek === 0) dayOfWeek = 7;
+
+        // Gọi API để lấy các khung giờ còn trống cho ngày đã chọn
+        fetch(`/api/time-slots?day=${dayOfWeek}`)
+            .then(response => response.json())
+            .then(data => {
+                const timeSlotSelect = document.getElementById('time_slot_id');
+                const currentValue = timeSlotSelect.value;
+
+                // Xóa tất cả các option hiện tại
+                timeSlotSelect.innerHTML = '<option value="">-- Chọn giờ hẹn --</option>';
+
+                // Thêm các option mới
+                data.forEach(slot => {
+                    const option = document.createElement('option');
+                    option.value = slot.id;
+                    option.textContent = `${slot.start_time} - ${slot.end_time}`;
+
+                    // Nếu option này trùng với giá trị đã chọn trước đó, đánh dấu là selected
+                    if (slot.id === currentValue) {
+                        option.selected = true;
+                    }
+
+                    timeSlotSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching time slots:', error);
+            });
     });
 </script>
 @endsection

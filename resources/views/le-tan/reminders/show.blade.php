@@ -54,23 +54,23 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <h4 class="text-sm font-medium text-gray-500 mb-1">Trạng thái</h4>
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                @if($reminder->status == 'pending') bg-yellow-100 text-yellow-800 
-                                @elseif($reminder->status == 'sent') bg-green-100 text-green-800 
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
+                                @if($reminder->status == 'pending') bg-yellow-100 text-yellow-800
+                                @elseif($reminder->status == 'sent') bg-green-100 text-green-800
                                 @else bg-red-100 text-red-800 @endif">
-                                @if($reminder->status == 'pending') Đang chờ 
-                                @elseif($reminder->status == 'sent') Đã gửi 
+                                @if($reminder->status == 'pending') Đang chờ
+                                @elseif($reminder->status == 'sent') Đã gửi
                                 @else Thất bại @endif
                             </span>
                         </div>
                         <div>
                             <h4 class="text-sm font-medium text-gray-500 mb-1">Loại nhắc nhở</h4>
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                @if($reminder->reminder_type == 'email') bg-blue-100 text-blue-800 
-                                @elseif($reminder->reminder_type == 'sms') bg-purple-100 text-purple-800 
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
+                                @if($reminder->reminder_type == 'email') bg-blue-100 text-blue-800
+                                @elseif($reminder->reminder_type == 'sms') bg-purple-100 text-purple-800
                                 @else bg-indigo-100 text-indigo-800 @endif">
-                                @if($reminder->reminder_type == 'email') Email 
-                                @elseif($reminder->reminder_type == 'sms') SMS 
+                                @if($reminder->reminder_type == 'email') Email
+                                @elseif($reminder->reminder_type == 'sms') SMS
                                 @else Email & SMS @endif
                             </span>
                         </div>
@@ -90,7 +90,7 @@
                         @endif
                         <div>
                             <h4 class="text-sm font-medium text-gray-500 mb-1">Người tạo</h4>
-                            <p class="text-gray-900">{{ $reminder->createdBy->first_name }} {{ $reminder->createdBy->last_name }}</p>
+                            <p class="text-gray-900">{{ $reminder->createdBy ? $reminder->createdBy->first_name . ' ' . $reminder->createdBy->last_name : 'N/A' }}</p>
                         </div>
                     </div>
 
@@ -123,24 +123,24 @@
                         </div>
                         <div>
                             <h4 class="text-sm font-medium text-gray-500 mb-1">Ngày hẹn</h4>
-                            <p class="text-gray-900">{{ $reminder->appointment->appointment_date->format('d/m/Y') }}</p>
+                            <p class="text-gray-900">{{ $reminder->appointment->date_appointments->format('d/m/Y') }}</p>
                         </div>
                         <div>
                             <h4 class="text-sm font-medium text-gray-500 mb-1">Giờ hẹn</h4>
-                            <p class="text-gray-900">{{ $reminder->appointment->timeSlot->start_time }}</p>
+                            <p class="text-gray-900">{{ $reminder->appointment->timeSlot ? $reminder->appointment->timeSlot->start_time : ($reminder->appointment->timeAppointment ? $reminder->appointment->timeAppointment->started_time : 'N/A') }}</p>
                         </div>
                         <div>
                             <h4 class="text-sm font-medium text-gray-500 mb-1">Trạng thái lịch hẹn</h4>
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                @if($reminder->appointment->status == 'pending') bg-yellow-100 text-yellow-800 
-                                @elseif($reminder->appointment->status == 'confirmed') bg-blue-100 text-blue-800 
-                                @elseif($reminder->appointment->status == 'completed') bg-green-100 text-green-800 
-                                @elseif($reminder->appointment->status == 'cancelled') bg-red-100 text-red-800 
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
+                                @if($reminder->appointment->status == 'pending') bg-yellow-100 text-yellow-800
+                                @elseif($reminder->appointment->status == 'confirmed') bg-blue-100 text-blue-800
+                                @elseif($reminder->appointment->status == 'completed') bg-green-100 text-green-800
+                                @elseif($reminder->appointment->status == 'cancelled') bg-red-100 text-red-800
                                 @else bg-gray-100 text-gray-800 @endif">
-                                @if($reminder->appointment->status == 'pending') Đang chờ 
-                                @elseif($reminder->appointment->status == 'confirmed') Đã xác nhận 
-                                @elseif($reminder->appointment->status == 'completed') Đã hoàn thành 
-                                @elseif($reminder->appointment->status == 'cancelled') Đã hủy 
+                                @if($reminder->appointment->status == 'pending') Đang chờ
+                                @elseif($reminder->appointment->status == 'confirmed') Đã xác nhận
+                                @elseif($reminder->appointment->status == 'completed') Đã hoàn thành
+                                @elseif($reminder->appointment->status == 'cancelled') Đã hủy
                                 @else Không đến @endif
                             </span>
                         </div>

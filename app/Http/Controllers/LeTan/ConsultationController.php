@@ -23,12 +23,12 @@ class ConsultationController extends Controller
     {
         // Khởi tạo query builder
         $query = ServiceConsultation::with(['customer', 'service', 'createdBy']);
-        
+
         // Áp dụng bộ lọc trạng thái nếu có
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
+
         // Áp dụng tìm kiếm nếu có
         if ($request->filled('search')) {
             $search = $request->search;
@@ -44,13 +44,13 @@ class ConsultationController extends Controller
                 });
             });
         }
-        
+
         // Sắp xếp theo ngày tạo mới nhất
         $query->orderBy('created_at', 'desc');
-        
+
         // Lấy danh sách tư vấn và phân trang
         $consultations = $query->paginate(10);
-        
+
         return view('le-tan.consultations.index', compact('consultations'));
     }
 
@@ -61,13 +61,15 @@ class ConsultationController extends Controller
      */
     public function create()
     {
-        $customers = User::role('customer')->orderBy('first_name')->get();
+        $customers = User::whereHas('role', function($query) {
+            $query->where('name', 'Customer');
+        })->orderBy('first_name')->get();
         $categories = Category::with(['services', 'children.services'])->whereNull('parent_id')->get();
-        $activePromotions = Promotion::where('status', 'active')
+        $activePromotions = Promotion::where('is_active', true)
             ->where('start_date', '<=', Carbon::now())
             ->where('end_date', '>=', Carbon::now())
             ->get();
-            
+
         return view('le-tan.consultations.create', compact('customers', 'categories', 'activePromotions'));
     }
 
@@ -110,7 +112,7 @@ class ConsultationController extends Controller
     {
         $consultation = ServiceConsultation::with(['customer', 'service', 'service.category', 'createdBy', 'appointment'])
             ->findOrFail($id);
-            
+
         return view('le-tan.consultations.show', compact('consultation'));
     }
 
@@ -123,20 +125,22 @@ class ConsultationController extends Controller
     public function edit($id)
     {
         $consultation = ServiceConsultation::findOrFail($id);
-        
+
         // Chỉ cho phép chỉnh sửa tư vấn đang ở trạng thái chờ
         if ($consultation->status !== 'pending') {
             return redirect()->route('le-tan.consultations.show', $consultation->id)
                 ->with('error', 'Không thể chỉnh sửa tư vấn đã được chuyển đổi hoặc hủy.');
         }
-        
-        $customers = User::role('customer')->orderBy('first_name')->get();
+
+        $customers = User::whereHas('role', function($query) {
+            $query->where('name', 'Customer');
+        })->orderBy('first_name')->get();
         $categories = Category::with(['services', 'children.services'])->whereNull('parent_id')->get();
-        $activePromotions = Promotion::where('status', 'active')
+        $activePromotions = Promotion::where('is_active', true)
             ->where('start_date', '<=', Carbon::now())
             ->where('end_date', '>=', Carbon::now())
             ->get();
-            
+
         return view('le-tan.consultations.edit', compact('consultation', 'customers', 'categories', 'activePromotions'));
     }
 
@@ -157,13 +161,13 @@ class ConsultationController extends Controller
         ]);
 
         $consultation = ServiceConsultation::findOrFail($id);
-        
+
         // Chỉ cho phép chỉnh sửa tư vấn đang ở trạng thái chờ
         if ($consultation->status !== 'pending') {
             return redirect()->route('le-tan.consultations.show', $consultation->id)
                 ->with('error', 'Không thể chỉnh sửa tư vấn đã được chuyển đổi hoặc hủy.');
         }
-        
+
         $consultation->customer_id = $request->customer_id;
         $consultation->service_id = $request->service_id;
         $consultation->notes = $request->notes;
@@ -184,19 +188,19 @@ class ConsultationController extends Controller
     public function destroy($id)
     {
         $consultation = ServiceConsultation::findOrFail($id);
-        
+
         // Chỉ cho phép xóa tư vấn đang ở trạng thái chờ
         if ($consultation->status !== 'pending') {
             return redirect()->route('le-tan.consultations.show', $consultation->id)
                 ->with('error', 'Không thể xóa tư vấn đã được chuyển đổi hoặc hủy.');
         }
-        
+
         $consultation->delete();
 
         return redirect()->route('le-tan.consultations.index')
             ->with('success', 'Tư vấn dịch vụ đã được xóa thành công.');
     }
-    
+
     /**
      * Hiển thị form chuyển đổi tư vấn thành lịch hẹn
      *
@@ -206,13 +210,13 @@ class ConsultationController extends Controller
     public function convert($id)
     {
         $consultation = ServiceConsultation::with(['customer', 'service'])->findOrFail($id);
-        
+
         // Chỉ cho phép chuyển đổi tư vấn đang ở trạng thái chờ
         if ($consultation->status !== 'pending') {
             return redirect()->route('le-tan.consultations.show', $consultation->id)
                 ->with('error', 'Không thể chuyển đổi tư vấn đã được chuyển đổi hoặc hủy.');
         }
-        
+
         // Chuyển hướng đến trang đặt lịch hẹn với thông tin từ tư vấn
         return redirect()->route('le-tan.appointments.create', [
             'customer_id' => $consultation->customer_id,

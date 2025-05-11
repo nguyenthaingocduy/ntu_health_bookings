@@ -78,7 +78,8 @@
         <aside id="sidebar" class="bg-gray-800 text-white w-full md:w-64 flex-shrink-0 md:sticky md:top-0 md:h-screen overflow-y-auto transition-transform duration-300 ease-in-out md:transform-none mobile-sidebar-closed fixed inset-y-0 left-0 z-30">
             <div class="p-4 flex items-center justify-between md:justify-start">
                 <div class="flex items-center">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-8 w-auto mr-2">
+                    <img src="/storage/logo/beauty-icon.png" alt="Beauty Icon" class="w-10 h-10" onerror="this.src='https://img.icons8.com/color/96/spa-flower.png'">
+
                     <span class="text-xl font-semibold">Beauty Spa</span>
                 </div>
                 <button id="closeSidebar" class="md:hidden text-white">

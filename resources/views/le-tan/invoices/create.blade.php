@@ -25,23 +25,33 @@
     </div>
     @endif
 
+    @if($errors->any())
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+        <ul>
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="p-6">
             <form action="{{ route('le-tan.invoices.store') }}" method="POST">
                 @csrf
-                
+
                 <div class="mb-6">
                     <label for="appointment_id" class="block text-sm font-medium text-gray-700 mb-2">Chọn lịch hẹn <span class="text-red-500">*</span></label>
-                    <select id="appointment_id" name="appointment_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md @error('appointment_id') border-red-500 @enderror" required>
+                    <select id="appointment_id" name="appointment_id" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('appointment_id') border-red-500 @enderror" required>
                         <option value="">-- Chọn lịch hẹn --</option>
                         @foreach($appointments as $appointment)
                             <option value="{{ $appointment->id }}" {{ old('appointment_id') == $appointment->id ? 'selected' : '' }}
                                 data-customer="{{ $appointment->customer->full_name }}"
                                 data-service="{{ $appointment->service->name }}"
                                 data-price="{{ $appointment->service->price }}"
-                                data-date="{{ $appointment->appointment_date->format('d/m/Y H:i') }}"
+                                data-date="{{ \Carbon\Carbon::parse($appointment->date_appointments)->format('d/m/Y H:i') }}"
                                 data-payment="{{ $appointment->payment->amount }}">
-                                {{ $appointment->appointment_code }} - {{ $appointment->customer->full_name }} - {{ $appointment->service->name }} - {{ $appointment->appointment_date->format('d/m/Y H:i') }}
+                                {{ $appointment->id }} - {{ $appointment->customer->full_name }} - {{ $appointment->service->name }} - {{ \Carbon\Carbon::parse($appointment->date_appointments)->format('d/m/Y H:i') }}
                             </option>
                         @endforeach
                     </select>
@@ -52,7 +62,7 @@
 
                 <div class="mb-6">
                     <label for="invoice_date" class="block text-sm font-medium text-gray-700 mb-2">Ngày hóa đơn <span class="text-red-500">*</span></label>
-                    <input type="date" name="invoice_date" id="invoice_date" class="focus:ring-pink-500 focus:border-pink-500 block w-full sm:text-sm border-gray-300 rounded-md @error('invoice_date') border-red-500 @enderror" value="{{ old('invoice_date', date('Y-m-d')) }}" required>
+                    <input type="date" name="invoice_date" id="invoice_date" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('invoice_date') border-red-500 @enderror" value="{{ old('invoice_date', date('Y-m-d')) }}" required>
                     @error('invoice_date')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -60,7 +70,7 @@
 
                 <div class="mb-6">
                     <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Ghi chú</label>
-                    <textarea id="notes" name="notes" rows="3" class="shadow-sm focus:ring-pink-500 focus:border-pink-500 mt-1 block w-full sm:text-sm border-gray-300 rounded-md @error('notes') border-red-500 @enderror" placeholder="Nhập ghi chú nếu có">{{ old('notes') }}</textarea>
+                    <textarea id="notes" name="notes" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('notes') border-red-500 @enderror" placeholder="Nhập ghi chú nếu có">{{ old('notes') }}</textarea>
                     @error('notes')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -89,7 +99,7 @@
                 </div>
 
                 <div class="flex justify-end">
-                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
@@ -106,14 +116,14 @@
     // Khi chọn lịch hẹn, hiển thị thông tin
     document.getElementById('appointment_id').addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
-        
+
         if (this.value) {
             // Lấy thông tin từ data attributes
             const customer = selectedOption.getAttribute('data-customer');
             const service = selectedOption.getAttribute('data-service');
             const date = selectedOption.getAttribute('data-date');
             const payment = selectedOption.getAttribute('data-payment');
-            
+
             // Hiển thị thông tin
             document.getElementById('customer-info').textContent = customer;
             document.getElementById('service-info').textContent = service;

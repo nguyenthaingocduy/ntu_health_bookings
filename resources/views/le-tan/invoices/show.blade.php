@@ -65,10 +65,10 @@
                 <div>
                     <h3 class="text-lg font-semibold text-gray-800 mb-3">Thông tin khách hàng</h3>
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <p class="text-sm font-medium text-gray-900">{{ $invoice->customer->full_name ?? 'N/A' }}</p>
-                        <p class="text-sm text-gray-600">Email: {{ $invoice->customer->email ?? 'N/A' }}</p>
-                        <p class="text-sm text-gray-600">Điện thoại: {{ $invoice->customer->phone ?? 'N/A' }}</p>
-                        <p class="text-sm text-gray-600">Địa chỉ: {{ $invoice->customer->address ?? 'N/A' }}</p>
+                        <p class="text-sm font-medium text-gray-900">{{ $invoice->user->full_name ?? 'N/A' }}</p>
+                        <p class="text-sm text-gray-600">Email: {{ $invoice->user->email ?? 'N/A' }}</p>
+                        <p class="text-sm text-gray-600">Điện thoại: {{ $invoice->user->phone ?? 'N/A' }}</p>
+                        <p class="text-sm text-gray-600">Địa chỉ: {{ $invoice->user->address ?? 'N/A' }}</p>
                     </div>
                 </div>
 
@@ -78,10 +78,10 @@
                         <div class="grid grid-cols-2 gap-2">
                             <p class="text-sm font-medium text-gray-600">Mã hóa đơn:</p>
                             <p class="text-sm text-gray-900">{{ $invoice->invoice_number }}</p>
-                            
+
                             <p class="text-sm font-medium text-gray-600">Ngày hóa đơn:</p>
                             <p class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</p>
-                            
+
                             <p class="text-sm font-medium text-gray-600">Phương thức thanh toán:</p>
                             <p class="text-sm text-gray-900">
                                 @if($invoice->payment_method == 'cash')
@@ -94,9 +94,9 @@
                                     {{ $invoice->payment_method }}
                                 @endif
                             </p>
-                            
+
                             <p class="text-sm font-medium text-gray-600">Người tạo:</p>
-                            <p class="text-sm text-gray-900">{{ $invoice->createdBy->full_name ?? 'N/A' }}</p>
+                            <p class="text-sm text-gray-900">{{ $invoice->creator->full_name ?? 'N/A' }}</p>
                         </div>
                     </div>
                 </div>
@@ -115,17 +115,17 @@
                                 </a>
                             </p>
                         </div>
-                        
+
                         <div>
                             <p class="text-sm font-medium text-gray-600">Dịch vụ:</p>
                             <p class="text-sm text-gray-900">{{ $invoice->appointment->service->name ?? 'N/A' }}</p>
                         </div>
-                        
+
                         <div>
                             <p class="text-sm font-medium text-gray-600">Ngày hẹn:</p>
                             <p class="text-sm text-gray-900">{{ $invoice->appointment->appointment_date ? $invoice->appointment->appointment_date->format('d/m/Y H:i') : 'N/A' }}</p>
                         </div>
-                        
+
                         <div>
                             <p class="text-sm font-medium text-gray-600">Trạng thái:</p>
                             <p class="text-sm text-gray-900">

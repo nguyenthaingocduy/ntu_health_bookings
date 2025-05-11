@@ -31,7 +31,7 @@ class User extends Authenticatable
         'phone',
         'address',
         'gender',
-        'birthday',
+        'date_of_birth',
         'password',
         'role_id',
         'type_id',
@@ -45,6 +45,7 @@ class User extends Authenticatable
         'notify_appointment_reminder',
         'notify_appointment_cancellation',
         'notify_promotions',
+        'updated_by',
     ];
 
     /**
@@ -67,7 +68,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'birthday' => 'date',
+            'date_of_birth' => 'date',
             'last_health_check' => 'date',
             'email_notifications_enabled' => 'boolean',
             'notify_appointment_confirmation' => 'boolean',

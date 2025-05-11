@@ -19,34 +19,124 @@
             }
         }
 
-        /* Sidebar nav group styles */
-        .nav-group {
-            margin-bottom: 0.5rem;
+        /* Sidebar styles */
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: #d1d5db;
+            transition: all 0.2s;
+        }
+
+        .sidebar-nav-item:hover {
+            background-color: rgba(75, 85, 99, 0.5);
+            color: white;
+        }
+
+        .sidebar-nav-item.active {
+            background-color: #4b5563;
+            color: white;
+        }
+
+        .sidebar-dropdown-button {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            color: #d1d5db;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .sidebar-dropdown-button:hover {
+            background-color: rgba(75, 85, 99, 0.5);
+            color: white;
         }
 
         .nav-group-items {
-            padding-top: 0.25rem;
-            padding-bottom: 0.25rem;
-            display: block !important; /* Đảm bảo hiển thị */
+            padding-left: 1rem;
         }
 
         .nav-group-items a {
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            color: #d1d5db;
             font-size: 0.9rem;
-            display: block;
-            padding-left: 1rem;
+            transition: all 0.2s;
             border-left: 2px solid rgba(255, 255, 255, 0.1);
-            margin-left: 0.5rem;
         }
 
         .nav-group-items a:hover {
+            background-color: rgba(75, 85, 99, 0.5);
+            color: white;
             border-left: 2px solid rgba(255, 255, 255, 0.5);
         }
 
-        .nav-group-items svg {
-            width: 1rem;
-            height: 1rem;
+        .nav-group-items a.active {
+            background-color: #4b5563;
+            color: white;
+            border-left: 2px solid white;
+        }
+
+        /* New sidebar dropdown styles */
+        .sidebar-dropdown-container {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: #d1d5db;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sidebar-menu-item:hover {
+            background-color: rgba(75, 85, 99, 0.5);
+            color: white;
+        }
+
+        .sidebar-dropdown {
+            display: none;
+            padding-left: 1rem;
+        }
+
+        .sidebar-dropdown.show {
+            display: block;
+        }
+
+        .sidebar-submenu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            color: #d1d5db;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            border-left: 2px solid rgba(255, 255, 255, 0.1);
+            text-decoration: none;
+        }
+
+        .sidebar-submenu-item:hover {
+            background-color: rgba(75, 85, 99, 0.5);
+            color: white;
+            border-left: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .sidebar-submenu-item.active {
+            background-color: #4b5563;
+            color: white;
+            border-left: 2px solid white;
+        }
+
+        .sidebar-dropdown-icon {
+            transition: transform 0.2s;
+        }
+
+        .sidebar-dropdown-icon.rotate {
+            transform: rotate(180deg);
         }
     </style>
     @yield('styles')
@@ -57,7 +147,8 @@
         <aside id="sidebar" class="bg-gray-800 text-white w-full md:w-64 flex-shrink-0 md:sticky md:top-0 md:h-screen overflow-y-auto transition-transform duration-300 ease-in-out md:transform-none mobile-sidebar-closed fixed inset-y-0 left-0 z-30">
             <div class="p-4 flex items-center justify-between md:justify-start">
                 <div class="flex items-center cursor-pointer" id="logoContainer">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-8 w-auto mr-2">
+                     <img src="/storage/logo/beauty-icon.png" alt="Beauty Icon" class="w-10 h-10" onerror="this.src='https://img.icons8.com/color/96/spa-flower.png'">
+
                     <span class="text-xl font-semibold">Beauty Spa</span>
                 </div>
                 <button id="closeSidebar" class="md:hidden text-white">
@@ -78,251 +169,262 @@
                 />
 
                 <!-- Quản lý khách hàng -->
-                <x-sidebar.nav-dropdown
-                    title="Quản lý khách hàng"
-                    icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                    </svg>'
-                    :routes="['le-tan.customers.index', 'le-tan.customers.create', 'le-tan.customers.edit', 'le-tan.customers.show']"
-                >
-                    <x-sidebar.nav-item
-                        route="le-tan.customers.index"
-                        text="Xem thông tin khách hàng"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                        </svg>'
-                        permission="customers.view"
-                    />
-
-                    <x-sidebar.nav-item
-                        route="le-tan.customers.create"
-                        text="Tạo tài khoản khách hàng"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-                        </svg>'
-                        permission="customers.create"
-                    />
-
-                    <x-sidebar.nav-item
-                        route="le-tan.customers.index"
-                        text="Cập nhật thông tin khách hàng"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>'
-                        permission="customers.edit"
-                    />
-
-                    <x-sidebar.nav-item
-                        route="le-tan.customers.index"
-                        text="Tìm kiếm khách hàng"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>'
-                        permission="customers.view"
-                    />
-                </x-sidebar.nav-dropdown>
+                <div class="sidebar-dropdown-container">
+                    <div class="sidebar-menu-item" onclick="toggleDropdown('customers-dropdown')">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                        <span class="flex-1">Quản lý khách hàng</span>
+                        <svg id="customers-dropdown-icon" class="w-4 h-4 sidebar-dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div id="customers-dropdown" class="sidebar-dropdown">
+                        <a href="{{ route('le-tan.customers.index') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.customers.index') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Xem thông tin khách hàng</span>
+                        </a>
+                        <a href="{{ route('le-tan.customers.create') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.customers.create') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Tạo tài khoản khách hàng</span>
+                        </a>
+                        <a href="{{ route('le-tan.customers.index') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.customers.edit') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Cập nhật thông tin khách hàng</span>
+                        </a>
+                        <a href="{{ route('le-tan.customers.index') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.customers.show') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Tìm kiếm khách hàng</span>
+                        </a>
+                    </div>
+                </div>
 
                 <!-- Quản lý lịch hẹn -->
-                <x-sidebar.nav-dropdown
-                    title="Quản lý lịch hẹn"
-                    icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>'
-                    :routes="['le-tan.appointments.create', 'le-tan.appointments.index', 'le-tan.reminders.index', 'le-tan.reminders.create']"
-                >
-                    <x-sidebar.nav-item
-                        route="le-tan.appointments.create"
-                        text="Đặt lịch hẹn"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>'
-                        permission="appointments.create"
-                    />
-
-                    <x-sidebar.nav-item
-                        route="le-tan.appointments.index"
-                        text="Xác nhận lịch hẹn"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>'
-                        permission="appointments.view"
-                    />
-
-                    <x-sidebar.nav-item
-                        route="le-tan.appointments.index"
-                        text="Hủy lịch hẹn"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>'
-                        permission="appointments.cancel"
-                    />
-
-                    <x-sidebar.nav-item
-                        route="le-tan.reminders.index"
-                        text="Nhắc lịch hẹn"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                        </svg>'
-                        permission="reminders.view"
-                    />
-
-                    <x-sidebar.nav-item
-                        route="le-tan.reminders.create"
-                        text="Tạo nhắc lịch hẹn"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>'
-                        permission="reminders.create"
-                    />
-                </x-sidebar.nav-dropdown>
+                <div class="sidebar-dropdown-container">
+                    <div class="sidebar-menu-item" onclick="toggleDropdown('appointments-dropdown')">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <span class="flex-1">Quản lý lịch hẹn</span>
+                        <svg id="appointments-dropdown-icon" class="w-4 h-4 sidebar-dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div id="appointments-dropdown" class="sidebar-dropdown">
+                        <a href="{{ route('le-tan.appointments.create') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.appointments.create') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Đặt lịch hẹn</span>
+                        </a>
+                        <a href="{{ route('le-tan.appointments.index') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.appointments.index') && !request()->has('status') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Xác nhận lịch hẹn</span>
+                        </a>
+                        <a href="{{ route('le-tan.appointments.index', ['status' => 'cancelled']) }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.appointments.index') && request()->get('status') == 'cancelled' ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Hủy lịch hẹn</span>
+                        </a>
+                        <a href="{{ route('le-tan.reminders.index') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.reminders.index') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Nhắc lịch hẹn</span>
+                        </a>
+                        <a href="{{ route('le-tan.reminders.create') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.reminders.create') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Tạo nhắc lịch hẹn</span>
+                        </a>
+                    </div>
+                </div>
 
                 <!-- Quản lý thanh toán -->
-                <x-sidebar.nav-dropdown
-                    title="Quản lý thanh toán"
-                    icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                    </svg>'
-                    :routes="['le-tan.payments.index', 'le-tan.invoices.index', 'le-tan.invoices.create']"
-                >
-                    <x-sidebar.nav-item
-                        route="le-tan.invoices.create"
-                        text="Tạo hóa đơn"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>'
-                        permission="invoices.create"
-                    />
-
-                    <x-sidebar.nav-item
-                        route="le-tan.payments.index"
-                        text="Xác nhận thanh toán"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>'
-                        permission="payments.view"
-                    />
-
-                    <x-sidebar.nav-item
-                        route="le-tan.invoices.index"
-                        text="In hóa đơn"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                        </svg>'
-                        permission="invoices.print"
-                    />
-
-                    <x-sidebar.nav-item
-                        route="le-tan.payments.index"
-                        text="Xem lịch sử thanh toán"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>'
-                        permission="payments.view"
-                    />
-                </x-sidebar.nav-dropdown>
+                <div class="sidebar-dropdown-container">
+                    <div class="sidebar-menu-item" onclick="toggleDropdown('payments-dropdown')">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <span class="flex-1">Quản lý thanh toán</span>
+                        <svg id="payments-dropdown-icon" class="w-4 h-4 sidebar-dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div id="payments-dropdown" class="sidebar-dropdown">
+                        <a href="{{ route('le-tan.invoices.create') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.invoices.create') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Tạo hóa đơn</span>
+                        </a>
+                        <a href="{{ route('le-tan.payments.index') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.payments.index') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Xác nhận thanh toán</span>
+                        </a>
+                        <a href="{{ route('le-tan.invoices.index') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.invoices.index') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>In hóa đơn</span>
+                        </a>
+                        <a href="{{ route('le-tan.payments.index') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.payments.history') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Xem lịch sử thanh toán</span>
+                        </a>
+                    </div>
+                </div>
 
                 <!-- Quản lý nhân viên -->
-                <x-sidebar.nav-dropdown
-                    title="Quản lý nhân viên"
-                    icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                    </svg>'
-                    :routes="['le-tan.employees.index', 'le-tan.employees.create', 'le-tan.employees.edit']"
-                >
-                    <x-sidebar.nav-item
-                        route="le-tan.dashboard"
-                        text="Xem danh sách nhân viên"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>'
-                        permission="employees.view"
-                    />
-
-                    <x-sidebar.nav-item
-                        route="le-tan.dashboard"
-                        text="Phân công lịch làm việc"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                        </svg>'
-                        permission="employees.schedule"
-                    />
-                </x-sidebar.nav-dropdown>
+                {{-- <div class="sidebar-dropdown-container">
+                    <div class="sidebar-menu-item" onclick="toggleDropdown('employees-dropdown')">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <span class="flex-1">Quản lý nhân viên</span>
+                        <svg id="employees-dropdown-icon" class="w-4 h-4 sidebar-dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div id="employees-dropdown" class="sidebar-dropdown">
+                        <a href="{{ route('le-tan.dashboard') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.employees.index') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Xem danh sách nhân viên</span>
+                        </a>
+                        <a href="{{ route('le-tan.dashboard') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.employees.schedule') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Phân công lịch làm việc</span>
+                        </a>
+                    </div>
+                </div> --}}
 
                 <!-- Quản lý dịch vụ -->
-                <x-sidebar.nav-dropdown
-                    title="Quản lý dịch vụ"
-                    icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                    </svg>'
-                    :routes="['le-tan.services.index', 'le-tan.consultations.index']"
-                >
-                    <x-sidebar.nav-item
-                        route="le-tan.services.index"
-                        text="Xem thông tin dịch vụ"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>'
-                        permission="services.view"
-                    />
+                <div class="sidebar-dropdown-container">
+                    <div class="sidebar-menu-item" onclick="toggleDropdown('services-dropdown')">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                        <span class="flex-1">Quản lý dịch vụ</span>
+                        <svg id="services-dropdown-icon" class="w-4 h-4 sidebar-dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div id="services-dropdown" class="sidebar-dropdown">
+                        <a href="{{ route('le-tan.services.index') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.services.index') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Xem thông tin dịch vụ</span>
+                        </a>
+                        <a href="{{ route('le-tan.consultations.index') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.consultations.index') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Tư vấn dịch vụ cho khách hàng</span>
+                        </a>
+                        <a href="{{ route('le-tan.services.index') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.promotions.index') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Xem thông tin khuyến mãi</span>
+                        </a>
+                    </div>
+                </div>
 
-                    <x-sidebar.nav-item
-                        route="le-tan.consultations.index"
-                        text="Tư vấn dịch vụ cho khách hàng"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
-                        </svg>'
-                        permission="consultations.view"
-                    />
-
-                    <x-sidebar.nav-item
-                        route="le-tan.services.index"
-                        text="Xem thông tin khuyến mãi"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
-                        </svg>'
-                        permission="services.view"
-                    />
-                </x-sidebar.nav-dropdown>
+                <!-- Quản lý lịch làm việc -->
+                {{-- <div class="sidebar-dropdown-container">
+                    <div class="sidebar-menu-item" onclick="toggleDropdown('schedule-dropdown')">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <span class="flex-1">Quản lý lịch làm việc</span>
+                        <svg id="schedule-dropdown-icon" class="w-4 h-4 sidebar-dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div id="schedule-dropdown" class="sidebar-dropdown">
+                        <a href="{{ route('le-tan.dashboard') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.schedule') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Xem lịch làm việc</span>
+                        </a>
+                        <a href="{{ route('le-tan.dashboard') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.appointments.assigned') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Phân công lịch hẹn</span>
+                        </a>
+                        <a href="{{ route('le-tan.dashboard') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.work-status.index') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Cập nhật trạng thái công việc</span>
+                        </a>
+                        <a href="{{ route('le-tan.dashboard') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.sessions.completed') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Báo cáo công việc</span>
+                        </a>
+                    </div>
+                </div> --}}
 
                 <!-- Báo cáo và thống kê -->
-                <x-sidebar.nav-dropdown
-                    title="Báo cáo và thống kê"
-                    icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                    </svg>'
-                    :routes="['le-tan.reports.index', 'le-tan.statistics.index']"
-                >
-                    <x-sidebar.nav-item
-                        route="le-tan.dashboard"
-                        text="Thống kê doanh thu"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>'
-                        permission="reports.view"
-                    />
-
-                    <x-sidebar.nav-item
-                        route="le-tan.dashboard"
-                        text="Thống kê lịch hẹn"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>'
-                        permission="reports.view"
-                    />
-
-                    <x-sidebar.nav-item
-                        route="le-tan.dashboard"
-                        text="Thống kê dịch vụ"
-                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
-                        </svg>'
-                        permission="reports.view"
-                    />
-                </x-sidebar.nav-dropdown>
+                {{-- <div class="sidebar-dropdown-container">
+                    <div class="sidebar-menu-item" onclick="toggleDropdown('reports-dropdown')">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <span class="flex-1">Báo cáo và thống kê</span>
+                        <svg id="reports-dropdown-icon" class="w-4 h-4 sidebar-dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div id="reports-dropdown" class="sidebar-dropdown">
+                        <a href="{{ route('le-tan.dashboard') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.reports.revenue') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Thống kê doanh thu</span>
+                        </a>
+                        <a href="{{ route('le-tan.dashboard') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.reports.appointments') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Thống kê lịch hẹn</span>
+                        </a>
+                        <a href="{{ route('le-tan.dashboard') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.reports.services') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Thống kê dịch vụ</span>
+                        </a>
+                    </div>
+                </div> --}}
 
                 <!-- Tài khoản -->
-                <x-sidebar.section-title title="Tài khoản" />
+                {{-- <x-sidebar.section-title title="Tài khoản" />
 
                 <x-sidebar.nav-item
                     route="admin.permissions.my-permissions"
@@ -342,7 +444,7 @@
                         </span>
                         <span>Đăng xuất</span>
                     </button>
-                </form>
+                </form> --}}
             </nav>
         </aside>
 
@@ -371,8 +473,8 @@
 
                                         <!-- Dropdown menu -->
                                         <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
-                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Thông tin cá nhân</a>
-                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Cài đặt</a>
+                                            {{-- <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Thông tin cá nhân</a>
+                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Cài đặt</a> --}}
                                             <form method="POST" action="{{ route('logout') }}">
                                                 @csrf
                                                 <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Đăng xuất</button>
@@ -432,40 +534,44 @@
             document.getElementById('sidebarOverlay').classList.add('hidden');
         });
 
-        // Toggle dropdown function for sidebar
-        function toggleDropdown(id) {
-            const dropdown = document.getElementById(id);
-            const arrow = document.getElementById('arrow-' + id);
+        // Function to toggle dropdown
+        function toggleDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            const icon = document.getElementById(dropdownId + '-icon');
 
-            if (dropdown.classList.contains('hidden')) {
-                dropdown.classList.remove('hidden');
-                dropdown.classList.add('block');
-                arrow.classList.add('transform', 'rotate-180');
+            if (dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+                if (icon) icon.classList.remove('rotate');
             } else {
-                dropdown.classList.remove('block');
-                dropdown.classList.add('hidden');
-                arrow.classList.remove('transform', 'rotate-180');
+                dropdown.style.display = 'block';
+                if (icon) icon.classList.add('rotate');
             }
         }
 
-        // Đảm bảo tất cả các dropdown đều được hiển thị khi trang tải
+        // Initialize dropdowns when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            // Lấy tất cả các phần tử nav-group-items
-            const navGroups = document.querySelectorAll('.nav-group-items');
+            console.log("DOM Content Loaded - Initializing dropdowns");
 
-            // Đảm bảo chúng được hiển thị
-            navGroups.forEach(function(group) {
-                group.classList.remove('hidden');
-                group.classList.add('block');
+            // Get all dropdown toggles
+            const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+            console.log("Found " + dropdownToggles.length + " dropdown buttons");
 
-                // Lấy ID của group
-                const id = group.id;
-                if (id) {
-                    const arrow = document.getElementById('arrow-' + id);
-                    if (arrow) {
-                        arrow.classList.add('transform', 'rotate-180');
+            // Add click event listeners to all dropdown toggles
+            dropdownToggles.forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    // Find the dropdown menu (next sibling after the button)
+                    const dropdownMenu = this.nextElementSibling;
+                    const arrow = this.querySelector('.dropdown-arrow');
+
+                    // Toggle the dropdown
+                    if (dropdownMenu.style.display === 'none') {
+                        dropdownMenu.style.display = 'block';
+                        if (arrow) arrow.classList.add('transform', 'rotate-180');
+                    } else {
+                        dropdownMenu.style.display = 'none';
+                        if (arrow) arrow.classList.remove('transform', 'rotate-180');
                     }
-                }
+                });
             });
 
             // Xử lý sự kiện click vào avatar để hiển thị dropdown menu
@@ -493,6 +599,7 @@
                     window.location.href = "{{ route('le-tan.dashboard') }}";
                 });
             }
+
         });
     </script>
     @yield('scripts')

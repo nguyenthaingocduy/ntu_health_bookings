@@ -12,14 +12,12 @@
             <p class="text-sm text-gray-500 mt-1">Quản lý các nhắc nhở lịch hẹn cho khách hàng</p>
         </div>
         <div class="flex flex-wrap gap-2">
-            @can('reminders.create')
             <a href="{{ route('le-tan.reminders.create') }}" class="flex items-center px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors duration-150 shadow-md">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
                 Tạo nhắc nhở mới
             </a>
-            @endcan
         </div>
     </div>
 
@@ -95,28 +93,28 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ $reminder->appointment->service->name }}</div>
-                            <div class="text-sm text-gray-500">{{ $reminder->appointment->appointment_date->format('d/m/Y') }} - {{ $reminder->appointment->timeSlot->start_time }}</div>
+                            <div class="text-sm text-gray-500">{{ $reminder->appointment->date_appointments->format('d/m/Y') }} - {{ $reminder->appointment->timeSlot ? $reminder->appointment->timeSlot->start_time : ($reminder->appointment->timeAppointment ? $reminder->appointment->timeAppointment->started_time : 'N/A') }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ $reminder->reminder_date->format('d/m/Y H:i') }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                @if($reminder->reminder_type == 'email') bg-blue-100 text-blue-800 
-                                @elseif($reminder->reminder_type == 'sms') bg-purple-100 text-purple-800 
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
+                                @if($reminder->reminder_type == 'email') bg-blue-100 text-blue-800
+                                @elseif($reminder->reminder_type == 'sms') bg-purple-100 text-purple-800
                                 @else bg-indigo-100 text-indigo-800 @endif">
-                                @if($reminder->reminder_type == 'email') Email 
-                                @elseif($reminder->reminder_type == 'sms') SMS 
+                                @if($reminder->reminder_type == 'email') Email
+                                @elseif($reminder->reminder_type == 'sms') SMS
                                 @else Email & SMS @endif
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                @if($reminder->status == 'pending') bg-yellow-100 text-yellow-800 
-                                @elseif($reminder->status == 'sent') bg-green-100 text-green-800 
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
+                                @if($reminder->status == 'pending') bg-yellow-100 text-yellow-800
+                                @elseif($reminder->status == 'sent') bg-green-100 text-green-800
                                 @else bg-red-100 text-red-800 @endif">
-                                @if($reminder->status == 'pending') Đang chờ 
-                                @elseif($reminder->status == 'sent') Đã gửi 
+                                @if($reminder->status == 'pending') Đang chờ
+                                @elseif($reminder->status == 'sent') Đã gửi
                                 @else Thất bại @endif
                             </span>
                         </td>
@@ -139,6 +137,13 @@
                                 @method('DELETE')
                                 <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Bạn có chắc chắn muốn xóa nhắc nhở này?')">
                                     Xóa
+                                </button>
+                            </form>
+                            @else
+                            <form action="{{ route('le-tan.reminders.send', $reminder->id) }}" method="POST" class="inline-block">
+                                @csrf
+                                <button type="submit" class="text-green-600 hover:text-green-900 mr-3">
+                                    Gửi lại
                                 </button>
                             </form>
                             @endif
