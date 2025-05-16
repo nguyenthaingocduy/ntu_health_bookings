@@ -52,14 +52,30 @@ class TimeSlotController extends Controller
         if ($request->has('day')) {
             // Lấy các khung giờ theo ngày trong tuần
             $dayOfWeek = $request->day;
+            $date = $request->has('date') ? $request->date : date('Y-m-d');
+
             $timeSlots = TimeSlot::where('day_of_week', $dayOfWeek)
+                ->where('is_available', true)
                 ->orderBy('start_time')
                 ->get()
-                ->map(function($slot) {
+                ->map(function($slot) use ($date) {
+                    // Đếm số lượng cuộc hẹn hiện tại trong khung giờ này
+                    $appointmentsCount = $slot->appointments()
+                        ->whereDate('date_appointments', $date)
+                        ->whereIn('status', ['pending', 'confirmed'])
+                        ->count();
+
+                    // Tính số lượng chỗ trống còn lại
+                    $availableSlots = max(0, $slot->max_appointments - $appointmentsCount);
+
                     return [
                         'id' => $slot->id,
                         'start_time' => $slot->start_time->format('H:i'),
-                        'end_time' => $slot->end_time->format('H:i')
+                        'end_time' => $slot->end_time->format('H:i'),
+                        'max_appointments' => $slot->max_appointments,
+                        'booked_count' => $appointmentsCount,
+                        'available_slots' => $availableSlots,
+                        'is_full' => $availableSlots <= 0
                     ];
                 });
 

@@ -26,7 +26,7 @@
         <form action="{{ route('le-tan.reminders.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
                 <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-                <select id="status" name="status" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                <select id="status" name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     <option value="">Tất cả trạng thái</option>
                     <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Đang chờ</option>
                     <option value="sent" {{ request('status') == 'sent' ? 'selected' : '' }}>Đã gửi</option>
@@ -35,7 +35,7 @@
             </div>
             <div>
                 <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
-                <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="Tên khách hàng, dịch vụ..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="Tên khách hàng, dịch vụ..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
             </div>
             <div class="flex items-end">
                 <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition-colors duration-150">

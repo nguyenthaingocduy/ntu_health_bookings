@@ -238,7 +238,31 @@ class Appointment extends Model
      */
     public function getAppointmentDateAttribute()
     {
-        return $this->date_appointments;
+        if ($this->date_appointments) {
+            // Nếu đã là Carbon instance, trả về luôn
+            if ($this->date_appointments instanceof \Illuminate\Support\Carbon) {
+                return $this->date_appointments;
+            }
+
+            // Nếu là string, chuyển đổi thành Carbon
+            try {
+                return \Illuminate\Support\Carbon::parse($this->date_appointments);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Lỗi chuyển đổi date_appointments: ' . $e->getMessage());
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the appointment code attribute.
+     *
+     * @return string
+     */
+    public function getAppointmentCodeAttribute()
+    {
+        return $this->attributes['appointment_code'] ?? ('APT-' . substr($this->id, 0, 8));
     }
 }
 

@@ -73,10 +73,10 @@
                             <div class="flex justify-between items-center mb-4">
                                 <h4 class="text-lg font-semibold text-gray-700">Danh sách quyền</h4>
                                 <div class="flex space-x-2">
-                                    <button type="button" onclick="selectAll()" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-150 text-sm">
+                                    <button type="button" onclick="document.querySelectorAll('.permission-checkbox').forEach(function(checkbox) { checkbox.checked = true; });" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-150 text-sm">
                                         Chọn tất cả
                                     </button>
-                                    <button type="button" onclick="deselectAll()" class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-150 text-sm">
+                                    <button type="button" onclick="document.querySelectorAll('.permission-checkbox').forEach(function(checkbox) { checkbox.checked = false; });" class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-150 text-sm">
                                         Bỏ chọn tất cả
                                     </button>
                                 </div>
@@ -215,23 +215,8 @@
         </div>
     </div>
 </div>
+
+
 @endsection
 
-@section('scripts')
-<script>
-    // Định nghĩa các hàm trong phạm vi toàn cục
-    function selectAll() {
-        var checkboxes = document.querySelectorAll('.permission-checkbox');
-        for (var i = 0; i < checkboxes.length; i++) {
-            checkboxes[i].checked = true;
-        }
-    }
 
-    function deselectAll() {
-        var checkboxes = document.querySelectorAll('.permission-checkbox');
-        for (var i = 0; i < checkboxes.length; i++) {
-            checkboxes[i].checked = false;
-        }
-    }
-</script>
-@endsection

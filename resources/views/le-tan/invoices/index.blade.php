@@ -83,10 +83,10 @@
                                 <div class="flex items-center">
                                     <div class="ml-4">
                                         <div class="text-sm font-medium text-gray-900">
-                                            {{ $invoice->customer->full_name ?? 'N/A' }}
+                                            {{ $invoice->user->full_name ?? 'N/A' }}
                                         </div>
                                         <div class="text-sm text-gray-500">
-                                            {{ $invoice->customer->email ?? 'N/A' }}
+                                            {{ $invoice->user->email ?? 'N/A' }}
                                         </div>
                                     </div>
                                 </div>
@@ -172,7 +172,7 @@
                     </tbody>
                 </table>
             </div>
-            
+
             <div class="mt-4">
                 {{ $invoices->links() }}
             </div>

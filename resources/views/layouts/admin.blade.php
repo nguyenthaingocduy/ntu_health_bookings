@@ -8,8 +8,14 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- Thêm CSS cơ bản để đảm bảo các phần tử hiển thị đúng -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Time Display Fix -->
+    <link rel="stylesheet" href="{{ asset('css/time-display-fix.css') }}">
 
     <style>
         /* Fix z-index issues */
@@ -45,7 +51,7 @@
 <body class="bg-gray-100">
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <aside class="w-64 bg-gray-800 text-white">
+        <aside class="w-64 bg-gray-800 text-white overflow-y-auto">
             <div class="p-4">
                 <a href="{{ route('admin.dashboard') }}" class="text-2xl font-bold text-pink-500">
                     Beauty Spa
@@ -77,6 +83,12 @@
                     Khách hàng
                 </a>
 
+                <a href="{{ route('admin.customer-types.index') }}"
+                   class="block px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->routeIs('admin.customer-types.*') ? 'bg-gray-700' : '' }}">
+                    <i class="fas fa-user-tag w-6"></i>
+                    Loại khách hàng
+                </a>
+
                 <a href="{{ route('admin.employees.index') }}"
                    class="block px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->routeIs('admin.employees.*') ? 'bg-gray-700' : '' }}">
                     <i class="fas fa-user-tie w-6"></i>
@@ -93,6 +105,28 @@
                    class="block px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('admin/promotions*') ? 'bg-gray-700' : '' }}">
                     <i class="fas fa-tags w-6"></i>
                     Khuyến mãi
+                </a>
+
+                <a href="{{ route('admin.invoices.index') }}"
+                   class="block px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('admin/invoices*') ? 'bg-gray-700' : '' }}">
+                    <i class="fas fa-file-invoice-dollar w-6"></i>
+                    Quản lý hóa đơn
+                </a>
+
+                <a href="{{ route('admin.work-schedules.index') }}"
+                   class="block px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('admin/work-schedules*') ? 'bg-gray-700' : '' }}">
+                    <i class="fas fa-calendar-week w-6"></i>
+                    Phân công lịch làm việc
+                </a>
+
+                <div class="py-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Báo cáo & Thống kê
+                </div>
+
+                <a href="{{ route('admin.reports.customer-types') }}"
+                   class="block px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('admin/reports/customer-types*') ? 'bg-gray-700' : '' }}">
+                    <i class="fas fa-chart-pie w-6"></i>
+                    Phân bố khách hàng
                 </a>
 
                 <div class="py-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -129,6 +163,9 @@
                         @endif
                     </div>
                 </a>
+
+                <!-- Thêm khoảng trống ở cuối sidebar -->
+                <div class="py-10"></div>
             </nav>
         </aside>
 
@@ -139,24 +176,26 @@
                 <div class="flex justify-between items-center px-6 py-4">
                     <h1 class="text-2xl font-semibold text-gray-800">@yield('header')</h1>
 
-                    <div class="flex items-center">
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" class="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
-                                <span>{{ Auth::user()->first_name }}</span>
-                                <i class="fas fa-chevron-down"></i>
-                            </button>
+                     <div class="flex items-center">
+                            <div class="ml-3 relative">
+                                <div class="flex items-center">
+                                    <span class="mr-3 text-sm text-gray-600 hidden sm:inline-block">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</span>
+                                    <div class="relative" id="userMenuContainer">
+                                        <img id="userMenuButton" class="h-8 w-8 rounded-full object-cover cursor-pointer" src="https://ui-avatars.com/api/?name={{ Auth::user()->first_name }}&background=0D8ABC&color=fff" alt="{{ Auth::user()->first_name }}">
 
-                            <div x-show="open" @click.away="open = false"
-                                 class="absolute right-0 mt-2 w-48 bg-white rounded shadow-lg py-2 z-50">
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit" class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
-                                        Đăng xuất
-                                    </button>
-                                </form>
+                                        <!-- Dropdown menu -->
+                                        <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
+                                            {{-- <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Thông tin cá nhân</a>
+                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Cài đặt</a> --}}
+                                            <form method="POST" action="{{ route('logout') }}">
+                                                @csrf
+                                                <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Đăng xuất</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
                 </div>
             </header>
 
@@ -193,9 +232,28 @@
         </div>
     </div>
 
+
     <!-- Alpine.js -->
     <script src="//unpkg.com/alpinejs" defer></script>
+    <script>
+        // Xử lý sự kiện click vào avatar để hiển thị dropdown menu
+            const userMenuButton = document.getElementById('userMenuButton');
+            const userMenu = document.getElementById('userMenu');
 
+            if (userMenuButton && userMenu) {
+                userMenuButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userMenu.classList.toggle('hidden');
+                });
+
+                // Đóng dropdown khi click ra ngoài
+                document.addEventListener('click', function(e) {
+                    if (!userMenuButton.contains(e.target) && !userMenu.contains(e.target)) {
+                        userMenu.classList.add('hidden');
+                    }
+                });
+            }
+    </script>
     @stack('scripts')
 </body>
 </html>

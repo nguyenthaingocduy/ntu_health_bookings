@@ -1,0 +1,56 @@
+/* Fix for time display issues */
+.time-slot-display,
+.schedule-cell span,
+table td,
+table th,
+.time-slot,
+.time-display,
+.appointment-time,
+.booking-time,
+.time-range,
+.time-info,
+.time-slot-info,
+.time-slot-range,
+.time-slot-text,
+.time-text,
+.time-value,
+.time-label,
+.time-field,
+.time-input,
+.time-select,
+.time-option,
+.time-display-text,
+.time-display-value,
+.time-display-label,
+.time-display-field,
+.time-display-input,
+.time-display-select,
+.time-display-option {
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-variant-numeric: normal !important;
+    font-feature-settings: normal !important;
+    font-variant: normal !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Đảm bảo tất cả các ký tự số hiển thị đúng */
+body {
+    font-variant-numeric: normal !important;
+}
+
+/* Ghi đè lên bất kỳ font chữ đặc biệt nào có thể gây ra vấn đề */
+.time-display-fix {
+    font-family: Arial, Helvetica, sans-serif !important;
+}
+
+/* Đảm bảo các ký tự số trong bảng hiển thị đúng */
+table {
+    font-variant-numeric: normal !important;
+}
+
+/* Đảm bảo các ký tự số trong form hiển thị đúng */
+input, select, textarea {
+    font-variant-numeric: normal !important;
+}

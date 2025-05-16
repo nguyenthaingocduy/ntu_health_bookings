@@ -65,7 +65,7 @@
                         
                         <div class="mb-6">
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Tên quyền <span class="text-red-500">*</span></label>
-                            <input type="text" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('name') border-red-500 @enderror" id="name" name="name" value="{{ old('name', $permission->name) }}" required placeholder="Ví dụ: users.view">
+                            <input type="text" class="w-full px-4 py-2 border border-gray-300  rounded-lg focus:pink-2 focus:outline-none focus:ring-pink-500 hover:border-pink-500 @error('name') border-red-500 @enderror" id="name" name="name" value="{{ old('name', $permission->name) }}" required placeholder="Ví dụ: users.view">
                             @error('name')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -74,7 +74,7 @@
                         
                         <div class="mb-6">
                             <label for="display_name" class="block text-sm font-medium text-gray-700 mb-2">Tên hiển thị <span class="text-red-500">*</span></label>
-                            <input type="text" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('display_name') border-red-500 @enderror" id="display_name" name="display_name" value="{{ old('display_name', $permission->display_name) }}" required placeholder="Ví dụ: Xem người dùng">
+                            <input type="text" class="w-full px-4 py-2 border border-gray-300  rounded-lg focus:pink-2 focus:outline-none focus:ring-pink-500 hover:border-pink-500 @error('display_name') border-red-500 @enderror" id="display_name" name="display_name" value="{{ old('display_name', $permission->display_name) }}" required placeholder="Ví dụ: Xem người dùng">
                             @error('display_name')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -83,7 +83,7 @@
                         <div class="mb-6">
                             <label for="group" class="block text-sm font-medium text-gray-700 mb-2">Nhóm quyền <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <select class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('group') border-red-500 @enderror" id="group" name="group" required>
+                                <select class="w-full px-4 py-2 border border-gray-300  rounded-lg focus:pink-2 focus:outline-none focus:ring-pink-500 hover:border-pink-500 @error('group') border-red-500 @enderror" id="group" name="group" required>
                                     <option value="">Chọn nhóm quyền</option>
                                     @foreach($groups as $group)
                                     <option value="{{ $group }}" {{ old('group', $permission->group) == $group ? 'selected' : '' }}>{{ $group }}</option>
@@ -92,7 +92,7 @@
                                 </select>
                             </div>
                             <div id="new-group-container" class="mt-3 hidden">
-                                <input type="text" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50" id="new_group" name="new_group" placeholder="Nhập tên nhóm mới">
+                                <input type="text" class="w-full px-4 py-2 border border-gray-300  rounded-lg focus:pink-2 focus:outline-none focus:ring-pink-500 hover:border-pink-500" id="new_group" name="new_group" placeholder="Nhập tên nhóm mới">
                             </div>
                             @error('group')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -101,7 +101,7 @@
                         
                         <div class="mb-6">
                             <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Mô tả</label>
-                            <textarea class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('description') border-red-500 @enderror" id="description" name="description" rows="4" placeholder="Mô tả chi tiết về quyền này">{{ old('description', $permission->description) }}</textarea>
+                            <textarea class="w-full px-4 py-2 border border-gray-300  rounded-lg focus:pink-2 focus:outline-none focus:ring-pink-500 hover:border-pink-500 @error('description') border-red-500 @enderror" id="description" name="description" rows="4" placeholder="Mô tả chi tiết về quyền này">{{ old('description', $permission->description) }}</textarea>
                             @error('description')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror

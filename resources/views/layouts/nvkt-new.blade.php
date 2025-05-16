@@ -113,6 +113,12 @@
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
+                            <span>Xem lịch làm việc (cũ)</span>
+                        </a>
+                        <a href="{{ route('nvkt.work-schedules.index') }}" class="sidebar-submenu-item {{ request()->routeIs('nvkt.work-schedules.index') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
                             <span>Xem lịch làm việc</span>
                         </a>
                         <a href="{{ route('nvkt.appointments.assigned') }}" class="sidebar-submenu-item {{ request()->routeIs('nvkt.appointments.assigned') ? 'active' : '' }}">
@@ -224,7 +230,7 @@
                 </div>
 
                 <!-- Tài khoản -->
-                <div class="mt-6 px-4 py-2">
+                {{-- <div class="mt-6 px-4 py-2">
                     <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tài khoản</h3>
                 </div>
 
@@ -233,7 +239,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
                     </svg>
                     <span>Quyền của tôi</span>
-                </a>
+                </a> --}}
             </nav>
         </aside>
 
@@ -262,8 +268,8 @@
                                     </button>
                                 </div>
                                 <div id="userMenu" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 hidden" role="menu" aria-orientation="vertical" aria-labelledby="userMenuButton" tabindex="-1">
-                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Thông tin cá nhân</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Cài đặt</a>
+                                    {{-- <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Thông tin cá nhân</a>
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Cài đặt</a> --}}
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
                                         <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Đăng xuất</button>

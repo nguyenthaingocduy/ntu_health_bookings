@@ -126,11 +126,19 @@
                                 {{ $appointment->service->name ?? 'N/A' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $appointment->date_appointments ? $appointment->date_appointments->format('d/m/Y') : 'N/A' }}
+                                @if($appointment->date_appointments && $appointment->date_appointments instanceof \DateTime)
+                                    {{ $appointment->date_appointments->format('d/m/Y') }}
+                                @elseif(is_string($appointment->date_appointments))
+                                    {{ \Carbon\Carbon::parse($appointment->date_appointments)->format('d/m/Y') }}
+                                @else
+                                    N/A
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                @if($appointment->timeSlot)
+                                @if($appointment->timeSlot && $appointment->timeSlot->start_time instanceof \DateTime && $appointment->timeSlot->end_time instanceof \DateTime)
                                     {{ $appointment->timeSlot->start_time->format('H:i') }} - {{ $appointment->timeSlot->end_time->format('H:i') }}
+                                @elseif($appointment->timeSlot && is_string($appointment->timeSlot->start_time) && is_string($appointment->timeSlot->end_time))
+                                    {{ \Carbon\Carbon::parse($appointment->timeSlot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($appointment->timeSlot->end_time)->format('H:i') }}
                                 @else
                                     N/A
                                 @endif

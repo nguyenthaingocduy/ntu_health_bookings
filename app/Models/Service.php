@@ -7,6 +7,7 @@ use App\Models\Clinic;
 use App\Models\Category;
 use App\Models\Appointment;
 use App\Models\Promotion;
+use App\Services\PricingService;
 
 class Service extends Model
 {
@@ -251,31 +252,34 @@ class Service extends Model
     }
 
     /**
-     * Tính giá sau khi áp dụng mã khuyến mãi bổ sung
+     * Tính giá sau khi áp dụng mã khuyến mãi bổ sung và loại khách hàng
      *
      * @param string $promotionCode Mã khuyến mãi bổ sung
+     * @param \App\Models\User|null $user Người dùng (nếu không cung cấp, sẽ lấy người dùng hiện tại)
      * @return float
      */
-    public function calculatePriceWithPromotion($promotionCode)
+    public function calculatePriceWithPromotion($promotionCode, $user = null)
     {
         // Log để debug
-        \Illuminate\Support\Facades\Log::info('Tính giá với mã khuyến mãi', [
+        \Illuminate\Support\Facades\Log::info('Tính giá với mã khuyến mãi và loại khách hàng', [
             'service_id' => $this->id,
             'service_name' => $this->name,
             'original_price' => $this->price,
-            'promotion_code' => $promotionCode
+            'promotion_code' => $promotionCode,
+            'user_id' => $user ? $user->id : 'current_user'
         ]);
 
-        // Sử dụng phương thức getDiscountedPriceAttribute với mã khuyến mãi bổ sung
-        $discountedPrice = $this->getDiscountedPriceAttribute($promotionCode);
+        // Sử dụng PricingService để tính giá
+        $pricingService = new PricingService();
+        $priceDetails = $pricingService->calculateFinalPrice($this, $promotionCode, $user);
 
         // Log kết quả
         \Illuminate\Support\Facades\Log::info('Kết quả tính giá', [
             'service_id' => $this->id,
-            'discounted_price' => $discountedPrice
+            'price_details' => $priceDetails
         ]);
 
-        return $discountedPrice;
+        return $priceDetails['final_price'];
     }
 
     /**

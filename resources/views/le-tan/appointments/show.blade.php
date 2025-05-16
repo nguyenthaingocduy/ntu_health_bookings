@@ -177,7 +177,16 @@
                             @endif
 
                             <p class="text-sm font-medium text-gray-600">Nhân viên phụ trách:</p>
-                            <p class="text-sm text-gray-900">{{ $appointment->employee->full_name ?? 'Chưa phân công' }}</p>
+                            <p class="text-sm text-gray-900">
+                                @if($appointment->employee)
+                                    {{ $appointment->employee->full_name }}
+                                    @if($appointment->employee->phone)
+                                        <span class="text-xs text-gray-500">({{ $appointment->employee->phone }})</span>
+                                    @endif
+                                @else
+                                    <span class="text-yellow-500 font-medium">Chưa phân công</span>
+                                @endif
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -221,22 +230,15 @@
 
             @if($appointment->status == 'confirmed')
             <div class="flex justify-end space-x-4 mt-6">
-                <form action="{{ route('le-tan.appointments.update', $appointment->id) }}" method="POST">
+                <button onclick="confirmComplete('{{ $appointment->id }}')" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Hoàn thành lịch hẹn
+                </button>
+                <form id="complete-form-{{ $appointment->id }}" action="{{ route('le-tan.appointments.complete', $appointment->id) }}" method="POST" class="hidden">
                     @csrf
                     @method('PUT')
-                    <input type="hidden" name="customer_id" value="{{ $appointment->customer_id }}">
-                    <input type="hidden" name="service_id" value="{{ $appointment->service_id }}">
-                    <input type="hidden" name="appointment_date" value="{{ $appointment->date_appointments ? $appointment->date_appointments->format('Y-m-d') : date('Y-m-d') }}">
-                    <input type="hidden" name="time_slot_id" value="{{ $appointment->time_slot_id }}">
-                    <input type="hidden" name="status" value="completed">
-                    <input type="hidden" name="notes" value="{{ $appointment->notes }}">
-
-                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                        Hoàn thành lịch hẹn
-                    </button>
                 </form>
 
                 <button onclick="confirmCancel('{{ $appointment->id }}')" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
@@ -271,6 +273,12 @@
     function confirmCancel(id) {
         if (confirm('Bạn có chắc chắn muốn hủy lịch hẹn này không?')) {
             document.getElementById('cancel-form-' + id).submit();
+        }
+    }
+
+    function confirmComplete(id) {
+        if (confirm('Bạn có chắc chắn muốn hoàn thành lịch hẹn này không?')) {
+            document.getElementById('complete-form-' + id).submit();
         }
     }
 </script>

@@ -260,7 +260,12 @@ class PermissionController extends Controller
     {
         $roles = Role::all();
         $permissions = [];
+
+        // Nếu không có role_id được chỉ định, chọn vai trò đầu tiên mặc định
         $selectedRoleId = $request->query('role_id');
+        if (empty($selectedRoleId) && $roles->count() > 0) {
+            $selectedRoleId = $roles->first()->id;
+        }
 
         // Kiểm tra xem cột 'group' có tồn tại trong bảng permissions không
         try {
@@ -280,6 +285,14 @@ class PermissionController extends Controller
         foreach ($roles as $role) {
             $rolePermissions[$role->id] = $role->permissions()->pluck('permissions.id')->toArray();
         }
+
+        // Ghi log để debug
+        \Illuminate\Support\Facades\Log::info('Role Permissions View', [
+            'roles' => $roles->count(),
+            'permissions' => count($permissions),
+            'view' => 'admin.permissions.role_permissions_tailwind',
+            'selectedRoleId' => $selectedRoleId
+        ]);
 
         return view('admin.permissions.role_permissions_tailwind', compact('roles', 'permissions', 'rolePermissions', 'selectedRoleId'));
     }
@@ -484,5 +497,106 @@ class PermissionController extends Controller
     public function myPermissions()
     {
         return view('admin.permissions.my_permissions');
+    }
+
+    /**
+     * Hiển thị trang ma trận phân quyền theo vai trò.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function rolePermissionsMatrix()
+    {
+        $roles = Role::all();
+        $permissions = [];
+
+        // Kiểm tra xem cột 'group' có tồn tại trong bảng permissions không
+        try {
+            if (Schema::hasColumn('permissions', 'group')) {
+                $permissions = Permission::orderBy('group')->orderBy('name')->get()->groupBy('group');
+            } else {
+                $allPermissions = Permission::orderBy('name')->get();
+                $permissions = ['Tất cả quyền' => $allPermissions];
+            }
+        } catch (\Exception $e) {
+            $allPermissions = Permission::orderBy('name')->get();
+            $permissions = ['Tất cả quyền' => $allPermissions];
+        }
+
+        $rolePermissions = [];
+
+        foreach ($roles as $role) {
+            $rolePermissions[$role->id] = $role->permissions()->pluck('permissions.id')->toArray();
+        }
+
+        return view('admin.permissions.role_permissions_matrix', compact('roles', 'permissions', 'rolePermissions'));
+    }
+
+    /**
+     * Cập nhật phân quyền theo vai trò từ ma trận.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function updateRolePermissionsMatrix(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'matrix' => 'required|array',
+            'matrix.*' => 'array',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        try {
+            $matrix = $request->matrix;
+
+            DB::beginTransaction();
+
+            // Xử lý quyền cho từng vai trò
+            foreach ($matrix as $roleId => $permissions) {
+                // Xác thực ID vai trò
+                if (!Role::where('id', $roleId)->exists()) {
+                    continue;
+                }
+
+                // Xóa quyền vai trò hiện có
+                RolePermission::where('role_id', $roleId)->delete();
+
+                // Tạo quyền vai trò mới
+                foreach (array_keys($permissions) as $permissionId) {
+                    // Xác thực ID quyền
+                    if (!Permission::where('id', $permissionId)->exists()) {
+                        continue;
+                    }
+
+                    RolePermission::create([
+                        'id' => Str::uuid(),
+                        'role_id' => $roleId,
+                        'permission_id' => $permissionId,
+                    ]);
+                }
+
+                // Xóa bộ nhớ đệm quyền cho tất cả người dùng có vai trò này
+                $users = User::where('role_id', $roleId)->get();
+
+                foreach ($users as $user) {
+                    $user->clearPermissionCache();
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.permissions.role-permissions-matrix')
+                ->with('success', 'Quyền của các vai trò đã được cập nhật thành công.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()
+                ->with('error', 'Đã xảy ra lỗi khi cập nhật quyền của vai trò: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 }

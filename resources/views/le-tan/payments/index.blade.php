@@ -101,7 +101,20 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                                {{ number_format($payment->amount, 0, ',', '.') }} VNĐ
+                                @if($payment->appointment && $payment->appointment->service && $payment->amount < $payment->appointment->service->price)
+                                    <div>
+                                        <span class="line-through text-gray-500">{{ number_format($payment->appointment->service->price, 0, ',', '.') }} VNĐ</span>
+                                    </div>
+                                    <div class="text-red-600">
+                                        {{ number_format($payment->amount, 0, ',', '.') }} VNĐ
+                                        @php
+                                            $discountPercent = round(($payment->appointment->service->price - $payment->amount) / $payment->appointment->service->price * 100);
+                                        @endphp
+                                        <span class="ml-1 px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">-{{ $discountPercent }}%</span>
+                                    </div>
+                                @else
+                                    {{ number_format($payment->amount, 0, ',', '.') }} VNĐ
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 @if($payment->payment_method == 'cash')
@@ -163,7 +176,7 @@
                     </tbody>
                 </table>
             </div>
-            
+
             <div class="mt-4">
                 {{ $payments->links() }}
             </div>

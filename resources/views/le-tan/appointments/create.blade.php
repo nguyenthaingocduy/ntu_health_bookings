@@ -79,7 +79,13 @@
                             <option value="">-- Chọn giờ hẹn --</option>
                             @foreach($timeSlots as $timeSlot)
                                 <option value="{{ $timeSlot->id }}" {{ old('time_slot_id') == $timeSlot->id ? 'selected' : '' }}>
-                                    {{ $timeSlot->start_time->format('H:i') }} - {{ $timeSlot->end_time->format('H:i') }}
+                                    @if($timeSlot->start_time instanceof \DateTime)
+                                        {{ $timeSlot->start_time->format('H:i') }} - {{ $timeSlot->end_time->format('H:i') }}
+                                    @elseif(is_string($timeSlot->start_time))
+                                        {{ \Carbon\Carbon::parse($timeSlot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($timeSlot->end_time)->format('H:i') }}
+                                    @else
+                                        {{ $timeSlot->start_time }} - {{ $timeSlot->end_time }}
+                                    @endif
                                 </option>
                             @endforeach
                         </select>
@@ -89,12 +95,30 @@
                     </div>
                 </div>
 
-                <div class="mb-6">
-                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Ghi chú</label>
-                    <textarea id="notes" name="notes" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('notes') border-red-500 @enderror" placeholder="Nhập ghi chú nếu có">{{ old('notes') }}</textarea>
-                    @error('notes')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="employee_id" class="block text-sm font-medium text-gray-700 mb-2">Nhân viên kỹ thuật</label>
+                        <select id="employee_id" name="employee_id" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('employee_id') border-red-500 @enderror">
+                            <option value="">-- Chọn nhân viên kỹ thuật --</option>
+                            @foreach($technicians as $technician)
+                                <option value="{{ $technician->id }}" {{ old('employee_id') == $technician->id ? 'selected' : '' }}>
+                                    {{ $technician->full_name }} - {{ $technician->phone }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('employee_id')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                        <p class="text-xs text-gray-500 mt-1">Có thể để trống và phân công sau</p>
+                    </div>
+
+                    <div>
+                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Ghi chú</label>
+                        <textarea id="notes" name="notes" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('notes') border-red-500 @enderror" placeholder="Nhập ghi chú nếu có">{{ old('notes') }}</textarea>
+                        @error('notes')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
                 <div class="bg-gray-50 p-4 rounded-lg mb-6">
@@ -145,6 +169,28 @@
         }
     });
 
+    // Hàm kiểm tra tính khả dụng của nhân viên kỹ thuật
+    function checkTechnicianAvailability() {
+        const selectedDate = document.getElementById('appointment_date').value;
+        const selectedTimeSlot = document.getElementById('time_slot_id').value;
+        const selectedTechnician = document.getElementById('employee_id').value;
+
+        if (selectedDate && selectedTimeSlot && selectedTechnician) {
+            // Gọi API để kiểm tra tính khả dụng của nhân viên
+            fetch(`/api/check-technician-availability?date=${selectedDate}&time_slot_id=${selectedTimeSlot}&technician_id=${selectedTechnician}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.available) {
+                        alert('Nhân viên kỹ thuật đã có lịch hẹn khác trong cùng khung giờ này. Vui lòng chọn nhân viên khác.');
+                        document.getElementById('employee_id').value = '';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking technician availability:', error);
+                });
+        }
+    }
+
     // Khi chọn ngày, kiểm tra và lọc các khung giờ phù hợp
     document.getElementById('appointment_date').addEventListener('change', function() {
         const selectedDate = this.value;
@@ -154,7 +200,7 @@
         if (dayOfWeek === 0) dayOfWeek = 7;
 
         // Gọi API để lấy các khung giờ còn trống cho ngày đã chọn
-        fetch(`/api/time-slots?day=${dayOfWeek}`)
+        fetch(`/api/time-slots?day=${dayOfWeek}&date=${selectedDate}`)
             .then(response => response.json())
             .then(data => {
                 const timeSlotSelect = document.getElementById('time_slot_id');
@@ -167,19 +213,53 @@
                 data.forEach(slot => {
                     const option = document.createElement('option');
                     option.value = slot.id;
-                    option.textContent = `${slot.start_time} - ${slot.end_time}`;
+
+                    // Hiển thị thông tin về số lượng chỗ trống
+                    let slotText = `${slot.start_time} - ${slot.end_time}`;
+
+                    // Thêm thông tin về số lượng chỗ trống
+                    if (slot.hasOwnProperty('available_slots')) {
+                        slotText += ` (${slot.available_slots}/${slot.max_appointments} chỗ trống)`;
+
+                        // Nếu đã đầy, thêm thông báo và vô hiệu hóa option
+                        if (slot.is_full) {
+                            slotText += ' - ĐÃ ĐẦY';
+                            option.disabled = true;
+                        }
+                    }
+
+                    option.textContent = slotText;
 
                     // Nếu option này trùng với giá trị đã chọn trước đó, đánh dấu là selected
-                    if (slot.id === currentValue) {
+                    if (slot.id === currentValue && !slot.is_full) {
                         option.selected = true;
                     }
 
                     timeSlotSelect.appendChild(option);
                 });
+
+                // Kiểm tra lại tính khả dụng của nhân viên kỹ thuật
+                if (document.getElementById('employee_id').value) {
+                    checkTechnicianAvailability();
+                }
             })
             .catch(error => {
                 console.error('Error fetching time slots:', error);
             });
+    });
+
+    // Khi chọn khung giờ, kiểm tra tính khả dụng của nhân viên kỹ thuật
+    document.getElementById('time_slot_id').addEventListener('change', function() {
+        if (document.getElementById('employee_id').value) {
+            checkTechnicianAvailability();
+        }
+    });
+
+    // Khi chọn nhân viên kỹ thuật, kiểm tra tính khả dụng
+    document.getElementById('employee_id').addEventListener('change', function() {
+        if (this.value) {
+            checkTechnicianAvailability();
+        }
     });
 </script>
 @endsection

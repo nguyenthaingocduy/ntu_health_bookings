@@ -17,6 +17,9 @@ class Kernel extends ConsoleKernel
 
         // Send pending emails every 10 minutes
         $schedule->command('emails:send-pending')->everyTenMinutes();
+
+        // Upgrade customer types every Sunday at midnight
+        $schedule->command('customers:upgrade-types')->weekly()->sundays()->at('00:00');
     }
 
     /**

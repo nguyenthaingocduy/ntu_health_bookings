@@ -14,13 +14,25 @@ Route::group([], function () {
     Route::delete('/permissions/{id}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
 
     // Role permissions
-    Route::get('/permissions/role-permissions', [PermissionController::class, 'rolePermissions'])->name('permissions.role-permissions');
-    Route::put('/permissions/role-permissions', [PermissionController::class, 'updateRolePermissions'])->name('permissions.update-role-permissions');
+    Route::get('/role-permissions', [PermissionController::class, 'rolePermissions'])->name('permissions.role-permissions');
+    Route::put('/role-permissions', [PermissionController::class, 'updateRolePermissions'])->name('permissions.update-role-permissions');
 
-    // User permissions - Vô hiệu hóa
-    // Route::get('/user-permissions', [PermissionController::class, 'userPermissions'])->name('permissions.user-permissions');
-    // Route::get('/user-permissions/{id}/edit', [PermissionController::class, 'editUserPermissions'])->name('permissions.edit-user-permissions');
-    // Route::put('/user-permissions/{id}', [PermissionController::class, 'updateUserPermissions'])->name('permissions.update-user-permissions');
+    // Đảm bảo route cũ cũng hoạt động để tránh lỗi 404
+    Route::get('/permissions/role-permissions', [PermissionController::class, 'rolePermissions']);
+    Route::put('/permissions/role-permissions', [PermissionController::class, 'updateRolePermissions']);
+
+    // Role permissions matrix
+    Route::get('/role-permissions-matrix', [PermissionController::class, 'rolePermissionsMatrix'])->name('permissions.role-permissions-matrix');
+    Route::put('/role-permissions-matrix', [PermissionController::class, 'updateRolePermissionsMatrix'])->name('permissions.update-role-permissions-matrix');
+
+    // Đảm bảo route cũ cũng hoạt động để tránh lỗi 404
+    Route::get('/permissions/role-permissions-matrix', [PermissionController::class, 'rolePermissionsMatrix']);
+    Route::put('/permissions/role-permissions-matrix', [PermissionController::class, 'updateRolePermissionsMatrix']);
+
+    // User permissions
+    Route::get('/user-permissions', [PermissionController::class, 'userPermissions'])->name('permissions.user-permissions');
+    Route::get('/user-permissions/{id}/edit', [PermissionController::class, 'editUserPermissions'])->name('permissions.edit-user-permissions');
+    Route::put('/user-permissions/{id}', [PermissionController::class, 'updateUserPermissions'])->name('permissions.update-user-permissions');
 
     // My permissions
     Route::get('/my-permissions', [PermissionController::class, 'myPermissions'])->name('permissions.my-permissions');

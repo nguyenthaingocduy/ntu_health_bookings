@@ -29,14 +29,22 @@
         <div class="p-6">
             <form action="{{ route('le-tan.payments.store') }}" method="POST">
                 @csrf
-                
+
                 <div class="mb-6">
                     <label for="appointment_id" class="block text-sm font-medium text-gray-700 mb-2">Chọn lịch hẹn <span class="text-red-500">*</span></label>
                     <select id="appointment_id" name="appointment_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md @error('appointment_id') border-red-500 @enderror" required>
                         <option value="">-- Chọn lịch hẹn --</option>
                         @foreach($appointments as $appointment)
                             <option value="{{ $appointment->id }}" {{ old('appointment_id') == $appointment->id ? 'selected' : '' }}>
-                                {{ $appointment->appointment_code }} - {{ $appointment->customer->full_name }} - {{ $appointment->service->name }} - {{ $appointment->appointment_date->format('d/m/Y H:i') }}
+                                {{ $appointment->appointment_code ?? 'APT-'.substr($appointment->id, 0, 8) }} -
+                                {{ $appointment->customer->full_name ?? 'Khách hàng' }} -
+                                {{ $appointment->service->name ?? 'Dịch vụ' }} -
+                                {{ $appointment->appointment_date ? $appointment->appointment_date->format('d/m/Y H:i') : ($appointment->date_appointments ? date('d/m/Y H:i', strtotime($appointment->date_appointments)) : 'Chưa có ngày hẹn') }}
+                                @if($appointment->status == 'confirmed')
+                                    (Đã xác nhận)
+                                @elseif($appointment->status == 'completed')
+                                    (Đã hoàn thành)
+                                @endif
                             </option>
                         @endforeach
                     </select>
@@ -48,7 +56,7 @@
                 <div class="mb-6">
                     <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Số tiền <span class="text-red-500">*</span></label>
                     <div class="mt-1 relative rounded-md shadow-sm">
-                        <input type="number" name="amount" id="amount" class="focus:ring-pink-500 focus:border-pink-500 block w-full pl-3 pr-12 sm:text-sm border-gray-300 rounded-md @error('amount') border-red-500 @enderror" placeholder="0" value="{{ old('amount') }}" required>
+                        <input type="number" name="amount" id="amount" class=" w-full px-4 py-2 border border-gray-300 block pl-3 pr-12 rounded-lg focus:ring-2 focus:ring-gray-500 @error('amount') border-red-500 @enderror" placeholder="0" value="{{ old('amount') }}" required>
                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                             <span class="text-gray-500 sm:text-sm">
                                 VNĐ
@@ -58,6 +66,7 @@
                     @error('amount')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
+                    <div id="price-info" class="hidden"></div>
                 </div>
 
                 <div class="mb-6">
@@ -86,7 +95,7 @@
 
                 <div class="mb-6">
                     <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Ghi chú</label>
-                    <textarea id="notes" name="notes" rows="3" class="shadow-sm focus:ring-pink-500 focus:border-pink-500 mt-1 block w-full sm:text-sm border-gray-300 rounded-md @error('notes') border-red-500 @enderror" placeholder="Nhập ghi chú nếu có">{{ old('notes') }}</textarea>
+                    <textarea id="notes" name="notes" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 @error('notes') border-red-500 @enderror" placeholder="Nhập ghi chú nếu có">{{ old('notes') }}</textarea>
                     @error('notes')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -111,14 +120,39 @@
     document.getElementById('appointment_id').addEventListener('change', function() {
         const appointmentId = this.value;
         if (!appointmentId) return;
-        
+
         // Tìm thông tin lịch hẹn đã chọn
         const appointments = @json($appointments);
         const selectedAppointment = appointments.find(appointment => appointment.id === appointmentId);
-        
-        if (selectedAppointment && selectedAppointment.service) {
-            // Điền số tiền dịch vụ
-            document.getElementById('amount').value = selectedAppointment.service.price;
+
+        if (selectedAppointment) {
+            // Sử dụng giá đã giảm (final_price) nếu có, nếu không thì sử dụng giá gốc
+            if (selectedAppointment.final_price && selectedAppointment.final_price > 0) {
+                document.getElementById('amount').value = selectedAppointment.final_price;
+            } else if (selectedAppointment.service) {
+                document.getElementById('amount').value = selectedAppointment.service.price;
+            }
+
+            // Hiển thị thông tin giảm giá nếu có
+            const priceInfoElement = document.getElementById('price-info');
+            if (priceInfoElement) {
+                if (selectedAppointment.final_price && selectedAppointment.service &&
+                    selectedAppointment.final_price < selectedAppointment.service.price) {
+                    const discountPercent = Math.round((selectedAppointment.service.price - selectedAppointment.final_price) / selectedAppointment.service.price * 100);
+
+                    priceInfoElement.innerHTML = `
+                        <div class="mt-2 text-sm">
+                            <span class="line-through text-gray-500">${new Intl.NumberFormat('vi-VN').format(selectedAppointment.service.price)} VNĐ</span>
+                            <span class="text-red-600 ml-2">${new Intl.NumberFormat('vi-VN').format(selectedAppointment.final_price)} VNĐ</span>
+                            <span class="ml-2 px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">Giảm ${discountPercent}%</span>
+                        </div>
+                    `;
+                    priceInfoElement.classList.remove('hidden');
+                } else {
+                    priceInfoElement.innerHTML = '';
+                    priceInfoElement.classList.add('hidden');
+                }
+            }
         }
     });
 </script>

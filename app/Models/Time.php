@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\TimeHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -37,6 +38,17 @@ class Time extends Model
     public function getAvailableSlotsAttribute()
     {
         return max(0, $this->capacity - $this->booked_count);
+    }
+
+    /**
+     * Get formatted time for display
+     *
+     * @return string
+     */
+    public function getFormattedTimeAttribute()
+    {
+        // Sử dụng helper function để định dạng thời gian
+        return TimeHelper::formatTime($this->started_time);
     }
 
     public function appointments()

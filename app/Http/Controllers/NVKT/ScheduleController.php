@@ -23,7 +23,15 @@ class ScheduleController extends Controller
         $startOfWeek = $date->copy()->startOfWeek();
         $endOfWeek = $date->copy()->endOfWeek();
 
-        $timeSlots = TimeSlot::orderBy('start_time')->get();
+        // Lấy các khung giờ duy nhất, sắp xếp theo thời gian bắt đầu
+        $timeSlots = TimeSlot::select('start_time', 'end_time')
+            ->distinct()
+            ->orderBy('start_time')
+            ->get()
+            ->unique(function ($item) {
+                // Sử dụng substr thay vì format vì start_time là string, không phải Carbon
+                return substr($item->start_time, 0, 5);
+            });
 
         $appointments = Appointment::with(['customer', 'service', 'timeSlot'])
             ->where('employee_id', Auth::id())
@@ -34,20 +42,30 @@ class ScheduleController extends Controller
 
         $schedule = [];
 
-        foreach ($timeSlots as $timeSlot) {
-            $schedule[$timeSlot->id] = [
+        foreach ($timeSlots as $index => $timeSlot) {
+            $scheduleKey = substr($timeSlot->start_time, 0, 5); // Sử dụng substr thay vì format
+            $schedule[$scheduleKey] = [
                 'time_slot' => $timeSlot,
                 'days' => []
             ];
 
             for ($day = 0; $day < 7; $day++) {
                 $currentDate = $startOfWeek->copy()->addDays($day);
-                $dayAppointments = $appointments->filter(function ($appointment) use ($currentDate, $timeSlot) {
+                $currentDayOfWeek = $currentDate->dayOfWeek == 0 ? 7 : $currentDate->dayOfWeek; // Chuyển đổi 0 (Chủ nhật) thành 7
+
+                // Tìm khung giờ tương ứng cho ngày hiện tại
+                $dayTimeSlot = TimeSlot::where('day_of_week', $currentDayOfWeek)
+                    ->whereTime('start_time', $timeSlot->start_time) // start_time đã là chuỗi thời gian
+                    ->first();
+
+                $dayTimeSlotId = $dayTimeSlot ? $dayTimeSlot->id : null;
+
+                $dayAppointments = $appointments->filter(function ($appointment) use ($currentDate, $dayTimeSlotId) {
                     return $appointment->date_appointments->isSameDay($currentDate) &&
-                           $appointment->time_slot_id == $timeSlot->id;
+                           $appointment->time_slot_id == $dayTimeSlotId;
                 });
 
-                $schedule[$timeSlot->id]['days'][$day] = [
+                $schedule[$scheduleKey]['days'][$day] = [
                     'date' => $currentDate,
                     'appointments' => $dayAppointments
                 ];

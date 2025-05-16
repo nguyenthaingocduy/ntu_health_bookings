@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\TimeHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -9,10 +10,10 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 class WorkingHour extends Model
 {
     use HasFactory, HasUuids;
-    
+
     protected $keyType = 'string';
     public $incrementing = false;
-    
+
     protected $fillable = [
         'id',
         'day_of_week',
@@ -21,12 +22,12 @@ class WorkingHour extends Model
         'is_closed',
         'note',
     ];
-    
+
     protected $casts = [
         'day_of_week' => 'integer',
         'is_closed' => 'boolean',
     ];
-    
+
     /**
      * Get the day name
      *
@@ -43,10 +44,10 @@ class WorkingHour extends Model
             5 => 'Thứ sáu',
             6 => 'Thứ bảy',
         ];
-        
+
         return $days[$this->day_of_week] ?? 'Không xác định';
     }
-    
+
     /**
      * Get the formatted open time
      *
@@ -57,10 +58,11 @@ class WorkingHour extends Model
         if ($this->is_closed || !$this->open_time) {
             return 'Đóng cửa';
         }
-        
-        return date('H:i', strtotime($this->open_time));
+
+        // Sử dụng helper function để định dạng thời gian
+        return TimeHelper::formatTime($this->open_time);
     }
-    
+
     /**
      * Get the formatted close time
      *
@@ -71,10 +73,11 @@ class WorkingHour extends Model
         if ($this->is_closed || !$this->close_time) {
             return 'Đóng cửa';
         }
-        
-        return date('H:i', strtotime($this->close_time));
+
+        // Sử dụng helper function để định dạng thời gian
+        return TimeHelper::formatTime($this->close_time);
     }
-    
+
     /**
      * Get the working hours display
      *
@@ -85,10 +88,11 @@ class WorkingHour extends Model
         if ($this->is_closed) {
             return 'Đóng cửa';
         }
-        
-        return $this->formatted_open_time . ' - ' . $this->formatted_close_time;
+
+        // Sử dụng helper function để định dạng khoảng thời gian
+        return TimeHelper::formatTimeRange($this->open_time, $this->close_time);
     }
-    
+
     /**
      * Check if the salon is open on a specific day and time
      *
@@ -99,16 +103,16 @@ class WorkingHour extends Model
     {
         $dayOfWeek = $dateTime->dayOfWeek;
         $time = $dateTime->format('H:i:s');
-        
+
         $workingHour = self::where('day_of_week', $dayOfWeek)->first();
-        
+
         if (!$workingHour || $workingHour->is_closed) {
             return false;
         }
-        
+
         return $time >= $workingHour->open_time && $time <= $workingHour->close_time;
     }
-    
+
     /**
      * Get all working hours ordered by day of week
      *

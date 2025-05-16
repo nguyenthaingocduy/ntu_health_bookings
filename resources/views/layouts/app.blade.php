@@ -14,6 +14,9 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+    <!-- Time Display Fix -->
+    <link rel="stylesheet" href="{{ asset('css/time-display-fix.css') }}">
+
     <!-- Scripts and Styles -->
     @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -491,15 +494,14 @@
             padding-top: 160px; /* Mặc định cho desktop */
         }
 
-        @media (max-width: 768px) {
-            .content-wrapper {
-                padding-top: 140px; /* Điều chỉnh cho tablet */
-            }
+         /* Content wrapper - add padding for fixed header */
+        .content-wrapper {
+            padding-top: 15rem; /* Thêm padding-top để tránh header che nội dung */
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
             .content-wrapper {
-                padding-top: 120px; /* Điều chỉnh cho mobile */
+                padding-top: 10rem; /* Tăng padding cho màn hình nhỏ vì header cao hơn */
             }
         }
 

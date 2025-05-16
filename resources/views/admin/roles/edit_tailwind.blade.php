@@ -10,7 +10,7 @@
             <p class="text-sm text-gray-500 mt-1">Cập nhật thông tin vai trò</p>
         </div>
         <div class="flex space-x-2">
-            <a href="{{ route('admin.permissions.role-permissions', ['role_id' => $role->id]) }}" class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-150 shadow-sm">
+            <a href="{{ route('admin.permissions.role-permissions-matrix', ['role_id' => $role->id]) }}" class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-150 shadow-sm">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
                 </svg>
@@ -73,7 +73,7 @@
                         
                         <div class="mb-6">
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Tên vai trò <span class="text-red-500">*</span></label>
-                            <input type="text" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('name') border-red-500 @enderror" id="name" name="name" value="{{ old('name', $role->name) }}" required placeholder="Ví dụ: Admin, Nhân viên, Khách hàng" {{ in_array($role->name, ['Admin', 'Nhân viên', 'Khách hàng']) ? 'readonly' : '' }}>
+                            <input type="text" class="w-full px-4 py-2 border border-gray-300  rounded-lg focus:pink-2 focus:outline-none focus:ring-pink-500 hover:border-pink-500 @error('name') border-red-500 @enderror" id="name" name="name" value="{{ old('name', $role->name) }}" required placeholder="Ví dụ: Admin, Nhân viên, Khách hàng" {{ in_array($role->name, ['Admin', 'Nhân viên', 'Khách hàng']) ? 'readonly' : '' }}>
                             @error('name')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -84,7 +84,7 @@
                         
                         <div class="mb-6">
                             <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Mô tả</label>
-                            <textarea class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('description') border-red-500 @enderror" id="description" name="description" rows="4" placeholder="Mô tả chi tiết về vai trò này">{{ old('description', $role->description) }}</textarea>
+                            <textarea class="w-full px-4 py-2 border border-gray-300  rounded-lg focus:pink-2 focus:outline-none focus:ring-pink-500 hover:border-pink-500 @error('description') border-red-500 @enderror" id="description" name="description" rows="4" placeholder="Mô tả chi tiết về vai trò này">{{ old('description', $role->description) }}</textarea>
                             @error('description')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -134,7 +134,7 @@
                     <div class="mb-6">
                         <h4 class="text-sm font-medium text-gray-500 uppercase mb-2">Thao tác</h4>
                         <div class="space-y-3">
-                            <a href="{{ route('admin.permissions.role-permissions', ['role_id' => $role->id]) }}" class="w-full flex items-center justify-center px-4 py-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg transition-colors duration-150">
+                            <a href="{{ route('admin.permissions.role-permissions-matrix', ['role_id' => $role->id]) }}" class="w-full flex items-center justify-center px-4 py-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg transition-colors duration-150">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
                                 </svg>

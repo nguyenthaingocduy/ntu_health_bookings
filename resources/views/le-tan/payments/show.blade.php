@@ -36,10 +36,21 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div class="text-sm font-medium text-gray-500">ID thanh toán:</div>
                             <div class="text-sm text-gray-900">{{ $payment->id }}</div>
-                            
+
                             <div class="text-sm font-medium text-gray-500">Số tiền:</div>
-                            <div class="text-sm text-gray-900 font-semibold">{{ number_format($payment->amount, 0, ',', '.') }} VNĐ</div>
-                            
+                            <div class="text-sm text-gray-900 font-semibold">
+                                @if($payment->appointment && $payment->appointment->service && $payment->amount < $payment->appointment->service->price)
+                                    <span class="line-through text-gray-500">{{ number_format($payment->appointment->service->price, 0, ',', '.') }} VNĐ</span>
+                                    <span class="text-red-600 ml-2">{{ number_format($payment->amount, 0, ',', '.') }} VNĐ</span>
+                                    @php
+                                        $discountPercent = round(($payment->appointment->service->price - $payment->amount) / $payment->appointment->service->price * 100);
+                                    @endphp
+                                    <span class="ml-2 px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">Giảm {{ $discountPercent }}%</span>
+                                @else
+                                    {{ number_format($payment->amount, 0, ',', '.') }} VNĐ
+                                @endif
+                            </div>
+
                             <div class="text-sm font-medium text-gray-500">Phương thức:</div>
                             <div class="text-sm text-gray-900">
                                 @if($payment->payment_method == 'cash')
@@ -60,7 +71,7 @@
                                     </span>
                                 @endif
                             </div>
-                            
+
                             <div class="text-sm font-medium text-gray-500">Trạng thái:</div>
                             <div class="text-sm text-gray-900">
                                 @if($payment->payment_status == 'completed')
@@ -81,34 +92,34 @@
                                     </span>
                                 @endif
                             </div>
-                            
+
                             <div class="text-sm font-medium text-gray-500">Mã giao dịch:</div>
                             <div class="text-sm text-gray-900">{{ $payment->transaction_id ?? 'N/A' }}</div>
-                            
+
                             <div class="text-sm font-medium text-gray-500">Ngày tạo:</div>
                             <div class="text-sm text-gray-900">{{ $payment->created_at->format('d/m/Y H:i') }}</div>
-                            
+
                             <div class="text-sm font-medium text-gray-500">Cập nhật lần cuối:</div>
                             <div class="text-sm text-gray-900">{{ $payment->updated_at->format('d/m/Y H:i') }}</div>
                         </div>
                     </div>
                 </div>
-                
+
                 <div>
                     <h2 class="text-lg font-semibold text-gray-800 mb-4">Thông tin khách hàng</h2>
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <div class="grid grid-cols-2 gap-4">
                             <div class="text-sm font-medium text-gray-500">Họ tên:</div>
                             <div class="text-sm text-gray-900">{{ $payment->customer->full_name ?? 'N/A' }}</div>
-                            
+
                             <div class="text-sm font-medium text-gray-500">Email:</div>
                             <div class="text-sm text-gray-900">{{ $payment->customer->email ?? 'N/A' }}</div>
-                            
+
                             <div class="text-sm font-medium text-gray-500">Số điện thoại:</div>
                             <div class="text-sm text-gray-900">{{ $payment->customer->phone ?? 'N/A' }}</div>
                         </div>
                     </div>
-                    
+
                     <h2 class="text-lg font-semibold text-gray-800 mt-6 mb-4">Thông tin lịch hẹn</h2>
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <div class="grid grid-cols-2 gap-4">
@@ -122,13 +133,20 @@
                                     N/A
                                 @endif
                             </div>
-                            
+
                             <div class="text-sm font-medium text-gray-500">Dịch vụ:</div>
-                            <div class="text-sm text-gray-900">{{ $payment->appointment->service->name ?? 'N/A' }}</div>
-                            
+                            <div class="text-sm text-gray-900">
+                                {{ $payment->appointment->service->name ?? 'N/A' }}
+                                @if($payment->appointment && $payment->appointment->promotion_code)
+                                    <span class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                                        Mã KM: {{ $payment->appointment->promotion_code }}
+                                    </span>
+                                @endif
+                            </div>
+
                             <div class="text-sm font-medium text-gray-500">Ngày hẹn:</div>
                             <div class="text-sm text-gray-900">{{ $payment->appointment->appointment_date ? $payment->appointment->appointment_date->format('d/m/Y H:i') : 'N/A' }}</div>
-                            
+
                             <div class="text-sm font-medium text-gray-500">Trạng thái:</div>
                             <div class="text-sm text-gray-900">
                                 @if($payment->appointment)
@@ -161,7 +179,7 @@
                     </div>
                 </div>
             </div>
-            
+
             @if($payment->notes)
             <div class="mt-6">
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Ghi chú</h2>
@@ -198,7 +216,7 @@
                     <p>NTU Health Booking</p>
                     <p>Ngày: {{ now()->format('d/m/Y H:i') }}</p>
                 </div>
-                
+
                 <div class="title">THÔNG TIN THANH TOÁN</div>
                 <table class="info-table">
                     <tr>
@@ -207,7 +225,18 @@
                     </tr>
                     <tr>
                         <th>Số tiền:</th>
-                        <td>{{ number_format($payment->amount, 0, ',', '.') }} VNĐ</td>
+                        <td>
+                            @if($payment->appointment && $payment->appointment->service && $payment->amount < $payment->appointment->service->price)
+                                <span style="text-decoration: line-through; color: #888;">{{ number_format($payment->appointment->service->price, 0, ',', '.') }} VNĐ</span>
+                                <span style="color: #e53e3e; margin-left: 8px;">{{ number_format($payment->amount, 0, ',', '.') }} VNĐ</span>
+                                @php
+                                    $discountPercent = round(($payment->appointment->service->price - $payment->amount) / $payment->appointment->service->price * 100);
+                                @endphp
+                                <span style="margin-left: 8px; padding: 2px 8px; background-color: #fed7d7; color: #9b2c2c; border-radius: 9999px; font-size: 12px;">Giảm {{ $discountPercent }}%</span>
+                            @else
+                                {{ number_format($payment->amount, 0, ',', '.') }} VNĐ
+                            @endif
+                        </td>
                     </tr>
                     <tr>
                         <th>Phương thức:</th>
@@ -242,7 +271,7 @@
                         <td>{{ $payment->created_at->format('d/m/Y H:i') }}</td>
                     </tr>
                 </table>
-                
+
                 <div class="title">THÔNG TIN KHÁCH HÀNG</div>
                 <table class="info-table">
                     <tr>
@@ -258,7 +287,7 @@
                         <td>{{ $payment->customer->phone ?? 'N/A' }}</td>
                     </tr>
                 </table>
-                
+
                 <div class="title">THÔNG TIN DỊCH VỤ</div>
                 <table class="info-table">
                     <tr>
@@ -267,19 +296,26 @@
                     </tr>
                     <tr>
                         <th>Dịch vụ:</th>
-                        <td>{{ $payment->appointment->service->name ?? 'N/A' }}</td>
+                        <td>
+                            {{ $payment->appointment->service->name ?? 'N/A' }}
+                            @if($payment->appointment && $payment->appointment->promotion_code)
+                                <span style="margin-left: 8px; padding: 2px 8px; background-color: #e6f0ff; color: #1e40af; border-radius: 9999px; font-size: 12px;">
+                                    Mã KM: {{ $payment->appointment->promotion_code }}
+                                </span>
+                            @endif
+                        </td>
                     </tr>
                     <tr>
                         <th>Ngày hẹn:</th>
                         <td>{{ $payment->appointment->appointment_date ? $payment->appointment->appointment_date->format('d/m/Y H:i') : 'N/A' }}</td>
                     </tr>
                 </table>
-                
+
                 @if($payment->notes)
                 <div class="title">GHI CHÚ</div>
                 <p>{{ $payment->notes }}</p>
                 @endif
-                
+
                 <div class="footer">
                     <p>Người thanh toán</p>
                     <br><br><br>

@@ -58,7 +58,17 @@
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">{{ $appointment->date_appointments->format('d/m/Y') }}</div>
-                                <div class="text-sm text-gray-500">{{ $appointment->timeSlot ? $appointment->timeSlot->start_time->format('H:i') . ' - ' . $appointment->timeSlot->end_time->format('H:i') : 'N/A' }}</div>
+                                <div class="text-sm text-gray-500">
+                                    @if($appointment->timeSlot)
+                                        @php
+                                            $startTime = is_string($appointment->timeSlot->start_time) ? substr($appointment->timeSlot->start_time, 0, 5) : $appointment->timeSlot->start_time->format('H:i');
+                                            $endTime = is_string($appointment->timeSlot->end_time) ? substr($appointment->timeSlot->end_time, 0, 5) : $appointment->timeSlot->end_time->format('H:i');
+                                        @endphp
+                                        {{ $startTime }} - {{ $endTime }}
+                                    @else
+                                        N/A
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
@@ -153,7 +163,17 @@
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">{{ $appointment->date_appointments->format('d/m/Y') }}</div>
-                                <div class="text-sm text-gray-500">{{ $appointment->timeSlot ? $appointment->timeSlot->start_time->format('H:i') . ' - ' . $appointment->timeSlot->end_time->format('H:i') : 'N/A' }}</div>
+                                <div class="text-sm text-gray-500">
+                                    @if($appointment->timeSlot)
+                                        @php
+                                            $startTime = is_string($appointment->timeSlot->start_time) ? substr($appointment->timeSlot->start_time, 0, 5) : $appointment->timeSlot->start_time->format('H:i');
+                                            $endTime = is_string($appointment->timeSlot->end_time) ? substr($appointment->timeSlot->end_time, 0, 5) : $appointment->timeSlot->end_time->format('H:i');
+                                        @endphp
+                                        {{ $startTime }} - {{ $endTime }}
+                                    @else
+                                        N/A
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">

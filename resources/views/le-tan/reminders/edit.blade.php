@@ -28,7 +28,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="appointment_id" class="block text-sm font-medium text-gray-700 mb-1">Lịch hẹn <span class="text-red-500">*</span></label>
-                    <select id="appointment_id" name="appointment_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                    <select id="appointment_id" name="appointment_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
                         <option value="">Chọn lịch hẹn</option>
                         @foreach($appointments as $appointment)
                         <option value="{{ $appointment->id }}" {{ (old('appointment_id', $reminder->appointment_id) == $appointment->id) ? 'selected' : '' }}>
@@ -46,7 +46,7 @@
 
                 <div>
                     <label for="reminder_type" class="block text-sm font-medium text-gray-700 mb-1">Loại nhắc nhở <span class="text-red-500">*</span></label>
-                    <select id="reminder_type" name="reminder_type" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                    <select id="reminder_type" name="reminder_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
                         <option value="email" {{ (old('reminder_type', $reminder->reminder_type) == 'email') ? 'selected' : '' }}>Email</option>
                         <option value="sms" {{ (old('reminder_type', $reminder->reminder_type) == 'sms') ? 'selected' : '' }}>SMS</option>
                         <option value="both" {{ (old('reminder_type', $reminder->reminder_type) == 'both') ? 'selected' : '' }}>Email & SMS</option>
@@ -58,7 +58,7 @@
 
                 <div>
                     <label for="reminder_date" class="block text-sm font-medium text-gray-700 mb-1">Ngày giờ nhắc <span class="text-red-500">*</span></label>
-                    <input type="datetime-local" id="reminder_date" name="reminder_date" value="{{ old('reminder_date', $reminder->reminder_date->format('Y-m-d\TH:i')) }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                    <input type="datetime-local" id="reminder_date" name="reminder_date" value="{{ old('reminder_date', $reminder->reminder_date->format('Y-m-d\TH:i')) }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
                     @error('reminder_date')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -66,11 +66,11 @@
 
                 <div class="md:col-span-2">
                     <label for="message" class="block text-sm font-medium text-gray-700 mb-1">Nội dung nhắc nhở <span class="text-red-500">*</span></label>
-                    <textarea id="message" name="message" rows="5" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>{{ old('message', $reminder->message) }}</textarea>
+                    <textarea id="message" name="message" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>{{ old('message', $reminder->message) }}</textarea>
                     @error('message')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
-                    <p class="text-sm text-gray-500 mt-2">
+                    {{-- <p class="text-sm text-gray-500 mt-2">
                         <span class="font-medium">Gợi ý:</span> Bạn có thể sử dụng các biến sau trong nội dung:
                         <br>
                         [tên khách hàng] - Tên khách hàng
@@ -80,7 +80,7 @@
                         [ngày] - Ngày hẹn
                         <br>
                         [giờ] - Giờ hẹn
-                    </p>
+                    </p> --}}
                 </div>
             </div>
 

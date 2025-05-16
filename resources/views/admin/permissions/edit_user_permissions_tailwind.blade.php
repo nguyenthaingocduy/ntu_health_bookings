@@ -103,10 +103,10 @@
                             </div>
 
                             <div class="flex items-center space-x-2">
-                                <button type="button" id="selectAllBtn" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-150 text-sm">
+                                <button type="button" onclick="selectAll()" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-150 text-sm">
                                     Chọn tất cả
                                 </button>
-                                <button type="button" id="deselectAllBtn" class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-150 text-sm">
+                                <button type="button" onclick="deselectAll()" class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-150 text-sm">
                                     Bỏ chọn tất cả
                                 </button>
                             </div>
@@ -268,8 +268,45 @@
 
 @section('scripts')
 <script>
+    // Định nghĩa các hàm trong phạm vi toàn cục
+    function selectAll() {
+        document.querySelectorAll('.permission-checkbox').forEach(function(checkbox) {
+            if (checkbox.closest('.permission-item').style.display !== 'none') {
+                checkbox.checked = true;
+            }
+        });
+        updateCardHighlights();
+    }
+
+    function deselectAll() {
+        document.querySelectorAll('.permission-checkbox').forEach(function(checkbox) {
+            checkbox.checked = false;
+        });
+        updateCardHighlights();
+    }
+
+    // Hàm cập nhật làm nổi bật thẻ với quyền đã chọn
+    function updateCardHighlights() {
+        document.querySelectorAll('.permission-item').forEach(function(card) {
+            const checkboxes = card.querySelectorAll('.permission-checkbox');
+            let hasChecked = false;
+
+            checkboxes.forEach(function(checkbox) {
+                if (checkbox.checked) {
+                    hasChecked = true;
+                }
+            });
+
+            if (hasChecked) {
+                card.classList.add('active');
+            } else {
+                card.classList.remove('active');
+            }
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        // Search functionality
+        // Chức năng tìm kiếm
         const searchInput = document.getElementById('searchInput');
         const permissionItems = document.querySelectorAll('.permission-item');
 
@@ -287,14 +324,14 @@
                 }
             });
 
-            // Hide empty groups
+            // Ẩn các nhóm trống
             document.querySelectorAll('.permission-group').forEach(function(group) {
                 const visibleItems = group.querySelectorAll('.permission-item[style=""]').length;
                 group.style.display = visibleItems > 0 ? '' : 'none';
             });
         });
 
-        // Group filter
+        // Bộ lọc nhóm
         const groupFilter = document.getElementById('groupFilter');
 
         groupFilter.addEventListener('change', function() {
@@ -309,27 +346,9 @@
             });
         });
 
-        // Select/deselect all
-        const selectAllBtn = document.getElementById('selectAllBtn');
-        const deselectAllBtn = document.getElementById('deselectAllBtn');
+        // Các nút chọn/bỏ chọn tất cả đã được xử lý bằng các hàm selectAll() và deselectAll()
 
-        selectAllBtn.addEventListener('click', function() {
-            document.querySelectorAll('.permission-checkbox').forEach(function(checkbox) {
-                if (checkbox.closest('.permission-item').style.display !== 'none') {
-                    checkbox.checked = true;
-                }
-            });
-        });
-
-        deselectAllBtn.addEventListener('click', function() {
-            document.querySelectorAll('.permission-checkbox').forEach(function(checkbox) {
-                if (checkbox.closest('.permission-item').style.display !== 'none') {
-                    checkbox.checked = false;
-                }
-            });
-        });
-
-        // Select/deselect group
+        // Chọn/bỏ chọn nhóm
         document.querySelectorAll('.select-group-btn').forEach(function(button) {
             button.addEventListener('click', function() {
                 const group = this.dataset.group;
@@ -340,6 +359,7 @@
                         checkbox.checked = true;
                     }
                 });
+                updateCardHighlights();
             });
         });
 
@@ -353,33 +373,14 @@
                         checkbox.checked = false;
                     }
                 });
+                updateCardHighlights();
             });
         });
 
-        // Highlight cards with selected permissions
-        function updateCardHighlights() {
-            document.querySelectorAll('.permission-item').forEach(function(card) {
-                const checkboxes = card.querySelectorAll('.permission-checkbox');
-                let hasChecked = false;
-
-                checkboxes.forEach(function(checkbox) {
-                    if (checkbox.checked) {
-                        hasChecked = true;
-                    }
-                });
-
-                if (hasChecked) {
-                    card.classList.add('active');
-                } else {
-                    card.classList.remove('active');
-                }
-            });
-        }
-
-        // Initial highlight
+        // Làm nổi bật ban đầu
         updateCardHighlights();
 
-        // Update highlights when checkboxes change
+        // Cập nhật làm nổi bật khi checkbox thay đổi
         document.querySelectorAll('.permission-checkbox').forEach(function(checkbox) {
             checkbox.addEventListener('change', function() {
                 updateCardHighlights();

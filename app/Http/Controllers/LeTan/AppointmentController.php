@@ -40,6 +40,11 @@ class AppointmentController extends Controller
         })->get();
         $services = Service::where('status', 'active')->get();
 
+        // Lấy danh sách nhân viên kỹ thuật
+        $technicians = User::whereHas('role', function($query) {
+            $query->where('name', 'Technician');
+        })->get();
+
         // Lấy ngày hiện tại và xác định ngày trong tuần (1-7)
         $today = now();
         $dayOfWeek = $today->dayOfWeek == 0 ? 7 : $today->dayOfWeek; // Chuyển đổi 0 (Chủ nhật) thành 7
@@ -49,7 +54,7 @@ class AppointmentController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        return view('le-tan.appointments.create', compact('customers', 'services', 'timeSlots'));
+        return view('le-tan.appointments.create', compact('customers', 'services', 'timeSlots', 'technicians'));
     }
 
     /**
@@ -65,6 +70,7 @@ class AppointmentController extends Controller
             'service_id' => 'required|exists:services,id',
             'appointment_date' => 'required|date|after_or_equal:today',
             'time_slot_id' => 'required|exists:time_slots,id',
+            'employee_id' => 'nullable|exists:users,id',
         ]);
 
         // Kiểm tra xem khung giờ đã đầy chưa
@@ -75,18 +81,42 @@ class AppointmentController extends Controller
             ->count();
 
         $timeSlot = TimeSlot::find($request->time_slot_id);
-        if ($existingAppointments >= $timeSlot->capacity) {
+        if ($existingAppointments >= $timeSlot->max_appointments) {
             return back()->with('error', 'Khung giờ này đã đầy. Vui lòng chọn khung giờ khác.');
+        }
+
+        // Nếu phân công nhân viên kỹ thuật, kiểm tra xem nhân viên đã có lịch hẹn khác trong cùng khung giờ chưa
+        if ($request->filled('employee_id')) {
+            $existingTechnicianAppointments = Appointment::where('date_appointments', $appointmentDate->format('Y-m-d'))
+                ->where('time_slot_id', $request->time_slot_id)
+                ->where('employee_id', $request->employee_id)
+                ->where('status', '!=', 'cancelled')
+                ->count();
+
+            if ($existingTechnicianAppointments > 0) {
+                return back()->with('error', 'Nhân viên kỹ thuật đã có lịch hẹn khác trong cùng khung giờ này. Vui lòng chọn nhân viên khác.');
+            }
         }
 
         $appointment = new Appointment();
         $appointment->customer_id = $request->customer_id;
         $appointment->service_id = $request->service_id;
         $appointment->date_appointments = $appointmentDate;
+        $appointment->date_register = now(); // Thêm giá trị cho trường date_register
         $appointment->time_slot_id = $request->time_slot_id;
+        $appointment->time_appointments_id = $request->time_slot_id; // Gán giá trị cho trường time_appointments_id
         $appointment->status = 'pending';
         $appointment->notes = $request->notes;
         $appointment->created_by = Auth::id();
+
+        // Phân công nhân viên kỹ thuật nếu được chọn
+        if ($request->filled('employee_id')) {
+            $appointment->employee_id = $request->employee_id;
+        } else {
+            // Nếu không có nhân viên kỹ thuật được chọn, gán giá trị null
+            $appointment->employee_id = null;
+        }
+
         $appointment->save();
 
         return redirect()->route('le-tan.appointments.index')
@@ -196,16 +226,52 @@ class AppointmentController extends Controller
         })->get();
         $services = Service::where('status', 'active')->get();
 
-        // Lấy ngày của lịch hẹn và xác định ngày trong tuần (1-7)
-        $appointmentDate = $appointment->date_appointments;
-        $dayOfWeek = $appointmentDate->dayOfWeek == 0 ? 7 : $appointmentDate->dayOfWeek; // Chuyển đổi 0 (Chủ nhật) thành 7
+        // Lấy danh sách nhân viên kỹ thuật
+        $technicians = User::whereHas('role', function($query) {
+            $query->where('name', 'Technician');
+        })->get();
 
-        // Lấy các khung giờ phù hợp với ngày trong tuần của lịch hẹn
-        $timeSlots = TimeSlot::where('day_of_week', $dayOfWeek)
-            ->orderBy('start_time')
-            ->get();
+        // Debug date_appointments
+        \Illuminate\Support\Facades\Log::info('Debug date_appointments', [
+            'appointment_id' => $appointment->id,
+            'date_appointments' => $appointment->date_appointments,
+            'date_appointments_type' => gettype($appointment->date_appointments),
+            'date_appointments_class' => $appointment->date_appointments ? get_class($appointment->date_appointments) : 'null'
+        ]);
 
-        return view('le-tan.appointments.edit', compact('appointment', 'customers', 'services', 'timeSlots'));
+        // Xử lý ngày của lịch hẹn
+        try {
+            if ($appointment->date_appointments instanceof \DateTime) {
+                $appointmentDate = $appointment->date_appointments;
+            } else {
+                $appointmentDate = \Carbon\Carbon::parse($appointment->date_appointments);
+            }
+
+            $dayOfWeek = $appointmentDate->dayOfWeek === 0 ? 7 : $appointmentDate->dayOfWeek; // Chuyển đổi 0 (Chủ nhật) thành 7
+
+            // Lấy các khung giờ phù hợp với ngày trong tuần của lịch hẹn
+            $timeSlots = TimeSlot::where('day_of_week', $dayOfWeek)
+                ->orderBy('start_time')
+                ->get();
+
+            // Thêm ngày đã định dạng vào dữ liệu
+            $appointment->formatted_date = $appointmentDate->format('Y-m-d');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error parsing date: ' . $e->getMessage(), [
+                'appointment_id' => $appointment->id,
+                'date_appointments' => $appointment->date_appointments
+            ]);
+
+            // Sử dụng ngày hiện tại nếu có lỗi
+            $appointmentDate = now();
+            $dayOfWeek = $appointmentDate->dayOfWeek === 0 ? 7 : $appointmentDate->dayOfWeek;
+            $timeSlots = TimeSlot::where('day_of_week', $dayOfWeek)
+                ->orderBy('start_time')
+                ->get();
+            $appointment->formatted_date = $appointmentDate->format('Y-m-d');
+        }
+
+        return view('le-tan.appointments.edit', compact('appointment', 'customers', 'services', 'timeSlots', 'technicians'));
     }
 
     /**
@@ -223,6 +289,7 @@ class AppointmentController extends Controller
             'appointment_date' => 'required|date',
             'time_slot_id' => 'required|exists:time_slots,id',
             'status' => 'required|in:pending,confirmed,completed,cancelled',
+            'employee_id' => 'nullable|exists:users,id',
         ]);
 
         $appointment = Appointment::findOrFail($id);
@@ -239,8 +306,27 @@ class AppointmentController extends Controller
                 ->count();
 
             $timeSlot = TimeSlot::find($request->time_slot_id);
-            if ($existingAppointments >= $timeSlot->capacity) {
+            if ($existingAppointments >= $timeSlot->max_appointments) {
                 return back()->with('error', 'Khung giờ này đã đầy. Vui lòng chọn khung giờ khác.');
+            }
+        }
+
+        // Nếu phân công nhân viên kỹ thuật, kiểm tra xem nhân viên đã có lịch hẹn khác trong cùng khung giờ chưa
+        if ($request->filled('employee_id') &&
+            ($appointment->employee_id != $request->employee_id ||
+             $appointment->date_appointments->format('Y-m-d') != $request->appointment_date ||
+             $appointment->time_slot_id != $request->time_slot_id)) {
+
+            $appointmentDate = Carbon::parse($request->appointment_date);
+            $existingTechnicianAppointments = Appointment::where('date_appointments', $appointmentDate->format('Y-m-d'))
+                ->where('time_slot_id', $request->time_slot_id)
+                ->where('employee_id', $request->employee_id)
+                ->where('status', '!=', 'cancelled')
+                ->where('id', '!=', $id)
+                ->count();
+
+            if ($existingTechnicianAppointments > 0) {
+                return back()->with('error', 'Nhân viên kỹ thuật đã có lịch hẹn khác trong cùng khung giờ này. Vui lòng chọn nhân viên khác.');
             }
         }
 
@@ -251,6 +337,12 @@ class AppointmentController extends Controller
         $appointment->status = $request->status;
         $appointment->notes = $request->notes;
         $appointment->updated_by = Auth::id();
+
+        // Cập nhật nhân viên kỹ thuật nếu được chọn
+        if ($request->filled('employee_id')) {
+            $appointment->employee_id = $request->employee_id;
+        }
+
         $appointment->save();
 
         return redirect()->route('le-tan.appointments.index')
@@ -329,6 +421,30 @@ class AppointmentController extends Controller
 
             return redirect()->back()
                 ->with('error', 'Đã xảy ra lỗi khi hủy lịch hẹn: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Hoàn thành lịch hẹn
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function complete($id)
+    {
+        $appointment = Appointment::findOrFail($id);
+
+        try {
+            // Cập nhật trạng thái lịch hẹn thành hoàn thành
+            $appointment->status = 'completed';
+            $appointment->updated_by = Auth::id();
+            $appointment->save();
+
+            return redirect()->route('le-tan.appointments.index')
+                ->with('success', 'Lịch hẹn đã được hoàn thành thành công.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Đã xảy ra lỗi khi hoàn thành lịch hẹn: ' . $e->getMessage());
         }
     }
 }

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
 use App\Services\EmailService;
+use App\Services\PricingService;
 use App\Helpers\UrlHelper;
 
 class AppointmentController extends Controller
@@ -146,51 +147,18 @@ class AppointmentController extends Controller
                 // Lấy thông tin dịch vụ
                 $service = Service::findOrFail($request->service_id);
 
-                // Tính giá sau khuyến mãi
-                $originalPrice = $service->price;
-                $finalPrice = $originalPrice;
-                $discountAmount = 0;
-                $directDiscountPercent = 0;
+                // Sử dụng PricingService để tính giá
+                $pricingService = new PricingService();
+                $priceDetails = $pricingService->calculateFinalPrice($service, $promotionCode, Auth::user());
 
-                if (!empty($promotionCode)) {
-                    $finalPrice = $service->calculatePriceWithPromotion($promotionCode);
+                // Lấy các giá trị từ kết quả tính toán
+                $originalPrice = $priceDetails['original_price'];
+                $finalPrice = $priceDetails['final_price'];
+                $discountAmount = $priceDetails['total_discount_amount'];
+                $directDiscountPercent = $priceDetails['total_discount_percentage'];
 
-                    // Lấy thông tin khuyến mãi
-                    $promotion = \App\Models\Promotion::where('code', strtoupper($promotionCode))
-                        ->where('is_active', true)
-                        ->where('start_date', '<=', now())
-                        ->where('end_date', '>=', now())
-                        ->first();
-
-                    if ($promotion) {
-                        if ($promotion->discount_type == 'percentage') {
-                            $directDiscountPercent = $promotion->discount_value;
-                        }
-                    }
-                } else if ($service->hasActivePromotion()) {
-                    // Nếu không có mã khuyến mãi nhưng dịch vụ có khuyến mãi
-                    $finalPrice = $service->getDiscountedPriceAttribute();
-
-                    // Lấy khuyến mãi đầu tiên của dịch vụ
-                    $servicePromotion = $service->promotions()
-                        ->where('is_active', true)
-                        ->where('start_date', '<=', now())
-                        ->where('end_date', '>=', now())
-                        ->first();
-
-                    if ($servicePromotion && $servicePromotion->discount_type == 'percentage') {
-                        $directDiscountPercent = $servicePromotion->discount_value;
-                    }
-                }
-
-                // Tính số tiền giảm giá
-                $discountAmount = $originalPrice - $finalPrice;
-
-                // Đảm bảo giá trị discount_amount và final_price được tính đúng
-                if ($directDiscountPercent > 0) {
-                    $discountAmount = $originalPrice * ($directDiscountPercent / 100);
-                    $finalPrice = $originalPrice - $discountAmount;
-                }
+                // Log thông tin chi tiết về giá và giảm giá
+                \Illuminate\Support\Facades\Log::info('Chi tiết giá và giảm giá', $priceDetails);
 
                 // Log thông tin đặt lịch
                 \Illuminate\Support\Facades\Log::info('Thông tin đặt lịch', [
@@ -362,58 +330,22 @@ class AppointmentController extends Controller
 
         // Đảm bảo giá sau khuyến mãi được tính đúng
         if ($appointment->service) {
-            // Tính lại giá sau khuyến mãi
-            $originalPrice = $appointment->service->price;
-            $finalPrice = $originalPrice;
-            $discountAmount = 0;
-            $directDiscountPercent = 0;
+            // Sử dụng PricingService để tính giá
+            $pricingService = new PricingService();
+            $priceDetails = $pricingService->calculateFinalPrice(
+                $appointment->service,
+                $appointment->promotion_code,
+                Auth::user()
+            );
 
-            // Nếu có mã khuyến mãi, tính giá với mã khuyến mãi
-            if ($appointment->promotion_code) {
-                $finalPrice = $appointment->service->calculatePriceWithPromotion($appointment->promotion_code);
+            // Lấy các giá trị từ kết quả tính toán
+            $originalPrice = $priceDetails['original_price'];
+            $finalPrice = $priceDetails['final_price'];
+            $discountAmount = $priceDetails['total_discount_amount'];
+            $directDiscountPercent = $priceDetails['total_discount_percentage'];
 
-                // Lấy thông tin khuyến mãi
-                $promotion = \App\Models\Promotion::where('code', $appointment->promotion_code)
-                    ->first();
-
-                if ($promotion) {
-                    // Tính phần trăm giảm giá
-                    $directDiscountPercent = $promotion->discount_type == 'percentage'
-                        ? $promotion->discount_value
-                        : round(($promotion->discount_value / $originalPrice) * 100);
-                }
-
-                // Tính số tiền giảm
-                $discountAmount = $originalPrice - $finalPrice;
-            } else {
-                // Nếu không có mã khuyến mãi, kiểm tra xem dịch vụ có khuyến mãi không
-                if ($appointment->service->hasActivePromotion()) {
-                    $finalPrice = $appointment->service->getDiscountedPriceAttribute();
-
-                    // Lấy khuyến mãi đầu tiên của dịch vụ
-                    $servicePromotion = $appointment->service->promotions()
-                        ->where('is_active', true)
-                        ->where('start_date', '<=', now())
-                        ->where('end_date', '>=', now())
-                        ->first();
-
-                    if ($servicePromotion && $servicePromotion->discount_type == 'percentage') {
-                        $directDiscountPercent = $servicePromotion->discount_value;
-                    } else {
-                        // Tính phần trăm giảm giá từ dịch vụ
-                        $directDiscountPercent = round(($originalPrice - $finalPrice) / $originalPrice * 100);
-                    }
-
-                    // Tính số tiền giảm
-                    $discountAmount = $originalPrice - $finalPrice;
-                }
-            }
-
-            // Đảm bảo giá trị discount_amount và final_price được tính đúng
-            if ($directDiscountPercent > 0) {
-                $discountAmount = $originalPrice * ($directDiscountPercent / 100);
-                $finalPrice = $originalPrice - $discountAmount;
-            }
+            // Log thông tin chi tiết về giá và giảm giá
+            \Illuminate\Support\Facades\Log::info('Chi tiết giá và giảm giá trong show()', $priceDetails);
 
             // Cập nhật giá sau khuyến mãi vào cơ sở dữ liệu
             if ($finalPrice != $appointment->final_price ||

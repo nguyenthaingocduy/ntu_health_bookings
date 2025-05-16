@@ -29,6 +29,9 @@ Route::get('/check-available-slots', [TimeSlotController::class, 'checkAvailable
 // Route to get all time slots
 Route::get('/time-slots', [TimeSlotController::class, 'getAllTimeSlots']);
 
+// Route to check technician availability
+Route::get('/check-technician-availability', [\App\Http\Controllers\Api\AppointmentApiController::class, 'checkTechnicianAvailability']);
+
 // Customer search for staff appointment booking
 Route::get('/customers/search', [\App\Http\Controllers\Api\CustomerController::class, 'search']);
 

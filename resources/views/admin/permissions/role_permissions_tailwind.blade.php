@@ -1,4 +1,8 @@
 @extends('layouts.admin')
+{{-- Debug info --}}
+@php
+    \Illuminate\Support\Facades\Log::info('Rendering role_permissions_tailwind.blade.php');
+@endphp
 
 @section('title', 'Phân quyền theo vai trò')
 
@@ -9,12 +13,20 @@
             <h1 class="text-2xl font-bold text-gray-800">Phân quyền theo vai trò</h1>
             <p class="text-sm text-gray-500 mt-1">Quản lý quyền truy cập cho từng vai trò trong hệ thống</p>
         </div>
-        <a href="{{ route('admin.permissions.index') }}" class="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-150 shadow-sm border border-gray-200">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            Quay lại
-        </a>
+        <div class="flex space-x-2">
+            <a href="{{ route('admin.permissions.role-permissions-matrix') }}" class="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-150 shadow-md">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                </svg>
+                Chế độ ma trận
+            </a>
+            <a href="{{ route('admin.permissions.index') }}" class="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-150 shadow-sm border border-gray-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Quay lại
+            </a>
+        </div>
     </div>
 
     <nav class="mb-8">
@@ -62,12 +74,20 @@
                 @method('PUT')
 
                 <div class="mb-6">
-                    <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
+                    <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 mb-4">
                         <div class="flex">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            <p><span class="font-bold">Hướng dẫn:</span> Vui lòng chọn một vai trò từ danh sách bên dưới để xem và cấu hình quyền cho vai trò đó.</p>
+                            <div>
+                                <p class="font-bold mb-1">Hướng dẫn sử dụng:</p>
+                                <ol class="list-decimal pl-5 space-y-1">
+                                    <li>Chọn vai trò từ danh sách bên dưới</li>
+                                    <li>Danh sách quyền sẽ hiển thị với các quyền đã được gán cho vai trò đó</li>
+                                    <li>Chọn hoặc bỏ chọn các quyền theo nhu cầu</li>
+                                    <li>Nhấn "Lưu thay đổi" để cập nhật quyền cho vai trò</li>
+                                </ol>
+                            </div>
                         </div>
                     </div>
 
@@ -85,7 +105,7 @@
                     @enderror
                 </div>
 
-                <div id="permissions-container" class="hidden">
+                <div id="permissions-container">
                     <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 mb-6" role="alert">
                         <div class="flex items-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -95,12 +115,15 @@
                         </div>
                     </div>
 
-                    <div class="hidden bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">
+                    <div class="hidden bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert" id="selected-role-info">
                         <div class="flex items-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            <p><span class="font-bold">Đang phân quyền cho vai trò:</span> <span id="selected-role-title" class="font-medium"></span></p>
+                            <div>
+                                <p class="font-bold">Đang phân quyền cho vai trò: <span id="selected-role-title" class="font-medium"></span></p>
+                                <p class="text-sm mt-1">Bạn có thể chọn hoặc bỏ chọn các quyền bên dưới để cấu hình quyền cho vai trò này.</p>
+                            </div>
                         </div>
                     </div>
 
@@ -146,7 +169,7 @@
                                     <span class="bg-blue-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full ml-2">{{ $groupPermissions->count() }}</span>
                                 </div>
                                 <div class="flex items-center space-x-2">
-                                    <button type="button" class="select-group-btn text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors duration-150">
+                                    <button type="button" class="select-group-btn text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors duration-150" id="select-group-btn-{{ $group }}">
                                         Chọn nhóm
                                     </button>
                                     <svg class="w-5 h-5 text-gray-500 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -192,162 +215,135 @@
                             Lưu thay đổi
                         </button>
                     </div>
-
-                    <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <h4 class="font-medium text-yellow-800 mb-2 flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-yellow-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                            </svg>
-                            Thông tin về quyền
-                        </h4>
-                        <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
-                            <li>Các quyền được nhóm theo chức năng để dễ dàng quản lý</li>
-                            <li>Mỗi quyền có thể được bật/tắt độc lập</li>
-                            <li>Bạn có thể chọn/bỏ chọn tất cả quyền trong một nhóm bằng nút "Chọn nhóm"</li>
-                            <li>Thay đổi quyền sẽ ảnh hưởng đến tất cả người dùng có vai trò này</li>
-                            <li>Các thay đổi chỉ có hiệu lực sau khi bạn nhấn "Lưu thay đổi"</li>
-                        </ul>
-                    </div>
                 </div>
             </form>
-        </div>
-
-    <!-- Phần giải thích về các quyền -->
-    <div class="mt-8 bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
-        <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-gray-200">
-            <h3 class="font-semibold text-gray-800 flex items-center">
-                <svg class="w-5 h-5 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                </svg>
-                Hướng dẫn phân quyền
-            </h3>
-        </div>
-        <div class="p-6">
-            <div class="space-y-4">
-                <div>
-                    <h4 class="font-medium text-gray-700 mb-2">Vai trò và quyền là gì?</h4>
-                    <p class="text-gray-600">Vai trò là một nhóm các quyền được gán cho người dùng. Mỗi người dùng có thể có một vai trò, và mỗi vai trò có thể có nhiều quyền khác nhau.</p>
-                </div>
-
-                <div>
-                    <h4 class="font-medium text-gray-700 mb-2">Các vai trò mặc định</h4>
-                    <ul class="list-disc pl-5 text-gray-600 space-y-1">
-                        <li><span class="font-medium">Admin</span>: Có toàn quyền truy cập và quản lý hệ thống</li>
-                        <li><span class="font-medium">Lễ tân</span>: Quản lý lịch hẹn, khách hàng và thanh toán</li>
-                        <li><span class="font-medium">Kỹ thuật viên</span>: Thực hiện các dịch vụ và cập nhật trạng thái</li>
-                        <li><span class="font-medium">Khách hàng</span>: Đặt lịch hẹn và xem thông tin cá nhân</li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 class="font-medium text-gray-700 mb-2">Cách phân quyền hiệu quả</h4>
-                    <ol class="list-decimal pl-5 text-gray-600 space-y-1">
-                        <li>Chọn vai trò cần phân quyền từ danh sách</li>
-                        <li>Xem xét kỹ các quyền cần thiết cho vai trò đó</li>
-                        <li>Chỉ cấp những quyền thực sự cần thiết (nguyên tắc tối thiểu)</li>
-                        <li>Kiểm tra lại các quyền đã cấp trước khi lưu</li>
-                        <li>Thường xuyên rà soát và cập nhật quyền khi cần thiết</li>
-                    </ol>
-                </div>
-
-                <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4">
-                    <div class="flex">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                        <p><span class="font-bold">Lưu ý quan trọng:</span> Việc phân quyền không đúng có thể dẫn đến rủi ro bảo mật hoặc làm gián đoạn hoạt động của hệ thống. Hãy cẩn thận khi cấp quyền cho các vai trò.</p>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
 @endsection
 
 @section('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const roleSelect = document.getElementById('role_id');
-        const permissionsContainer = document.getElementById('permissions-container');
-        const permissionCheckboxes = document.querySelectorAll('.permission-checkbox');
-        const selectAllBtn = document.getElementById('select-all-btn');
-        const deselectAllBtn = document.getElementById('deselect-all-btn');
-        const selectedPermissionsCounter = document.getElementById('selected-permissions');
-        const permissionSearch = document.getElementById('permission-search');
-        const permissionGroups = document.querySelectorAll('.permission-group-header');
-        const rolePermissions = @json($rolePermissions);
-
-        // Hiển thị hướng dẫn khi trang được tải
-        if (!roleSelect.value) {
-            // Hiển thị thông báo hướng dẫn
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 mt-4';
-            alertDiv.id = 'role-selection-guide';
-            alertDiv.innerHTML = `
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <p><span class="font-bold">Bước tiếp theo:</span> Sau khi chọn vai trò, bạn sẽ thấy danh sách các quyền có thể cấp cho vai trò đó.</p>
-                </div>
-            `;
-
-            // Chèn thông báo sau select box
-            roleSelect.parentNode.insertAdjacentElement('afterend', alertDiv);
-        }
-
-        // Hiển thị quyền khi chọn vai trò
-        roleSelect.addEventListener('change', function() {
-            // Xóa thông báo hướng dẫn nếu có
-            const guideElement = document.getElementById('role-selection-guide');
-            if (guideElement) {
-                guideElement.remove();
-            }
-
-            if (this.value) {
-                permissionsContainer.classList.remove('hidden');
-
-                // Đặt lại tất cả checkbox
-                permissionCheckboxes.forEach(checkbox => {
-                    checkbox.checked = false;
-                });
-
-                // Chọn các quyền đã được gán cho vai trò
-                if (rolePermissions[this.value]) {
-                    const permissions = rolePermissions[this.value];
-                    permissionCheckboxes.forEach(checkbox => {
-                        if (permissions.includes(checkbox.value)) {
-                            checkbox.checked = true;
-                        }
-                    });
-                }
-
-                updateSelectedCount();
-                updateGroupSelectButtons();
-
-                // Hiển thị tên vai trò đã chọn
-                const selectedRoleName = roleSelect.options[roleSelect.selectedIndex].text;
-                const roleTitle = document.getElementById('selected-role-title');
-                if (roleTitle) {
-                    roleTitle.textContent = selectedRoleName;
-                    roleTitle.parentElement.classList.remove('hidden');
-                }
-            } else {
-                permissionsContainer.classList.add('hidden');
-                const roleTitle = document.getElementById('selected-role-title');
-                if (roleTitle) {
-                    roleTitle.parentElement.classList.add('hidden');
-                }
-            }
+<script type="text/javascript">
+// Thêm debug helper
+function addClickDebugger(selector, name) {
+    document.querySelectorAll(selector).forEach(function(el) {
+        el.addEventListener('click', function() {
+            console.log(name + ' clicked via event listener');
         });
 
-        // Kiểm tra nếu đã chọn vai trò
-        if (roleSelect.value) {
+        // Thêm inline onclick attribute
+        el.setAttribute('onclick', "console.log('" + name + " clicked via onclick attribute'); return true;");
+    });
+}
+
+// Thêm debug khi trang đã tải
+window.addEventListener('load', function() {
+    console.log('Window loaded - adding debug helpers');
+    addClickDebugger('#select-all-btn', 'Select all button');
+    addClickDebugger('#deselect-all-btn', 'Deselect all button');
+    addClickDebugger('.select-group-btn', 'Group button');
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded');
+
+    // Lấy các phần tử DOM
+    const roleSelect = document.getElementById('role_id');
+    console.log('Role select:', roleSelect);
+
+    const permissionsContainer = document.getElementById('permissions-container');
+    console.log('Permissions container:', permissionsContainer);
+
+    const permissionCheckboxes = document.querySelectorAll('.permission-checkbox');
+    console.log('Permission checkboxes:', permissionCheckboxes.length);
+
+    const selectAllBtn = document.getElementById('select-all-btn');
+    console.log('Select all button:', selectAllBtn);
+
+    const deselectAllBtn = document.getElementById('deselect-all-btn');
+    console.log('Deselect all button:', deselectAllBtn);
+
+    const selectedPermissionsCounter = document.getElementById('selected-permissions');
+    console.log('Selected permissions counter:', selectedPermissionsCounter);
+
+    const permissionSearch = document.getElementById('permission-search');
+    console.log('Permission search:', permissionSearch);
+
+    const permissionGroups = document.querySelectorAll('.permission-group-header');
+    console.log('Permission groups:', permissionGroups.length);
+
+    const selectGroupBtns = document.querySelectorAll('.select-group-btn');
+    console.log('Select group buttons:', selectGroupBtns.length);
+
+    const rolePermissions = @json($rolePermissions);
+    console.log('Role permissions:', Object.keys(rolePermissions).length);
+
+    // Đảm bảo vai trò được chọn khi trang được tải
+    if (!roleSelect.value && roleSelect.options.length > 1) {
+        // Chọn vai trò đầu tiên mặc định
+        roleSelect.selectedIndex = 1; // Chọn tùy chọn đầu tiên (không phải "-- Chọn vai trò --")
+    }
+
+    // Hiển thị quyền cho vai trò đã chọn ngay khi trang được tải
+    if (roleSelect.value) {
+        // Chọn các quyền đã được gán cho vai trò
+        if (rolePermissions[roleSelect.value]) {
+            const permissions = rolePermissions[roleSelect.value];
+            permissionCheckboxes.forEach(checkbox => {
+                if (permissions.includes(checkbox.value)) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+
+        updateSelectedCount();
+        updateGroupSelectButtons();
+
+        // Hiển thị tên vai trò đã chọn
+        const selectedRoleName = roleSelect.options[roleSelect.selectedIndex].text;
+        const roleTitle = document.getElementById('selected-role-title');
+        const roleInfo = document.getElementById('selected-role-info');
+        if (roleTitle) {
+            roleTitle.textContent = selectedRoleName;
+            roleInfo.classList.remove('hidden');
+        }
+    } else {
+        // Hiển thị thông báo hướng dẫn nếu không có vai trò nào được chọn
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 mt-4';
+        alertDiv.id = 'role-selection-guide';
+        alertDiv.innerHTML = `
+            <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p><span class="font-bold">Bước tiếp theo:</span> Vui lòng chọn một vai trò từ danh sách để xem và cấu hình quyền.</p>
+            </div>
+        `;
+
+        // Chèn thông báo sau select box
+        roleSelect.parentNode.insertAdjacentElement('afterend', alertDiv);
+    }
+
+    // Hiển thị quyền khi chọn vai trò
+    roleSelect.addEventListener('change', function() {
+        // Xóa thông báo hướng dẫn nếu có
+        const guideElement = document.getElementById('role-selection-guide');
+        if (guideElement) {
+            guideElement.remove();
+        }
+
+        if (this.value) {
             permissionsContainer.classList.remove('hidden');
 
+            // Đặt lại tất cả checkbox
+            permissionCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+
             // Chọn các quyền đã được gán cho vai trò
-            if (rolePermissions[roleSelect.value]) {
-                const permissions = rolePermissions[roleSelect.value];
+            if (rolePermissions[this.value]) {
+                const permissions = rolePermissions[this.value];
                 permissionCheckboxes.forEach(checkbox => {
                     if (permissions.includes(checkbox.value)) {
                         checkbox.checked = true;
@@ -361,168 +357,242 @@
             // Hiển thị tên vai trò đã chọn
             const selectedRoleName = roleSelect.options[roleSelect.selectedIndex].text;
             const roleTitle = document.getElementById('selected-role-title');
+            const roleInfo = document.getElementById('selected-role-info');
             if (roleTitle) {
                 roleTitle.textContent = selectedRoleName;
-                roleTitle.parentElement.classList.remove('hidden');
+                roleInfo.classList.remove('hidden');
+            }
+        } else {
+            permissionsContainer.classList.add('hidden');
+            const roleInfo = document.getElementById('selected-role-info');
+            if (roleInfo) {
+                roleInfo.classList.add('hidden');
             }
         }
+    });
 
-        // Cập nhật số lượng quyền đã chọn
-        function updateSelectedCount() {
-            const selectedCount = document.querySelectorAll('.permission-checkbox:checked').length;
-            selectedPermissionsCounter.textContent = selectedCount;
+    // Mở tất cả các nhóm quyền khi trang được tải
+    document.querySelectorAll('.permission-group-body').forEach(body => {
+        // Mặc định hiển thị tất cả các nhóm
+        body.classList.remove('hidden');
+    });
 
-            // Cập nhật màu sắc dựa trên số lượng quyền đã chọn
-            const totalCount = permissionCheckboxes.length;
-            const percentSelected = (selectedCount / totalCount) * 100;
+    // Cập nhật số lượng quyền đã chọn
+    function updateSelectedCount() {
+        const selectedCount = document.querySelectorAll('.permission-checkbox:checked').length;
+        selectedPermissionsCounter.textContent = selectedCount;
 
-            const counterElement = selectedPermissionsCounter.closest('div');
+        // Cập nhật màu sắc dựa trên số lượng quyền đã chọn
+        const totalCount = permissionCheckboxes.length;
+        const percentSelected = (selectedCount / totalCount) * 100;
 
-            // Đổi màu dựa trên phần trăm quyền đã chọn
-            if (percentSelected === 0) {
-                counterElement.className = 'bg-gray-500 text-white px-4 py-2 rounded-lg shadow-sm';
-            } else if (percentSelected < 30) {
-                counterElement.className = 'bg-blue-500 text-white px-4 py-2 rounded-lg shadow-sm';
-            } else if (percentSelected < 70) {
-                counterElement.className = 'bg-green-500 text-white px-4 py-2 rounded-lg shadow-sm';
-            } else {
-                counterElement.className = 'bg-pink-500 text-white px-4 py-2 rounded-lg shadow-sm';
-            }
+        const counterElement = selectedPermissionsCounter.closest('div');
+
+        // Đổi màu dựa trên phần trăm quyền đã chọn
+        if (percentSelected === 0) {
+            counterElement.className = 'bg-gray-500 text-white px-4 py-2 rounded-lg shadow-sm';
+        } else if (percentSelected < 30) {
+            counterElement.className = 'bg-blue-500 text-white px-4 py-2 rounded-lg shadow-sm';
+        } else if (percentSelected < 70) {
+            counterElement.className = 'bg-green-500 text-white px-4 py-2 rounded-lg shadow-sm';
+        } else {
+            counterElement.className = 'bg-pink-500 text-white px-4 py-2 rounded-lg shadow-sm';
         }
+    }
 
-        // Chọn tất cả quyền
-        selectAllBtn.addEventListener('click', function() {
-            permissionCheckboxes.forEach(checkbox => {
-                const item = checkbox.closest('.permission-item');
-                if (getComputedStyle(item).display !== 'none') {
-                    checkbox.checked = true;
-                }
+    // Chọn tất cả quyền - Sử dụng cách tiếp cận đơn giản nhất
+    const selectAllButton = document.getElementById('select-all-btn');
+    if (selectAllButton) {
+        selectAllButton.onclick = function() {
+            console.log('Select all button clicked (simplest)');
+
+            // Lấy tất cả các checkbox hiện tại
+            const checkboxes = document.querySelectorAll('.permission-checkbox');
+            console.log('Found ' + checkboxes.length + ' checkboxes');
+
+            // Chọn tất cả
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = true;
             });
+
             updateSelectedCount();
             updateGroupSelectButtons();
-        });
 
-        // Bỏ chọn tất cả quyền
-        deselectAllBtn.addEventListener('click', function() {
-            permissionCheckboxes.forEach(checkbox => {
+            return false; // Ngăn chặn hành vi mặc định
+        };
+    }
+
+    // Bỏ chọn tất cả quyền - Sử dụng cách tiếp cận đơn giản nhất
+    const deselectAllButton = document.getElementById('deselect-all-btn');
+    if (deselectAllButton) {
+        deselectAllButton.onclick = function() {
+            console.log('Deselect all button clicked (simplest)');
+
+            // Lấy tất cả các checkbox hiện tại
+            const checkboxes = document.querySelectorAll('.permission-checkbox');
+            console.log('Found ' + checkboxes.length + ' checkboxes');
+
+            // Bỏ chọn tất cả
+            checkboxes.forEach(function(checkbox) {
                 checkbox.checked = false;
             });
+
+            updateSelectedCount();
+            updateGroupSelectButtons();
+
+            return false; // Ngăn chặn hành vi mặc định
+        };
+    }
+
+    // Tìm kiếm quyền
+    permissionSearch.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+
+        document.querySelectorAll('.permission-item').forEach(item => {
+            const permissionName = item.getAttribute('data-permission-name').toLowerCase();
+            const permissionLabel = item.querySelector('span').textContent.toLowerCase();
+
+            if (permissionName.includes(searchTerm) || permissionLabel.includes(searchTerm)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        // Hiển thị/ẩn nhóm dựa trên kết quả tìm kiếm
+        document.querySelectorAll('.permission-group').forEach(group => {
+            const visibleItems = Array.from(group.querySelectorAll('.permission-item')).filter(item =>
+                getComputedStyle(item).display !== 'none'
+            ).length;
+
+            if (visibleItems === 0) {
+                group.style.display = 'none';
+            } else {
+                group.style.display = '';
+            }
+        });
+    });
+
+
+
+    // Cập nhật trạng thái nút chọn nhóm
+    function updateGroupSelectButtons() {
+        console.log('Updating group select buttons');
+
+        const groups = document.querySelectorAll('.permission-group');
+        console.log('Found ' + groups.length + ' permission groups');
+
+        groups.forEach(group => {
+            const checkboxes = group.querySelectorAll('.permission-checkbox');
+            const selectBtn = group.querySelector('.select-group-btn');
+
+            if (!checkboxes.length) {
+                console.log('No checkboxes found in group');
+                return;
+            }
+
+            if (!selectBtn) {
+                console.log('No select button found in group');
+                return;
+            }
+
+            // Kiểm tra xem tất cả các checkbox đã được chọn chưa
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+            // Cập nhật văn bản và lớp CSS của nút
+            if (allChecked) {
+                selectBtn.textContent = 'Bỏ chọn nhóm';
+                selectBtn.classList.remove('bg-green-100', 'text-green-700');
+                selectBtn.classList.add('bg-red-100', 'text-red-700');
+            } else {
+                selectBtn.textContent = 'Chọn nhóm';
+                selectBtn.classList.remove('bg-red-100', 'text-red-700');
+                selectBtn.classList.add('bg-green-100', 'text-green-700');
+            }
+        });
+    }
+
+    // Mở/đóng nhóm quyền
+    permissionGroups.forEach(header => {
+        header.addEventListener('click', function(e) {
+            // Không xử lý nếu click vào nút chọn nhóm
+            if (e.target.classList.contains('select-group-btn') || e.target.closest('.select-group-btn')) {
+                return;
+            }
+
+            const body = this.nextElementSibling;
+            const arrow = this.querySelector('svg');
+
+            if (body.classList.contains('hidden')) {
+                body.classList.remove('hidden');
+                arrow.classList.remove('rotate-180');
+            } else {
+                body.classList.add('hidden');
+                arrow.classList.add('rotate-180');
+            }
+        });
+    });
+
+    // Chọn tất cả quyền trong một nhóm - Sử dụng cách tiếp cận đơn giản nhất
+    // Đăng ký sự kiện click cho tất cả các nút chọn nhóm
+    const groupButtons = document.querySelectorAll('.select-group-btn');
+    console.log('Setting up ' + groupButtons.length + ' group buttons');
+
+    groupButtons.forEach(function(btn) {
+        // Sử dụng thuộc tính onclick trực tiếp
+        btn.onclick = function() {
+            console.log('Group button clicked (simplest)');
+
+            // Tìm nhóm chứa nút
+            const group = this.closest('.permission-group');
+            if (!group) {
+                console.error('Group not found');
+                return false;
+            }
+
+            // Tìm tất cả các checkbox trong nhóm
+            const checkboxes = group.querySelectorAll('.permission-checkbox');
+            console.log('Found ' + checkboxes.length + ' checkboxes in group');
+
+            if (checkboxes.length === 0) {
+                console.error('No checkboxes found in group');
+                return false;
+            }
+
+            // Kiểm tra xem tất cả các checkbox đã được chọn chưa
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+            // Đảo ngược trạng thái của tất cả các checkbox
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = !allChecked;
+            });
+
+            // Cập nhật văn bản và lớp CSS của nút
+            this.textContent = allChecked ? 'Chọn nhóm' : 'Bỏ chọn nhóm';
+
+            if (allChecked) {
+                this.classList.remove('bg-red-100', 'text-red-700');
+                this.classList.add('bg-green-100', 'text-green-700');
+            } else {
+                this.classList.remove('bg-green-100', 'text-green-700');
+                this.classList.add('bg-red-100', 'text-red-700');
+            }
+
+            // Cập nhật số lượng quyền đã chọn và trạng thái nút
+            updateSelectedCount();
+            updateGroupSelectButtons();
+
+            return false; // Ngăn chặn hành vi mặc định
+        };
+    });
+
+    // Cập nhật trạng thái nút khi thay đổi checkbox
+    permissionCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
             updateSelectedCount();
             updateGroupSelectButtons();
         });
-
-        // Tìm kiếm quyền
-        permissionSearch.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-
-            document.querySelectorAll('.permission-item').forEach(item => {
-                const permissionName = item.getAttribute('data-permission-name').toLowerCase();
-                const permissionLabel = item.querySelector('span').textContent.toLowerCase();
-
-                if (permissionName.includes(searchTerm) || permissionLabel.includes(searchTerm)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-
-            // Hiển thị/ẩn nhóm dựa trên kết quả tìm kiếm
-            document.querySelectorAll('.permission-group').forEach(group => {
-                const visibleItems = Array.from(group.querySelectorAll('.permission-item')).filter(item =>
-                    getComputedStyle(item).display !== 'none'
-                ).length;
-
-                if (visibleItems === 0) {
-                    group.style.display = 'none';
-                } else {
-                    group.style.display = '';
-                }
-            });
-        });
-
-        // Mở tất cả các nhóm quyền khi trang được tải
-        document.querySelectorAll('.permission-group-body').forEach(body => {
-            // Mặc định hiển thị tất cả các nhóm
-            body.classList.remove('hidden');
-        });
-
-        // Cập nhật trạng thái nút chọn nhóm
-        function updateGroupSelectButtons() {
-            document.querySelectorAll('.permission-group').forEach(group => {
-                const checkboxes = group.querySelectorAll('.permission-checkbox');
-                const selectBtn = group.querySelector('.select-group-btn');
-
-                if (!checkboxes.length || !selectBtn) return;
-
-                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-                const allUnchecked = Array.from(checkboxes).every(cb => !cb.checked);
-
-                if (allChecked) {
-                    selectBtn.textContent = 'Bỏ chọn nhóm';
-                    selectBtn.classList.remove('bg-green-100', 'text-green-700');
-                    selectBtn.classList.add('bg-red-100', 'text-red-700');
-                } else {
-                    selectBtn.textContent = 'Chọn nhóm';
-                    selectBtn.classList.remove('bg-red-100', 'text-red-700');
-                    selectBtn.classList.add('bg-green-100', 'text-green-700');
-                }
-            });
-        }
-
-        // Mở/đóng nhóm quyền
-        permissionGroups.forEach(header => {
-            header.addEventListener('click', function(e) {
-                // Không xử lý nếu click vào nút chọn nhóm
-                if (e.target.classList.contains('select-group-btn') || e.target.closest('.select-group-btn')) {
-                    return;
-                }
-
-                const body = this.nextElementSibling;
-                const arrow = this.querySelector('svg');
-
-                if (body.classList.contains('hidden')) {
-                    body.classList.remove('hidden');
-                    arrow.classList.remove('rotate-180');
-                } else {
-                    body.classList.add('hidden');
-                    arrow.classList.add('rotate-180');
-                }
-            });
-        });
-
-        // Chọn tất cả quyền trong một nhóm
-        const selectGroupBtns = document.querySelectorAll('.select-group-btn');
-        selectGroupBtns.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-
-                const group = this.closest('.permission-group');
-                const checkboxes = group.querySelectorAll('.permission-checkbox');
-
-                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = !allChecked;
-                });
-
-                this.textContent = allChecked ? 'Chọn nhóm' : 'Bỏ chọn nhóm';
-                this.classList.toggle('bg-green-100');
-                this.classList.toggle('text-green-700');
-                this.classList.toggle('bg-red-100');
-                this.classList.toggle('text-red-700');
-
-                updateSelectedCount();
-                updateGroupSelectButtons();
-            });
-        });
-
-        // Cập nhật trạng thái nút khi thay đổi checkbox
-        permissionCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                updateSelectedCount();
-                updateGroupSelectButtons();
-            });
-        });
     });
+});
 </script>
 @endsection

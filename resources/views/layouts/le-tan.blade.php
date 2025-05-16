@@ -6,6 +6,7 @@
     <title>@yield('title', 'Lễ tân - Hệ thống đặt lịch làm đẹp')</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/time-display-fix.css') }}">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         [x-cloak] { display: none !important; }
@@ -264,6 +265,12 @@
                         </svg>
                     </div>
                     <div id="payments-dropdown" class="sidebar-dropdown">
+                        <a href="{{ route('le-tan.payments.create') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.payments.create') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                            <span>Tạo thanh toán</span>
+                        </a>
                         <a href="{{ route('le-tan.invoices.create') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.invoices.create') ? 'active' : '' }}">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>

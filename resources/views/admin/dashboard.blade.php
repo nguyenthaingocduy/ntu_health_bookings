@@ -55,7 +55,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
     <div class="lg:col-span-2">
         <div class="bg-white rounded-lg shadow">
             <div class="p-6 border-b border-gray-200">
@@ -98,7 +98,7 @@
                                                 Hoàn thành
                                             </span>
                                             @break
-                                        @case('canceled')
+                                        @case('cancelled')
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
                                                 Đã hủy
                                             </span>
@@ -145,6 +145,18 @@
 
                     <div>
                         <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-700">Đã xác nhận</span>
+                            <span class="text-sm font-medium text-gray-700">{{ $confirmedAppointments }}</span>
+                        </div>
+                        <div class="overflow-hidden h-2 text-xs flex rounded bg-blue-200">
+                            <div style="width: {{ ($confirmedAppointments / max($totalAppointments, 1)) * 100 }}%"
+                                 class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
                             <span class="text-sm font-medium text-gray-700">Hoàn thành</span>
                             <span class="text-sm font-medium text-gray-700">{{ $completedAppointments }}</span>
                         </div>
@@ -155,12 +167,102 @@
                         </div>
                     </div>
 
-                    <div class="mt-6 pt-4 border-t border-gray-200">
-                        <h3 class="text-md font-semibold text-gray-700 mb-3">Công cụ</h3>
-                        <a href="{{ route('admin.test-upload-form') }}" class="inline-flex items-center px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600 transition-colors">
-                            <i class="fas fa-upload mr-2"></i> Kiểm tra upload ảnh
-                        </a>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-700">Đã hủy</span>
+                            <span class="text-sm font-medium text-gray-700">{{ $canceledAppointments }}</span>
+                        </div>
+                        <div class="overflow-hidden h-2 text-xs flex rounded bg-red-200">
+                            <div style="width: {{ ($canceledAppointments / max($totalAppointments, 1)) * 100 }}%"
+                                 class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500">
+                            </div>
+                        </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thêm phần thống kê nhân viên và khách hàng -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+    <!-- Thống kê nhân viên có nhiều lịch hẹn nhất -->
+    <div>
+        <div class="bg-white rounded-lg shadow">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-700">Nhân viên có nhiều lịch hẹn nhất</h2>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    @forelse($staffAppointments as $staff)
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-500 mr-3">
+                                        <i class="fas fa-user-tie"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-700">
+                                        @if($staff->employee)
+                                            {{ $staff->employee->first_name }} {{ $staff->employee->last_name }}
+                                        @else
+                                            Nhân viên #{{ $staff->employee_id }}
+                                        @endif
+                                    </span>
+                                </div>
+                                <span class="text-sm font-medium bg-pink-100 text-pink-700 px-2 py-1 rounded-full">
+                                    {{ $staff->total }} lịch hẹn
+                                </span>
+                            </div>
+                            <div class="overflow-hidden h-2 text-xs flex rounded bg-pink-200">
+                                <div style="width: {{ ($staff->total / max($staffAppointments->max('total'), 1)) * 100 }}%"
+                                     class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-pink-500">
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-gray-500 text-center py-4">Không có dữ liệu</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thống kê khách hàng có nhiều lịch hẹn nhất -->
+    <div>
+        <div class="bg-white rounded-lg shadow">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-700">Khách hàng thân thiết</h2>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    @forelse($topCustomers as $customer)
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mr-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-700">
+                                        @if($customer->user)
+                                            {{ $customer->user->first_name }} {{ $customer->user->last_name }}
+                                        @else
+                                            Khách hàng #{{ $customer->customer_id }}
+                                        @endif
+                                    </span>
+                                </div>
+                                <span class="text-sm font-medium bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                    {{ $customer->total }} lịch hẹn
+                                </span>
+                            </div>
+                            <div class="overflow-hidden h-2 text-xs flex rounded bg-blue-200">
+                                <div style="width: {{ ($customer->total / max($topCustomers->max('total'), 1)) * 100 }}%"
+                                     class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500">
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-gray-500 text-center py-4">Không có dữ liệu</p>
+                    @endforelse
                 </div>
             </div>
         </div>

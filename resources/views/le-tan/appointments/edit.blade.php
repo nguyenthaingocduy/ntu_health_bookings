@@ -70,7 +70,9 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                         <label for="appointment_date" class="block text-sm font-medium text-gray-700 mb-2">Ngày hẹn <span class="text-red-500">*</span></label>
-                        <input type="date" id="appointment_date" name="appointment_date" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('appointment_date') border-red-500 @enderror" value="{{ old('appointment_date', $appointment->date_appointments->format('Y-m-d')) }}" min="{{ date('Y-m-d') }}" required>
+                        <input type="date" id="appointment_date" name="appointment_date" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('appointment_date') border-red-500 @enderror"
+                        value="{{ old('appointment_date', $appointment->formatted_date ?? date('Y-m-d')) }}"
+                        min="{{ date('Y-m-d') }}" required>
                         @error('appointment_date')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -92,18 +94,35 @@
                     </div>
                 </div>
 
-                <div class="mb-6">
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Trạng thái <span class="text-red-500">*</span></label>
-                    <select id="status" name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md @error('status') border-red-500 @enderror" required>
-                        <option value="pending" {{ (old('status', $appointment->status) == 'pending') ? 'selected' : '' }}>Chờ xác nhận</option>
-                        <option value="confirmed" {{ (old('status', $appointment->status) == 'confirmed') ? 'selected' : '' }}>Đã xác nhận</option>
-                        <option value="completed" {{ (old('status', $appointment->status) == 'completed') ? 'selected' : '' }}>Đã hoàn thành</option>
-                        <option value="cancelled" {{ (old('status', $appointment->status) == 'cancelled') ? 'selected' : '' }}>Đã hủy</option>
-                        <option value="no-show" {{ (old('status', $appointment->status) == 'no-show') ? 'selected' : '' }}>Không đến</option>
-                    </select>
-                    @error('status')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Trạng thái <span class="text-red-500">*</span></label>
+                        <select id="status" name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md @error('status') border-red-500 @enderror" required>
+                            <option value="pending" {{ (old('status', $appointment->status) == 'pending') ? 'selected' : '' }}>Chờ xác nhận</option>
+                            <option value="confirmed" {{ (old('status', $appointment->status) == 'confirmed') ? 'selected' : '' }}>Đã xác nhận</option>
+                            <option value="completed" {{ (old('status', $appointment->status) == 'completed') ? 'selected' : '' }}>Đã hoàn thành</option>
+                            <option value="cancelled" {{ (old('status', $appointment->status) == 'cancelled') ? 'selected' : '' }}>Đã hủy</option>
+                            <option value="no-show" {{ (old('status', $appointment->status) == 'no-show') ? 'selected' : '' }}>Không đến</option>
+                        </select>
+                        @error('status')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="employee_id" class="block text-sm font-medium text-gray-700 mb-2">Nhân viên kỹ thuật</label>
+                        <select id="employee_id" name="employee_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md @error('employee_id') border-red-500 @enderror">
+                            <option value="">-- Chọn nhân viên kỹ thuật --</option>
+                            @foreach($technicians as $technician)
+                                <option value="{{ $technician->id }}" {{ (old('employee_id', $appointment->employee_id) == $technician->id) ? 'selected' : '' }}>
+                                    {{ $technician->full_name }} - {{ $technician->phone }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('employee_id')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
                 <div class="mb-6">
@@ -175,7 +194,7 @@
         if (dayOfWeek === 0) dayOfWeek = 7;
 
         // Gọi API để lấy các khung giờ còn trống cho ngày đã chọn
-        fetch(`/api/time-slots?day=${dayOfWeek}`)
+        fetch(`/api/time-slots?day=${dayOfWeek}&date=${selectedDate}`)
             .then(response => response.json())
             .then(data => {
                 const timeSlotSelect = document.getElementById('time_slot_id');
@@ -188,7 +207,22 @@
                 data.forEach(slot => {
                     const option = document.createElement('option');
                     option.value = slot.id;
-                    option.textContent = `${slot.start_time} - ${slot.end_time}`;
+
+                    // Hiển thị thông tin về số lượng chỗ trống
+                    let slotText = `${slot.start_time} - ${slot.end_time}`;
+
+                    // Thêm thông tin về số lượng chỗ trống
+                    if (slot.hasOwnProperty('available_slots')) {
+                        slotText += ` (${slot.available_slots}/${slot.max_appointments} chỗ trống)`;
+
+                        // Nếu đã đầy, thêm thông báo và vô hiệu hóa option
+                        if (slot.is_full) {
+                            slotText += ' - ĐÃ ĐẦY';
+                            option.disabled = true;
+                        }
+                    }
+
+                    option.textContent = slotText;
 
                     // Nếu option này trùng với giá trị đã chọn trước đó, đánh dấu là selected
                     if (slot.id === currentValue) {

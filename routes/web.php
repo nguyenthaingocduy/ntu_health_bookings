@@ -59,6 +59,10 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::get('/profile/notification-settings', [ProfileController::class, 'notificationSettings'])->name('profile.notification-settings');
     Route::put('/profile/notifications', [ProfileController::class, 'updateNotifications'])->name('profile.update-notifications');
 
+    // Loại khách hàng
+    Route::get('/customer-types', [\App\Http\Controllers\Customer\CustomerTypeController::class, 'index'])->name('customer-types.index');
+    Route::get('/customer-types/{customerType}', [\App\Http\Controllers\Customer\CustomerTypeController::class, 'show'])->name('customer-types.show');
+
     Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
     Route::get('/appointments/create/{service?}', [AppointmentController::class, 'create'])->name('appointments.create');
     Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');

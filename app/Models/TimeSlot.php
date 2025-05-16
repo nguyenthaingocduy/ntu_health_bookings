@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Helpers\TimeHelper;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class TimeSlot extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'start_time',
@@ -18,8 +20,6 @@ class TimeSlot extends Model
     ];
 
     protected $casts = [
-        'start_time' => 'datetime',
-        'end_time' => 'datetime',
         'is_available' => 'boolean',
     ];
 
@@ -30,7 +30,8 @@ class TimeSlot extends Model
 
     public function getFormattedTimeAttribute()
     {
-        return $this->start_time->format('H:i') . ' - ' . $this->end_time->format('H:i');
+        // Sử dụng helper function để định dạng khoảng thời gian
+        return TimeHelper::formatTimeRange($this->start_time, $this->end_time);
     }
 
     public function isAvailableForDate($date)
@@ -53,4 +54,42 @@ class TimeSlot extends Model
 
         return $appointmentsCount < $this->max_appointments;
     }
+
+    /**
+     * Kiểm tra xem khung giờ có còn chỗ trống không
+     *
+     * @param string $date Ngày cần kiểm tra (Y-m-d)
+     * @return bool
+     */
+    public function hasAvailableSlots($date)
+    {
+        // Đếm số lượng cuộc hẹn hiện tại trong khung giờ này
+        $appointmentsCount = $this->appointments()
+            ->whereDate('date_appointments', $date)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->count();
+
+        // Trả về true nếu số lượng cuộc hẹn nhỏ hơn số lượng tối đa
+        return $appointmentsCount < $this->max_appointments;
+    }
+
+    /**
+     * Lấy số lượng chỗ trống còn lại
+     *
+     * @param string $date Ngày cần kiểm tra (Y-m-d)
+     * @return int
+     */
+    public function getAvailableSlotsCount($date)
+    {
+        // Đếm số lượng cuộc hẹn hiện tại trong khung giờ này
+        $appointmentsCount = $this->appointments()
+            ->whereDate('date_appointments', $date)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->count();
+
+        // Trả về số lượng chỗ trống còn lại
+        return max(0, $this->max_appointments - $appointmentsCount);
+    }
+
+
 }

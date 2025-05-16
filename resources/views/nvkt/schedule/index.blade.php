@@ -64,11 +64,11 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach($schedule as $timeSlotId => $timeSlotData)
+                    @foreach($schedule as $timeSlotKey => $timeSlotData)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">
-                                {{ $timeSlotData['time_slot']->start_time->format('H:i') }} - {{ $timeSlotData['time_slot']->end_time->format('H:i') }}
+                                {{ $timeSlotKey }} - {{ substr($timeSlotData['time_slot']->end_time, 0, 5) }}
                             </div>
                         </td>
                         @foreach($timeSlotData['days'] as $dayData)

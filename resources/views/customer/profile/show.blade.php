@@ -148,6 +148,18 @@
                                 </a>
                             </div>
                         </div>
+
+                        <div class="border rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Hạng thành viên</h4>
+                                    <p class="text-gray-600 text-sm mt-1">Xem thông tin về các hạng thành viên và quyền lợi</p>
+                                </div>
+                                <a href="{{ route('customer.customer-types.index') }}" class="text-pink-600 hover:text-pink-700">
+                                    <i class="fas fa-crown mr-1"></i> Xem chi tiết
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

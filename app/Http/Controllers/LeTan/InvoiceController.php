@@ -22,7 +22,7 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        $invoices = Invoice::with(['appointment', 'customer', 'createdBy'])
+        $invoices = Invoice::with(['appointment', 'user', 'creator'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
