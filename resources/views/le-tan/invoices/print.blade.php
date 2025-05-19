@@ -182,36 +182,90 @@
         <div style="margin-bottom: 30px;">
             <h2 style="font-size: 16px; margin: 0 0 10px; padding-bottom: 5px; border-bottom: 1px solid #eee;">Thông tin lịch hẹn</h2>
             <p><strong>Mã lịch hẹn:</strong> {{ $invoice->appointment->appointment_code ?? 'N/A' }}</p>
-            <p><strong>Dịch vụ:</strong> {{ $invoice->appointment->service->name ?? 'N/A' }}</p>
+            <p>
+                <strong>Dịch vụ:</strong> {{ $invoice->appointment->service->name ?? 'N/A' }}
+                @if($invoice->appointment->promotion_code)
+                    <span style="margin-left: 10px; font-size: 12px; color: #3b82f6;">(Mã KM: {{ $invoice->appointment->promotion_code }})</span>
+                @endif
+            </p>
             <p><strong>Ngày hẹn:</strong> {{ $invoice->appointment->appointment_date ? $invoice->appointment->appointment_date->format('d/m/Y H:i') : 'N/A' }}</p>
+            @if($invoice->discount > 0)
+                @php
+                    $discountPercent = round(($invoice->discount / $invoice->subtotal) * 100);
+                @endphp
+                <p>
+                    <strong>Giá gốc:</strong> <span style="text-decoration: line-through; color: #6b7280;">{{ number_format($invoice->subtotal, 0, ',', '.') }} VNĐ</span>
+                    <span style="margin-left: 10px; font-size: 12px; color: #dc2626;">Giảm {{ $discountPercent }}%</span>
+                </p>
+                <p><strong>Giá sau giảm:</strong> <span style="color: #dc2626; font-weight: bold;">{{ number_format($invoice->subtotal - $invoice->discount, 0, ',', '.') }} VNĐ</span></p>
+                <p><strong>Phải thanh toán:</strong> <span style="color: #000; font-weight: bold;">{{ number_format($invoice->total, 0, ',', '.') }} VNĐ</span></p>
+            @endif
         </div>
         @endif
 
-        <table class="invoice-items">
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
             <thead>
-                <tr>
-                    <th>Dịch vụ</th>
-                    <th class="text-right">Đơn giá</th>
-                    <th class="text-right">Số lượng</th>
-                    <th class="text-right">Thành tiền</th>
+                <tr style="background-color: #f5f5f5;">
+                    <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; width: 40%;">Dịch vụ</th>
+                    <th style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd; width: 25%;">Đơn giá</th>
+                    <th style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd; width: 10%;">Số lượng</th>
+                    <th style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd; width: 25%;">Thành tiền</th>
                 </tr>
             </thead>
             <tbody>
                 @if($invoice->appointment && $invoice->appointment->service)
                 <tr>
-                    <td>{{ $invoice->appointment->service->name }}</td>
-                    <td class="text-right">{{ number_format($invoice->appointment->service->price, 0, ',', '.') }} VNĐ</td>
-                    <td class="text-right">1</td>
-                    <td class="text-right">{{ number_format($invoice->appointment->service->price, 0, ',', '.') }} VNĐ</td>
+                    <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">
+                        {{ $invoice->appointment->service->name }}
+                        @if($invoice->appointment->promotion_code)
+                            <br><span style="font-size: 12px; color: #3b82f6;">(Mã KM: {{ $invoice->appointment->promotion_code }})</span>
+                        @endif
+                    </td>
+                    <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">
+                        @if($invoice->discount > 0)
+                            <span style="text-decoration: line-through; color: #6b7280;">{{ number_format($invoice->subtotal, 0, ',', '.') }} VNĐ</span>
+                            <br>
+                            <span style="color: #dc2626;">{{ number_format($invoice->subtotal - $invoice->discount, 0, ',', '.') }} VNĐ</span>
+                            @php
+                                $discountPercent = round(($invoice->discount / $invoice->subtotal) * 100);
+                            @endphp
+                            <br><span style="font-size: 12px; color: #dc2626;">(-{{ $discountPercent }}%)</span>
+                        @else
+                            {{ number_format($invoice->subtotal, 0, ',', '.') }} VNĐ
+                        @endif
+                    </td>
+                    <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">1</td>
+                    <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd; font-weight: bold;">
+                        {{ number_format($invoice->total, 0, ',', '.') }} VNĐ
+                    </td>
                 </tr>
                 @endif
             </tbody>
         </table>
 
-        <table class="invoice-total">
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
             <tr>
-                <th>Tổng cộng:</th>
-                <td>{{ number_format($invoice->total, 0, ',', '.') }} VNĐ</td>
+                <th style="font-weight: normal; color: #6b7280; text-align: right; padding: 10px; width: 70%;">Tổng giá gốc:</th>
+                <td style="color: #6b7280; text-align: right; padding: 10px; width: 30%;">{{ number_format($invoice->subtotal, 0, ',', '.') }} VNĐ</td>
+            </tr>
+            @if($invoice->discount > 0)
+                <tr>
+                    <th style="font-weight: normal; color: #dc2626; text-align: right; padding: 10px; width: 70%;">Giảm giá:</th>
+                    <td style="color: #dc2626; text-align: right; padding: 10px; width: 30%;">
+                        @php
+                            $discountPercent = round(($invoice->discount / $invoice->subtotal) * 100);
+                        @endphp
+                        -{{ number_format($invoice->discount, 0, ',', '.') }} VNĐ ({{ $discountPercent }}%)
+                    </td>
+                </tr>
+                <tr>
+                    <th style="font-weight: normal; text-align: right; padding: 10px; width: 70%;">Giá sau giảm:</th>
+                    <td style="text-align: right; padding: 10px; width: 30%;">{{ number_format($invoice->subtotal - $invoice->discount, 0, ',', '.') }} VNĐ</td>
+                </tr>
+            @endif
+            <tr>
+                <th style="font-weight: bold; text-align: right; padding: 10px; width: 70%; border-top: 1px solid #ddd;">Phải thanh toán:</th>
+                <td style="font-weight: bold; text-align: right; padding: 10px; width: 30%; border-top: 1px solid #ddd;">{{ number_format($invoice->total, 0, ',', '.') }} VNĐ</td>
             </tr>
         </table>
 

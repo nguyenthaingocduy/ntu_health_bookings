@@ -23,7 +23,7 @@ class ViewComposerServiceProvider extends ServiceProvider
     {
         // Share clinics data with the service-popup component
         View::composer('components.service-popup', function ($view) {
-            $view->with('clinics', Clinic::where('status', 'active')->get());
+            $view->with('clinics', Clinic::all());
         });
     }
 }

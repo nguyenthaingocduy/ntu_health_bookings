@@ -83,12 +83,37 @@
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <div class="grid grid-cols-2 gap-2">
                             <p class="text-sm font-medium text-gray-600">Ngày hẹn:</p>
-                            <p class="text-sm text-gray-900">{{ $appointment->date_appointments ? $appointment->date_appointments->format('d/m/Y') : 'N/A' }}</p>
+                            <p class="text-sm text-gray-900">
+                                @php
+                                    $dateAppointments = $appointment->date_appointments;
+                                    $formattedDate = 'N/A';
+
+                                    if ($dateAppointments) {
+                                        if ($dateAppointments instanceof \Carbon\Carbon) {
+                                            $formattedDate = $dateAppointments->format('d/m/Y');
+                                        } elseif (is_string($dateAppointments)) {
+                                            try {
+                                                $formattedDate = \Carbon\Carbon::parse($dateAppointments)->format('d/m/Y');
+                                            } catch (\Exception $e) {
+                                                $formattedDate = $dateAppointments;
+                                            }
+                                        }
+                                    }
+                                @endphp
+                                {{ $formattedDate }}
+                            </p>
 
                             <p class="text-sm font-medium text-gray-600">Giờ hẹn:</p>
                             <p class="text-sm text-gray-900">
                                 @if($appointment->timeSlot)
-                                    {{ $appointment->timeSlot->start_time->format('H:i') }} - {{ $appointment->timeSlot->end_time->format('H:i') }}
+                                    @php
+                                        $startTime = $appointment->timeSlot->start_time;
+                                        $endTime = $appointment->timeSlot->end_time;
+
+                                        $startTimeFormatted = is_string($startTime) ? substr($startTime, 0, 5) : $startTime->format('H:i');
+                                        $endTimeFormatted = is_string($endTime) ? substr($endTime, 0, 5) : $endTime->format('H:i');
+                                    @endphp
+                                    {{ $startTimeFormatted }} - {{ $endTimeFormatted }}
                                 @else
                                     N/A
                                 @endif
@@ -203,17 +228,12 @@
 
             @if($appointment->status == 'pending')
             <div class="flex justify-end space-x-4 mt-6">
-                <form action="{{ route('le-tan.appointments.confirm', $appointment->id) }}" method="POST">
-                    @csrf
-                    @method('POST')
-
-                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                        Xác nhận lịch hẹn
-                    </button>
-                </form>
+                <a href="{{ route('le-tan.appointments.assign-staff', $appointment->id) }}" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Xác nhận và phân công nhân viên
+                </a>
 
                 <button onclick="confirmCancel('{{ $appointment->id }}')" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

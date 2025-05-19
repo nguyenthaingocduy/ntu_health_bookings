@@ -16,11 +16,28 @@ class SessionController extends Controller
      */
     public function completed()
     {
-        $completedSessions = Appointment::with(['customer', 'service', 'timeSlot'])
+        $completedSessions = Appointment::with(['customer', 'service', 'timeSlot', 'timeAppointment'])
             ->where('employee_id', Auth::id())
             ->where('status', 'completed')
             ->orderBy('date_appointments', 'desc')
             ->paginate(10);
+
+        // Convert string dates to Carbon objects
+        foreach ($completedSessions as $session) {
+            // Ensure date_appointments is a Carbon instance
+            if (is_string($session->date_appointments)) {
+                $session->date_appointments = \Carbon\Carbon::parse($session->date_appointments);
+            }
+
+            // Ensure check_in_time and check_out_time are Carbon instances if they exist
+            if ($session->check_in_time && is_string($session->check_in_time)) {
+                $session->check_in_time = \Carbon\Carbon::parse($session->check_in_time);
+            }
+
+            if ($session->check_out_time && is_string($session->check_out_time)) {
+                $session->check_out_time = \Carbon\Carbon::parse($session->check_out_time);
+            }
+        }
 
         return view('nvkt.sessions.completed', compact('completedSessions'));
     }

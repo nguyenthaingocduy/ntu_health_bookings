@@ -185,15 +185,11 @@
                                 </a>
                                 @endif
                                 @if($appointment->status == 'pending')
-                                <button onclick="confirmAppointment('{{ $appointment->id }}')" class="text-green-600 hover:text-green-900 mr-3">
+                                <a href="{{ route('le-tan.appointments.assign-staff', $appointment->id) }}" class="text-green-600 hover:text-green-900 mr-3" title="Xác nhận và phân công nhân viên">
                                     <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                     </svg>
-                                </button>
-                                <form id="confirm-form-{{ $appointment->id }}" action="{{ route('le-tan.appointments.confirm', $appointment->id) }}" method="POST" class="hidden">
-                                    @csrf
-                                    @method('POST')
-                                </form>
+                                </a>
                                 @endif
 
                                 @if($appointment->status == 'pending' || $appointment->status == 'confirmed')
@@ -235,11 +231,7 @@
         }
     }
 
-    function confirmAppointment(id) {
-        if (confirm('Bạn có chắc chắn muốn xác nhận lịch hẹn này không?')) {
-            document.getElementById('confirm-form-' + id).submit();
-        }
-    }
+    // Removed confirmAppointment function as we now use a direct link to assign-staff page
 </script>
 @endsection
 @endsection

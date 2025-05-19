@@ -112,12 +112,28 @@
                     <i class="fas fa-file-invoice-dollar w-6"></i>
                     Quản lý hóa đơn
                 </a>
-
-                <a href="{{ route('admin.work-schedules.index') }}"
-                   class="block px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('admin/work-schedules*') ? 'bg-gray-700' : '' }}">
-                    <i class="fas fa-calendar-week w-6"></i>
-                    Phân công lịch làm việc
-                </a>
+{{-- 
+                <div x-data="{ open: false }" class="relative">
+                    <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('admin/work-schedules*') ? 'bg-gray-700' : '' }}">
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar-week w-6"></i>
+                            <span>Phân công lịch làm việc</span>
+                        </div>
+                        <svg :class="{'transform rotate-180': open}" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="open" @click.away="open = false" class="pl-8 mt-1 space-y-1">
+                        <a href="{{ route('admin.work-schedules.weekly-assignment') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 {{ request()->routeIs('admin.work-schedules.weekly-assignment') ? 'bg-gray-700' : '' }}">
+                            <i class="fas fa-calendar-alt w-5"></i>
+                            Phân công lịch làm việc
+                        </a>
+                        <a href="{{ route('admin.work-schedules.view-week') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 {{ request()->routeIs('admin.work-schedules.view-week') ? 'bg-gray-700' : '' }}">
+                            <i class="fas fa-eye w-5"></i>
+                            Xem lịch làm việc
+                        </a>
+                    </div>
+                </div> --}}
 
                 <div class="py-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Báo cáo & Thống kê

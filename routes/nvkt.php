@@ -27,8 +27,7 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserRole::class.':Technicia
     Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule');
     Route::get('/appointments/assigned', [ScheduleController::class, 'assignedAppointments'])->name('appointments.assigned');
 
-    // Work Schedules
-    Route::get('/work-schedules', [\App\Http\Controllers\NVKT\WorkScheduleController::class, 'index'])->name('work-schedules.index');
+    // Work Schedules - Removed
 
     // Sessions
     Route::get('/sessions/completed', [SessionController::class, 'completed'])->name('sessions.completed');

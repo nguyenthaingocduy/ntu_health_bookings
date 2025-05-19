@@ -39,18 +39,24 @@ class InvoiceController extends Controller
      */
     public function create()
     {
-        $customers = User::whereHas('role', function($query) {
-            $query->where('name', 'Customer');
-        })->get();
+        try {
+            $customers = User::whereHas('role', function($query) {
+                $query->where('name', 'Customer');
+            })->get();
 
-        $services = Service::where('status', 'active')->get();
-        $appointments = Appointment::whereIn('status', ['confirmed', 'completed'])
-            ->whereDoesntHave('invoice')
-            ->get();
+            $services = Service::where('status', 'active')->get();
+            $appointments = Appointment::with(['customer', 'service', 'timeAppointment'])
+                ->whereIn('status', ['confirmed', 'completed'])
+                ->whereDoesntHave('invoice')
+                ->get();
 
-        $taxRate = Setting::get('tax_rate', 10);
+            $taxRate = Setting::get('tax_rate', 10);
 
-        return view('admin.invoices.create', compact('customers', 'services', 'appointments', 'taxRate'));
+            return view('admin.invoices.create-tailwind', compact('customers', 'services', 'appointments', 'taxRate'));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in InvoiceController@create: ' . $e->getMessage());
+            return back()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
+        }
     }
 
     /**

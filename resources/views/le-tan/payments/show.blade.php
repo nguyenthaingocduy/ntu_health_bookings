@@ -44,8 +44,11 @@
                                     <span class="text-red-600 ml-2">{{ number_format($payment->amount, 0, ',', '.') }} VNĐ</span>
                                     @php
                                         $discountPercent = round(($payment->appointment->service->price - $payment->amount) / $payment->appointment->service->price * 100);
+                                        $discountAmount = $payment->appointment->service->price - $payment->amount;
                                     @endphp
-                                    <span class="ml-2 px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">Giảm {{ $discountPercent }}%</span>
+                                    <div class="mt-1">
+                                        <span class="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">Giảm {{ number_format($discountAmount, 0, ',', '.') }} VNĐ ({{ $discountPercent }}%)</span>
+                                    </div>
                                 @else
                                     {{ number_format($payment->amount, 0, ',', '.') }} VNĐ
                                 @endif
@@ -231,8 +234,11 @@
                                 <span style="color: #e53e3e; margin-left: 8px;">{{ number_format($payment->amount, 0, ',', '.') }} VNĐ</span>
                                 @php
                                     $discountPercent = round(($payment->appointment->service->price - $payment->amount) / $payment->appointment->service->price * 100);
+                                    $discountAmount = $payment->appointment->service->price - $payment->amount;
                                 @endphp
-                                <span style="margin-left: 8px; padding: 2px 8px; background-color: #fed7d7; color: #9b2c2c; border-radius: 9999px; font-size: 12px;">Giảm {{ $discountPercent }}%</span>
+                                <div style="margin-top: 5px;">
+                                    <span style="padding: 2px 8px; background-color: #fed7d7; color: #9b2c2c; border-radius: 9999px; font-size: 12px;">Giảm {{ number_format($discountAmount, 0, ',', '.') }} VNĐ ({{ $discountPercent }}%)</span>
+                                </div>
                             @else
                                 {{ number_format($payment->amount, 0, ',', '.') }} VNĐ
                             @endif

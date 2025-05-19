@@ -157,12 +157,9 @@
                                 </a>
 
                                 @if($appointment->status == 'pending')
-                                <form action="{{ route('admin.appointments.confirm', $appointment) }}" method="POST" class="inline">
-                                    @csrf
-                                    <button type="submit" class="text-green-500 hover:text-green-700" title="Xác nhận">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                </form>
+                                <a href="{{ route('admin.appointments.assign-staff', $appointment->id) }}" class="text-blue-500 hover:text-blue-700 bg-blue-100 hover:bg-blue-200 p-1.5 rounded-full transition duration-300" title="Xác nhận và phân công">
+                                    <i class="fas fa-user-plus"></i>
+                                </a>
                                 @endif
 
                                 @if(in_array($appointment->status, ['pending', 'confirmed']))

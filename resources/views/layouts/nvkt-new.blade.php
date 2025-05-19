@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Kỹ thuật viên - Hệ thống đặt lịch làm đẹp')</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -78,7 +79,7 @@
         <aside id="sidebar" class="bg-gray-800 text-white w-full md:w-64 flex-shrink-0 md:sticky md:top-0 md:h-screen overflow-y-auto transition-transform duration-300 ease-in-out md:transform-none mobile-sidebar-closed fixed inset-y-0 left-0 z-30">
             <div class="p-4 flex items-center justify-between md:justify-start">
                 <div class="flex items-center">
-                    <img src="/storage/logo/beauty-icon.png" alt="Beauty Icon" class="w-10 h-10" onerror="this.src='https://img.icons8.com/color/96/spa-flower.png'">
+                    <img src="{{ asset('images/beauty-icon.png') }}" alt="Beauty Icon" class="w-10 h-10" onerror="this.src='https://img.icons8.com/color/96/spa-flower.png'">
 
                     <span class="text-xl font-semibold">Beauty Spa</span>
                 </div>
@@ -115,12 +116,7 @@
                             </svg>
                             <span>Xem lịch làm việc (cũ)</span>
                         </a>
-                        <a href="{{ route('nvkt.work-schedules.index') }}" class="sidebar-submenu-item {{ request()->routeIs('nvkt.work-schedules.index') ? 'active' : '' }}">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                            </svg>
-                            <span>Xem lịch làm việc</span>
-                        </a>
+
                         <a href="{{ route('nvkt.appointments.assigned') }}" class="sidebar-submenu-item {{ request()->routeIs('nvkt.appointments.assigned') ? 'active' : '' }}">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>

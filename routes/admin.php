@@ -42,6 +42,7 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix
     Route::resource('clinics', ClinicController::class);
     Route::post('clinics/{id}/toggle-status', [ClinicController::class, 'toggleStatus'])->name('clinics.toggle-status');
     Route::resource('appointments', AppointmentController::class);
+    Route::get('appointments/{id}/assign-staff', [AppointmentController::class, 'assignStaff'])->name('appointments.assign-staff');
     Route::post('appointments/{id}/confirm', [AppointmentController::class, 'confirm'])->name('appointments.confirm');
     Route::post('appointments/{id}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::post('appointments/{id}/complete', [AppointmentController::class, 'complete'])->name('appointments.complete');

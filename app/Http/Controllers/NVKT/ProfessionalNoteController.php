@@ -18,10 +18,17 @@ class ProfessionalNoteController extends Controller
      */
     public function index()
     {
-        $notes = ProfessionalNote::with('customer')
+        $notes = ProfessionalNote::with(['customer', 'service', 'appointment', 'appointment.service'])
             ->where('created_by', Auth::id())
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+
+        // Xử lý dịch vụ cho mỗi ghi chú nếu không có dịch vụ trực tiếp
+        foreach ($notes as $note) {
+            if (!$note->service && $note->appointment && $note->appointment->service) {
+                $note->service = $note->appointment->service;
+            }
+        }
 
         return view('nvkt.notes.index', compact('notes'));
     }
@@ -61,6 +68,7 @@ class ProfessionalNoteController extends Controller
         $request->validate([
             'customer_id' => 'required|exists:users,id',
             'appointment_id' => 'nullable|exists:appointments,id',
+            'service_id' => 'nullable|exists:services,id',
             'title' => 'required|string|max:255',
             'content' => 'required|string',
         ]);
@@ -68,6 +76,7 @@ class ProfessionalNoteController extends Controller
         $note = new ProfessionalNote();
         $note->customer_id = $request->customer_id;
         $note->appointment_id = $request->appointment_id;
+        $note->service_id = $request->service_id; // Lưu service_id
         $note->title = $request->title;
         $note->content = $request->content;
         $note->created_by = Auth::id();
@@ -85,11 +94,22 @@ class ProfessionalNoteController extends Controller
      */
     public function show($id)
     {
-        $note = ProfessionalNote::with(['customer', 'appointment', 'appointment.service', 'service'])
-            ->where('created_by', Auth::id())
-            ->findOrFail($id);
+        try {
+            $note = ProfessionalNote::with(['customer', 'service', 'appointment', 'appointment.service'])
+                ->where('created_by', Auth::id())
+                ->findOrFail($id);
 
-        return view('nvkt.notes.show', compact('note'));
+            // Nếu không có dịch vụ trực tiếp, thử lấy từ appointment
+            if (!$note->service && $note->appointment && $note->appointment->service) {
+                $note->service = $note->appointment->service;
+            }
+
+            return view('nvkt.notes.show', compact('note'));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error showing professional note: ' . $e->getMessage());
+            return redirect()->route('nvkt.notes.index')
+                ->with('error', 'Không thể hiển thị ghi chú. Vui lòng thử lại sau.');
+        }
     }
 
     /**
@@ -131,6 +151,7 @@ class ProfessionalNoteController extends Controller
         $request->validate([
             'customer_id' => 'required|exists:users,id',
             'appointment_id' => 'nullable|exists:appointments,id',
+            'service_id' => 'nullable|exists:services,id',
             'title' => 'required|string|max:255',
             'content' => 'required|string',
         ]);
@@ -138,6 +159,7 @@ class ProfessionalNoteController extends Controller
         $note = ProfessionalNote::where('created_by', Auth::id())->findOrFail($id);
         $note->customer_id = $request->customer_id;
         $note->appointment_id = $request->appointment_id;
+        $note->service_id = $request->service_id; // Cập nhật service_id
         $note->title = $request->title;
         $note->content = $request->content;
         $note->save();

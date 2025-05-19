@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/time-display-fix.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <!-- No Alpine.js needed -->
     <style>
         @media (max-width: 768px) {
             .mobile-sidebar-open {
@@ -16,6 +16,20 @@
             .mobile-sidebar-closed {
                 transform: translateX(-100%);
             }
+        }
+
+        /* Dropdown menu styles */
+        .dropdown-menu {
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .transform.rotate-180 {
+            transform: rotate(180deg);
         }
     </style>
     @yield('styles')
@@ -26,7 +40,7 @@
         <aside id="sidebar" class="bg-gray-800 text-white w-full md:w-64 flex-shrink-0 md:sticky md:top-0 md:h-screen overflow-y-auto transition-transform duration-300 ease-in-out md:transform-none mobile-sidebar-closed fixed inset-y-0 left-0 z-30">
             <div class="p-4 flex items-center justify-between md:justify-start">
                 <div class="flex items-center">
-                   <img src="/storage/logo/beauty-icon.png" alt="Beauty Icon" class="w-10 h-10" onerror="this.src='https://img.icons8.com/color/96/spa-flower.png'">
+                   <img src="{{ asset('images/beauty-icon.png') }}" alt="Beauty Icon" class="w-10 h-10" onerror="this.src='https://img.icons8.com/color/96/spa-flower.png'">
 
                     <span class="text-xl font-semibold">Beauty Spa</span>
                 </div>
@@ -61,6 +75,8 @@
                         </svg>'
                         permission="work_schedule.view"
                     />
+
+
 
                     <x-sidebar.nav-item
                         route="nvkt.appointments.assigned"
@@ -289,17 +305,15 @@
         });
 
         // Sidebar dropdown toggle
-        function toggleDropdown(id) {
+        function toggleSidebarDropdown(id) {
             const dropdown = document.getElementById(id);
             const arrow = document.getElementById('arrow-' + id);
 
-            if (dropdown.classList.contains('hidden')) {
-                dropdown.classList.remove('hidden');
-                dropdown.classList.add('block');
+            if (dropdown.style.display === 'none') {
+                dropdown.style.display = 'block';
                 arrow.classList.add('transform', 'rotate-180');
             } else {
-                dropdown.classList.remove('block');
-                dropdown.classList.add('hidden');
+                dropdown.style.display = 'none';
                 arrow.classList.remove('transform', 'rotate-180');
             }
         }

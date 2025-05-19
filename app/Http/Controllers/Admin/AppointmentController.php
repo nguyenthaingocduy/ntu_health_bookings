@@ -10,6 +10,7 @@ use App\Models\Time;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class AppointmentController extends Controller
@@ -169,12 +170,84 @@ class AppointmentController extends Controller
             ->with('success', 'Lịch hẹn đã được xóa thành công.');
     }
 
-    public function confirm($id)
+    /**
+     * Hiển thị form phân công nhân viên kỹ thuật
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function assignStaff($id)
     {
-        $appointment = Appointment::findOrFail($id);
-        $appointment->update(['status' => 'confirmed']);
+        $appointment = Appointment::with(['service', 'customer', 'timeAppointment', 'timeSlot'])
+            ->findOrFail($id);
 
-        return redirect()->back()->with('success', 'Lịch hẹn đã được xác nhận thành công.');
+        // Lấy danh sách nhân viên kỹ thuật
+        $technicians = \App\Models\User::whereHas('role', function($query) {
+            $query->where('name', 'Technician');
+        })->get();
+
+        // Kiểm tra nhân viên nào có lịch trống vào thời điểm này
+        $availableTechnicians = [];
+        foreach ($technicians as $technician) {
+            // Kiểm tra xem nhân viên đã có lịch hẹn khác trong cùng thời gian chưa
+            $hasConflict = Appointment::where('employee_id', $technician->id)
+                ->where('date_appointments', $appointment->date_appointments)
+                ->where('time_appointments_id', $appointment->time_appointments_id)
+                ->where('id', '!=', $appointment->id)
+                ->whereIn('status', ['confirmed', 'in_progress'])
+                ->exists();
+
+            if (!$hasConflict) {
+                $availableTechnicians[] = $technician;
+            }
+        }
+
+        return view('admin.appointments.assign-staff-tailwind', compact('appointment', 'availableTechnicians'));
+    }
+
+    /**
+     * Xác nhận lịch hẹn và phân công nhân viên kỹ thuật
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function confirm(Request $request, $id)
+    {
+        $request->validate([
+            'employee_id' => 'required|exists:users,id',
+        ]);
+
+        $appointment = Appointment::findOrFail($id);
+
+        try {
+            // Cập nhật trạng thái và nhân viên phục vụ
+            $appointment->status = 'confirmed';
+            $appointment->employee_id = $request->employee_id;
+            $appointment->updated_by = Auth::id();
+            $appointment->save();
+
+            // Tạo lịch làm việc cho nhân viên kỹ thuật
+            if ($appointment->timeSlot) {
+                \App\Models\WorkSchedule::updateOrCreate(
+                    [
+                        'user_id' => $request->employee_id,
+                        'date' => $appointment->date_appointments->format('Y-m-d'),
+                        'time_slot_id' => $appointment->timeSlot->id,
+                    ],
+                    [
+                        'status' => 'scheduled',
+                        'notes' => 'Tự động phân công từ lịch hẹn #' . $appointment->id,
+                    ]
+                );
+            }
+
+            return redirect()->route('admin.appointments.index')
+                ->with('success', 'Lịch hẹn đã được xác nhận và phân công nhân viên thành công.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Đã xảy ra lỗi khi xác nhận lịch hẹn: ' . $e->getMessage());
+        }
     }
 
     public function cancel($id)

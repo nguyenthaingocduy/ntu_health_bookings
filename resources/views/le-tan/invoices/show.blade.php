@@ -118,7 +118,32 @@
 
                         <div>
                             <p class="text-sm font-medium text-gray-600">Dịch vụ:</p>
-                            <p class="text-sm text-gray-900">{{ $invoice->appointment->service->name ?? 'N/A' }}</p>
+                            <p class="text-sm text-gray-900">
+                                {{ $invoice->appointment->service->name ?? 'N/A' }}
+                                @if($invoice->appointment->promotion_code)
+                                    <span class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                                        Mã KM: {{ $invoice->appointment->promotion_code }}
+                                    </span>
+                                @endif
+                            </p>
+                            @if($invoice->discount > 0)
+                                @php
+                                    $discountPercent = round(($invoice->discount / $invoice->subtotal) * 100);
+                                @endphp
+                                <p class="text-sm text-gray-600 mt-1">
+                                    Giá gốc: <span class="line-through">{{ number_format($invoice->subtotal, 0, ',', '.') }} VNĐ</span>
+                                </p>
+                                <p class="text-sm text-red-600">
+                                    Giảm giá: <span class="font-medium">{{ number_format($invoice->discount, 0, ',', '.') }} VNĐ</span>
+                                    <span class="ml-1 px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">-{{ $discountPercent }}%</span>
+                                </p>
+                                <p class="text-sm text-gray-700 mt-1">
+                                    Giá sau giảm: <span class="font-medium">{{ number_format($invoice->subtotal - $invoice->discount, 0, ',', '.') }} VNĐ</span>
+                                </p>
+                                <p class="text-sm text-gray-900 font-medium mt-1">
+                                    Phải thanh toán: {{ number_format($invoice->total, 0, ',', '.') }} VNĐ
+                                </p>
+                            @endif
                         </div>
 
                         <div>
@@ -182,23 +207,67 @@
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $invoice->appointment->service->name }}
+                                    @if($invoice->appointment->promotion_code)
+                                        <span class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                                            Mã KM: {{ $invoice->appointment->promotion_code }}
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                                    {{ number_format($invoice->appointment->service->price, 0, ',', '.') }} VNĐ
+                                    @if($invoice->discount > 0)
+                                        <span class="line-through text-gray-500">{{ number_format($invoice->subtotal, 0, ',', '.') }} VNĐ</span>
+                                        <br>
+                                        <span class="text-red-600">{{ number_format($invoice->subtotal - $invoice->discount, 0, ',', '.') }} VNĐ</span>
+                                        @php
+                                            $discountPercent = round(($invoice->discount / $invoice->subtotal) * 100);
+                                        @endphp
+                                        <span class="ml-1 px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">-{{ $discountPercent }}%</span>
+                                    @else
+                                        {{ number_format($invoice->subtotal, 0, ',', '.') }} VNĐ
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
                                     1
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                                    {{ number_format($invoice->appointment->service->price, 0, ',', '.') }} VNĐ
+                                    {{ number_format($invoice->total, 0, ',', '.') }} VNĐ
                                 </td>
                             </tr>
                             @endif
                         </tbody>
                         <tfoot class="bg-gray-50">
                             <tr>
+                                <td colspan="3" class="px-6 py-3 text-right text-sm font-medium text-gray-500">
+                                    Tổng giá gốc:
+                                </td>
+                                <td class="px-6 py-3 text-right text-sm font-medium text-gray-500">
+                                    {{ number_format($invoice->subtotal, 0, ',', '.') }} VNĐ
+                                </td>
+                            </tr>
+                            @if($invoice->discount > 0)
+                                <tr>
+                                    <td colspan="3" class="px-6 py-3 text-right text-sm font-medium text-red-600">
+                                        Giảm giá:
+                                    </td>
+                                    <td class="px-6 py-3 text-right text-sm font-medium text-red-600">
+                                        @php
+                                            $discountPercent = round(($invoice->discount / $invoice->subtotal) * 100);
+                                        @endphp
+                                        -{{ number_format($invoice->discount, 0, ',', '.') }} VNĐ ({{ $discountPercent }}%)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="px-6 py-3 text-right text-sm font-medium text-gray-700">
+                                        Giá sau giảm:
+                                    </td>
+                                    <td class="px-6 py-3 text-right text-sm font-medium text-gray-700">
+                                        {{ number_format($invoice->subtotal - $invoice->discount, 0, ',', '.') }} VNĐ
+                                    </td>
+                                </tr>
+                            @endif
+                            <tr>
                                 <td colspan="3" class="px-6 py-3 text-right text-sm font-medium text-gray-900">
-                                    Tổng cộng:
+                                    Phải thanh toán:
                                 </td>
                                 <td class="px-6 py-3 text-right text-sm font-medium text-gray-900">
                                     {{ number_format($invoice->total, 0, ',', '.') }} VNĐ

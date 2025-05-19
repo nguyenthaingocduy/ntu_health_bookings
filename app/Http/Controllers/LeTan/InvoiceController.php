@@ -5,12 +5,9 @@ namespace App\Http\Controllers\LeTan;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Invoice;
-use App\Models\Payment;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller
@@ -38,12 +35,15 @@ class InvoiceController extends Controller
     {
         try {
             $appointments = Appointment::with(['customer', 'service', 'payment'])
-                ->where('status', 'completed')
+                ->whereIn('status', ['completed', 'confirmed']) // Hiển thị cả lịch hẹn đã xác nhận và đã hoàn thành
                 ->whereHas('payment', function($query) {
                     $query->where('payment_status', 'completed');
                 })
                 ->whereDoesntHave('invoice')
                 ->get();
+
+            // Debug: Kiểm tra số lượng lịch hẹn
+            Log::info('Số lượng lịch hẹn cho hóa đơn: ' . $appointments->count());
 
             return view('le-tan.invoices.create', compact('appointments'));
         } catch (\Exception $e) {
@@ -78,22 +78,38 @@ class InvoiceController extends Controller
         // Tạo mã hóa đơn
         $invoiceNumber = 'INV-' . date('Ymd') . '-' . str_pad(Invoice::count() + 1, 4, '0', STR_PAD_LEFT);
 
-        // Lấy số tiền từ payment
-        $amount = $appointment->payment ? $appointment->payment->amount : 0;
+        // Tính toán giá dựa trên thông tin lịch hẹn
+
+        // Tính toán giá gốc và giảm giá
+        $originalPrice = $appointment->service ? $appointment->service->price : 0;
+        $finalPrice = $appointment->final_price && $appointment->final_price > 0 ? $appointment->final_price : $originalPrice;
+        $discountAmount = $originalPrice - $finalPrice;
 
         $invoice = new Invoice();
         $invoice->appointment_id = $request->appointment_id;
         $invoice->user_id = $appointment->customer_id; // Sử dụng user_id thay vì customer_id
         $invoice->invoice_number = $invoiceNumber;
-        $invoice->subtotal = $amount; // Sử dụng subtotal thay vì amount
+        $invoice->subtotal = $originalPrice; // Sử dụng giá gốc làm subtotal
         $invoice->tax = 0;
-        $invoice->discount = 0;
-        $invoice->total = $amount; // Sử dụng total thay vì amount
-        $invoice->payment_method = 'cash';
+        $invoice->discount = $discountAmount; // Lưu số tiền giảm giá
+        $invoice->total = $finalPrice; // Sử dụng giá sau giảm làm total
+        $invoice->payment_method = $appointment->payment ? $appointment->payment->payment_method : 'cash';
         $invoice->payment_status = 'paid';
         $invoice->notes = $request->notes;
         $invoice->created_by = Auth::id();
         $invoice->save();
+
+        // Đảm bảo rằng trạng thái lịch hẹn là 'completed'
+        if ($appointment->status != 'completed') {
+            $appointment->status = 'completed';
+            $appointment->save();
+        }
+
+        // Đảm bảo rằng trạng thái thanh toán là 'completed'
+        if ($appointment->payment && $appointment->payment->payment_status != 'completed') {
+            $appointment->payment->payment_status = 'completed';
+            $appointment->payment->save();
+        }
 
         return redirect()->route('le-tan.invoices.show', $invoice->id)
             ->with('success', 'Hóa đơn đã được tạo thành công.');

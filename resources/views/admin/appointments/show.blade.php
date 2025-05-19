@@ -99,12 +99,9 @@
                 <!-- Actions -->
                 <div class="mt-8 flex space-x-4">
                     @if($appointment->status == 'pending')
-                    <form action="{{ route('admin.appointments.confirm', $appointment) }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition">
-                            <i class="fas fa-check mr-2"></i>Xác nhận
-                        </button>
-                    </form>
+                    <a href="{{ route('admin.appointments.assign-staff', $appointment->id) }}" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-6 py-2 rounded-lg shadow hover:shadow-lg transition duration-300 inline-flex items-center">
+                        <i class="fas fa-user-plus mr-2"></i>Xác nhận và phân công
+                    </a>
                     @endif
 
                     @if(in_array($appointment->status, ['pending', 'confirmed']))

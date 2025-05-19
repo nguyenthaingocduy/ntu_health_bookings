@@ -31,7 +31,8 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserRole::class.':Reception
     Route::get('/appointments/{id}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
     Route::put('/appointments/{id}', [AppointmentController::class, 'update'])->name('appointments.update');
     Route::match(['post', 'put'], '/appointments/{id}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
-    Route::match(['post', 'put'], '/appointments/{id}/confirm', [AppointmentController::class, 'confirm'])->name('appointments.confirm');
+    Route::get('/appointments/{id}/assign-staff', [AppointmentController::class, 'assignStaff'])->name('appointments.assign-staff');
+    Route::post('/appointments/{id}/confirm', [AppointmentController::class, 'confirm'])->name('appointments.confirm');
     Route::match(['post', 'put'], '/appointments/{id}/complete', [AppointmentController::class, 'complete'])->name('appointments.complete');
 
     // Customers

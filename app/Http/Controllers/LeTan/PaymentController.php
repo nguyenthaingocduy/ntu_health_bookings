@@ -92,6 +92,12 @@ class PaymentController extends Controller
         $payment->created_by = Auth::id();
         $payment->save();
 
+        // Cập nhật trạng thái lịch hẹn thành 'completed' nếu thanh toán thành công
+        if ($request->payment_status == 'completed') {
+            $appointment->status = 'completed';
+            $appointment->save();
+        }
+
         return redirect()->route('le-tan.payments.index')
             ->with('success', 'Thanh toán đã được tạo thành công.');
     }

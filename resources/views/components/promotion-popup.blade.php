@@ -1,13 +1,13 @@
 <!-- Promotion Pop-up -->
 <div id="promotionPopup" class="fixed inset-0 z-50 flex items-center justify-center hidden">
     <!-- Overlay - Blocks interaction with main interface -->
-    <div id="promotionOverlay" onclick="hidePromotionPopup()" class="absolute inset-0 bg-black bg-opacity-70"></div>
+    <div id="promotionOverlay" onclick="hidePromotionPopup()" class="absolute inset-0 bg-white bg-opacity-70"></div>
 
     <!-- Pop-up Content -->
     <div id="promotionContent" class="relative bg-gradient-to-br from-pink-600 to-purple-800 rounded-xl w-full md:w-1/2 lg:w-1/2 h-auto max-h-1/2 mx-auto overflow-hidden shadow-2xl border-2 border-pink-300">
         <!-- Close Button -->
         <div class="absolute top-3 right-3 z-10">
-            <button type="button" id="closePromotionBtn" onclick="hidePromotionPopup()" class="bg-white text-pink-600 hover:bg-pink-100 w-10 h-10 flex items-center justify-center rounded-full shadow-lg transition-all duration-200 transform hover:scale-110 border-2 border-pink-300 hover:border-pink-400">
+            <button type="button" id="closePromotionBtn" onclick="hidePromotionPopup()" class="bg-pink text-pink-600 hover:bg-pink-100 w-10 h-10 flex items-center justify-center rounded-full shadow-lg transition-all duration-200 transform hover:scale-110 border-2 border-pink-300 hover:border-pink-400">
                 <span class="text-2xl font-bold">×</span>
             </button>
         </div>
@@ -22,7 +22,7 @@
                 <img src="/storage/logo/beauty-icon.png" alt="Beauty Icon" class="w-10 h-10" onerror="this.src='https://img.icons8.com/color/96/spa-flower.png'">
             </div>
             <h2 id="salonName" class="text-3xl font-bold">
-                <span class="text-white">Beauty</span><span class="text-yellow-300">Salon</span>
+                <span class="text-pink">Beauty</span><span class="text-yellow-300">Salon</span>
             </h2>
         </div>
 
@@ -31,7 +31,7 @@
             <!-- Left Content -->
             <div class="md:w-3/5 p-6">
                 <!-- Promotion Content -->
-                <div id="promotionDetails" class="space-y-4 text-white">
+                <div id="promotionDetails" class="space-y-4 text-black">
                     <!-- Promotion items will be inserted here dynamically -->
                 </div>
             </div>
