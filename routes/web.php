@@ -71,6 +71,11 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
 
     Route::get('/clinics/{clinicId}/services', [ServiceController::class, 'byClinic'])->name('services.by-clinic');
+
+    // Hóa đơn
+    Route::get('/invoices', [\App\Http\Controllers\Customer\InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/{id}', [\App\Http\Controllers\Customer\InvoiceController::class, 'show'])->name('invoices.show');
+    Route::get('/invoices/{id}/download', [\App\Http\Controllers\Customer\InvoiceController::class, 'download'])->name('invoices.download');
 });
 
 // Khu vực admin - Moved to admin.php

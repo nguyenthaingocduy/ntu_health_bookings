@@ -8,6 +8,7 @@ use App\Http\Controllers\LeTan\ConsultationController;
 use App\Http\Controllers\LeTan\ReminderController;
 use App\Http\Controllers\LeTan\ServiceController;
 use App\Http\Controllers\LeTan\InvoiceController;
+use App\Http\Controllers\LeTan\PromotionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -79,6 +80,15 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserRole::class.':Reception
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
     Route::get('/invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
     Route::get('/invoices/{id}/print', [InvoiceController::class, 'print'])->name('invoices.print');
+
+    // Promotions
+    Route::get('/promotions', [PromotionController::class, 'index'])->name('promotions.index');
+    Route::get('/promotions/create', [PromotionController::class, 'create'])->name('promotions.create');
+    Route::post('/promotions', [PromotionController::class, 'store'])->name('promotions.store');
+    Route::get('/promotions/{id}', [PromotionController::class, 'show'])->name('promotions.show');
+    Route::get('/promotions/{id}/edit', [PromotionController::class, 'edit'])->name('promotions.edit');
+    Route::put('/promotions/{id}', [PromotionController::class, 'update'])->name('promotions.update');
+    Route::delete('/promotions/{id}', [PromotionController::class, 'destroy'])->name('promotions.destroy');
 });
 
 // Redirect từ /receptionist sang /le-tan/dashboard

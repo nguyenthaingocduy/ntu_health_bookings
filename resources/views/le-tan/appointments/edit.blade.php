@@ -79,16 +79,16 @@
                     </div>
 
                     <div>
-                        <label for="time_slot_id" class="block text-sm font-medium text-gray-700 mb-2">Giờ hẹn <span class="text-red-500">*</span></label>
-                        <select id="time_slot_id" name="time_slot_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md @error('time_slot_id') border-red-500 @enderror" required>
+                        <label for="time_appointments_id" class="block text-sm font-medium text-gray-700 mb-2">Giờ hẹn <span class="text-red-500">*</span></label>
+                        <select id="time_appointments_id" name="time_appointments_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md @error('time_appointments_id') border-red-500 @enderror" required>
                             <option value="">-- Chọn giờ hẹn --</option>
                             @foreach($timeSlots as $timeSlot)
-                                <option value="{{ $timeSlot->id }}" {{ (old('time_slot_id', $appointment->time_slot_id) == $timeSlot->id) ? 'selected' : '' }}>
-                                    {{ $timeSlot->start_time->format('H:i') }} - {{ $timeSlot->end_time->format('H:i') }}
+                                <option value="{{ $timeSlot->id }}" {{ (old('time_appointments_id', $appointment->time_appointments_id) == $timeSlot->id) ? 'selected' : '' }}>
+                                    {{ \App\Helpers\TimeHelper::formatTime($timeSlot->started_time) }}
                                 </option>
                             @endforeach
                         </select>
-                        @error('time_slot_id')
+                        @error('time_appointments_id')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
@@ -188,20 +188,16 @@
     // Khi chọn ngày, kiểm tra và lọc các khung giờ phù hợp
     document.getElementById('appointment_date').addEventListener('change', function() {
         const selectedDate = this.value;
-        let dayOfWeek = new Date(selectedDate).getDay(); // 0 = Chủ nhật, 1 = Thứ 2, ...
-
-        // Chuyển đổi 0 (Chủ nhật) thành 7 để phù hợp với hệ thống của chúng ta
-        if (dayOfWeek === 0) dayOfWeek = 7;
 
         // Gọi API để lấy các khung giờ còn trống cho ngày đã chọn
-        fetch(`/api/time-slots?day=${dayOfWeek}&date=${selectedDate}`)
+        fetch(`/api/times?date=${selectedDate}`)
             .then(response => response.json())
             .then(data => {
-                const timeSlotSelect = document.getElementById('time_slot_id');
-                const currentValue = timeSlotSelect.value;
+                const timeSelect = document.getElementById('time_appointments_id');
+                const currentValue = timeSelect.value;
 
                 // Xóa tất cả các option hiện tại
-                timeSlotSelect.innerHTML = '<option value="">-- Chọn giờ hẹn --</option>';
+                timeSelect.innerHTML = '<option value="">-- Chọn giờ hẹn --</option>';
 
                 // Thêm các option mới
                 data.forEach(slot => {
@@ -209,14 +205,15 @@
                     option.value = slot.id;
 
                     // Hiển thị thông tin về số lượng chỗ trống
-                    let slotText = `${slot.start_time} - ${slot.end_time}`;
+                    let slotText = slot.started_time;
 
                     // Thêm thông tin về số lượng chỗ trống
-                    if (slot.hasOwnProperty('available_slots')) {
-                        slotText += ` (${slot.available_slots}/${slot.max_appointments} chỗ trống)`;
+                    if (slot.hasOwnProperty('capacity') && slot.hasOwnProperty('booked_count')) {
+                        const availableSlots = slot.capacity - slot.booked_count;
+                        slotText += ` (${availableSlots}/${slot.capacity} chỗ trống)`;
 
                         // Nếu đã đầy, thêm thông báo và vô hiệu hóa option
-                        if (slot.is_full) {
+                        if (availableSlots <= 0) {
                             slotText += ' - ĐÃ ĐẦY';
                             option.disabled = true;
                         }
@@ -229,7 +226,7 @@
                         option.selected = true;
                     }
 
-                    timeSlotSelect.appendChild(option);
+                    timeSelect.appendChild(option);
                 });
             })
             .catch(error => {

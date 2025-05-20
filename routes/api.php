@@ -29,6 +29,9 @@ Route::get('/check-available-slots', [TimeSlotController::class, 'checkAvailable
 // Route to get all time slots
 Route::get('/time-slots', [TimeSlotController::class, 'getAllTimeSlots']);
 
+// Route to get all times
+Route::get('/times', [\App\Http\Controllers\Api\TimeController::class, 'getAllTimes']);
+
 // Route to check technician availability
 Route::get('/check-technician-availability', [\App\Http\Controllers\Api\AppointmentApiController::class, 'checkTechnicianAvailability']);
 
@@ -37,8 +40,8 @@ Route::get('/customers/search', [\App\Http\Controllers\Api\CustomerController::c
 
 // Promotions API
 Route::get('/active-promotions', [\App\Http\Controllers\Api\PromotionController::class, 'getActivePromotions']);
-
 Route::post('/validate-promotion', [\App\Http\Controllers\Api\PromotionController::class, 'validateCode']);
+Route::get('/check-promotion', [\App\Http\Controllers\Api\PromotionController::class, 'checkPromotion']);
 
 // API cho nhân viên kỹ thuật
 Route::middleware('auth:sanctum')->prefix('nvkt')->group(function () {

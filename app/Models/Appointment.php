@@ -26,7 +26,10 @@ class Appointment extends Model
         'is_completed',
         'cancellation_reason',
         'promotion_code',
-        'final_price'
+        'final_price',
+        'discount_amount',
+        'direct_discount_percent',
+        'updated_by'
     ];
 
     protected $casts = [
@@ -102,8 +105,38 @@ class Appointment extends Model
      */
     public function getFinalPriceAttribute()
     {
-        // Nếu đã có giá trong cơ sở dữ liệu và khác 0, sử dụng giá đó
-        if (isset($this->attributes['final_price']) && $this->attributes['final_price'] > 0) {
+        // Luôn tính toán lại giá nếu có mã khuyến mãi hoặc giá chưa được tính
+        // Thêm điều kiện kiểm tra xem có mã khuyến mãi từ query string không
+        $promotionCodeFromQuery = request()->query('promotion_code');
+        $recalculate = !empty($this->promotion_code) ||
+                      !empty($promotionCodeFromQuery) ||
+                      !isset($this->attributes['final_price']) ||
+                      $this->attributes['final_price'] <= 0;
+
+        // Log để debug
+        \Illuminate\Support\Facades\Log::info('Kiểm tra tính toán lại giá', [
+            'appointment_id' => $this->id,
+            'promotion_code' => $this->promotion_code,
+            'promotion_code_from_query' => $promotionCodeFromQuery,
+            'final_price_in_db' => $this->attributes['final_price'] ?? 0,
+            'recalculate' => $recalculate
+        ]);
+
+        // Nếu có mã khuyến mãi từ query string, cập nhật vào appointment
+        if (!empty($promotionCodeFromQuery) && $promotionCodeFromQuery != $this->promotion_code) {
+            \Illuminate\Support\Facades\Log::info('Cập nhật mã khuyến mãi mới từ query string trong model', [
+                'appointment_id' => $this->id,
+                'old_promotion_code' => $this->promotion_code,
+                'new_promotion_code' => $promotionCodeFromQuery
+            ]);
+
+            $this->promotion_code = $promotionCodeFromQuery;
+            $this->save();
+            $recalculate = true;
+        }
+
+        // Nếu đã có giá trong cơ sở dữ liệu và không cần tính lại, sử dụng giá đó
+        if (!$recalculate && isset($this->attributes['final_price']) && $this->attributes['final_price'] > 0) {
             // Log để debug
             \Illuminate\Support\Facades\Log::info('Sử dụng giá từ cơ sở dữ liệu', [
                 'appointment_id' => $this->id,
@@ -120,8 +153,15 @@ class Appointment extends Model
         // Đảm bảo mã khuyến mãi được xử lý đúng cách
         $promotionCode = !empty($this->promotion_code) ? strtoupper($this->promotion_code) : null;
 
-        // Tính giá sau khuyến mãi
-        $finalPrice = $this->service->calculatePriceWithPromotion($promotionCode);
+        // Sử dụng PricingService để tính giá
+        $pricingService = new \App\Services\PricingService();
+        $priceDetails = $pricingService->calculateFinalPrice($this->service, $promotionCode);
+
+        // Lấy các giá trị từ kết quả tính toán
+        $originalPrice = $priceDetails['original_price'];
+        $finalPrice = $priceDetails['final_price'];
+        $discountAmount = $priceDetails['total_discount_amount'];
+        $directDiscountPercent = $priceDetails['total_discount_percentage'];
 
         // Log để debug
         \Illuminate\Support\Facades\Log::info('Tính giá sau khuyến mãi', [
@@ -129,13 +169,25 @@ class Appointment extends Model
             'service_id' => $this->service_id,
             'service_price' => $this->service->price,
             'promotion_code' => $promotionCode,
+            'original_price' => $originalPrice,
             'final_price' => $finalPrice,
+            'discount_amount' => $discountAmount,
+            'direct_discount_percent' => $directDiscountPercent,
             'from_database' => false
         ]);
 
         // Cập nhật giá vào cơ sở dữ liệu
         try {
-            $this->update(['final_price' => $finalPrice]);
+            $this->update([
+                'final_price' => $finalPrice,
+                'discount_amount' => $discountAmount,
+                'direct_discount_percent' => $directDiscountPercent
+            ]);
+
+            // Cập nhật lại giá trị trong attributes để đảm bảo giá trị mới được sử dụng
+            $this->attributes['final_price'] = $finalPrice;
+            $this->attributes['discount_amount'] = $discountAmount;
+            $this->attributes['direct_discount_percent'] = $directDiscountPercent;
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Không thể cập nhật giá sau khuyến mãi: ' . $e->getMessage());
         }

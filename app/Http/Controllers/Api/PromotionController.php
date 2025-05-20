@@ -160,4 +160,122 @@ class PromotionController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Kiểm tra mã khuyến mãi cho dịch vụ
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkPromotion(Request $request)
+    {
+        try {
+            // Validate request
+            $code = strtoupper($request->query('code', ''));
+            $serviceId = $request->query('service_id', '');
+
+            if (empty($code) || empty($serviceId)) {
+                return response()->json([
+                    'valid' => false,
+                    'message' => 'Thiếu mã khuyến mãi hoặc ID dịch vụ'
+                ]);
+            }
+
+            // Log để debug
+            \Illuminate\Support\Facades\Log::info('Kiểm tra mã khuyến mãi', [
+                'code' => $code,
+                'service_id' => $serviceId
+            ]);
+
+            // Tìm mã khuyến mãi
+            $promotion = Promotion::where('code', $code)
+                ->where('is_active', true)
+                ->where('start_date', '<=', now())
+                ->where('end_date', '>=', now())
+                ->first();
+
+            if (!$promotion) {
+                return response()->json([
+                    'valid' => false,
+                    'message' => 'Mã khuyến mãi không tồn tại hoặc đã hết hạn'
+                ]);
+            }
+
+            // Kiểm tra giới hạn sử dụng
+            if ($promotion->usage_limit && $promotion->usage_count >= $promotion->usage_limit) {
+                return response()->json([
+                    'valid' => false,
+                    'message' => 'Mã khuyến mãi đã hết lượt sử dụng'
+                ]);
+            }
+
+            // Lấy thông tin dịch vụ
+            $service = \App\Models\Service::find($serviceId);
+            if (!$service) {
+                return response()->json([
+                    'valid' => false,
+                    'message' => 'Không tìm thấy dịch vụ'
+                ]);
+            }
+
+            // Kiểm tra giá tối thiểu
+            if ($service->price < $promotion->minimum_purchase) {
+                return response()->json([
+                    'valid' => false,
+                    'message' => 'Giá dịch vụ không đủ để áp dụng mã khuyến mãi này. Tối thiểu: ' . number_format($promotion->minimum_purchase, 0, ',', '.') . 'đ'
+                ]);
+            }
+
+            // Tính giá sau khuyến mãi
+            $discountAmount = 0;
+            $finalPrice = $service->price;
+
+            if ($promotion->discount_type === 'percentage') {
+                $discountAmount = $service->price * ($promotion->discount_value / 100);
+                if ($promotion->maximum_discount && $discountAmount > $promotion->maximum_discount) {
+                    $discountAmount = $promotion->maximum_discount;
+                }
+            } else {
+                $discountAmount = $promotion->discount_value;
+            }
+
+            $finalPrice = max(0, $service->price - $discountAmount);
+
+            // Định dạng giá
+            $formattedFinalPrice = number_format($finalPrice, 0, ',', '.') . 'đ';
+            $formattedDiscountAmount = number_format($discountAmount, 0, ',', '.') . 'đ';
+            $discountPercentage = round(($discountAmount / $service->price) * 100, 1);
+
+            return response()->json([
+                'valid' => true,
+                'message' => "Giảm {$discountPercentage}% ({$formattedDiscountAmount})",
+                'promotion' => [
+                    'id' => $promotion->id,
+                    'code' => $promotion->code,
+                    'title' => $promotion->title,
+                    'discount_type' => $promotion->discount_type,
+                    'discount_value' => $promotion->discount_value,
+                    'formatted_discount' => $promotion->formatted_discount_value
+                ],
+                'original_price' => $service->price,
+                'discount_amount' => $discountAmount,
+                'final_price' => $finalPrice,
+                'discounted_price' => $formattedFinalPrice,
+                'discount_percentage' => $discountPercentage
+            ]);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Lỗi khi kiểm tra mã khuyến mãi: ' . $e->getMessage(), [
+                'code' => $request->query('code', ''),
+                'service_id' => $request->query('service_id', ''),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'valid' => false,
+                'message' => 'Đã xảy ra lỗi khi kiểm tra mã khuyến mãi'
+            ]);
+        }
+    }
 }

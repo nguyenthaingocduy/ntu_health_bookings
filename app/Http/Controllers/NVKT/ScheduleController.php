@@ -33,11 +33,11 @@ class ScheduleController extends Controller
                 return substr($item->start_time, 0, 5);
             });
 
-        $appointments = Appointment::with(['customer', 'service', 'timeSlot'])
+        $appointments = Appointment::with(['customer', 'service', 'timeAppointment'])
             ->where('employee_id', Auth::id())
             ->whereBetween('date_appointments', [$startOfWeek, $endOfWeek])
             ->orderBy('date_appointments')
-            ->orderBy('time_slot_id')
+            ->orderBy('time_appointments_id')
             ->get();
 
         $schedule = [];
@@ -54,15 +54,15 @@ class ScheduleController extends Controller
                 $currentDayOfWeek = $currentDate->dayOfWeek == 0 ? 7 : $currentDate->dayOfWeek; // Chuyển đổi 0 (Chủ nhật) thành 7
 
                 // Tìm khung giờ tương ứng cho ngày hiện tại
-                $dayTimeSlot = TimeSlot::where('day_of_week', $currentDayOfWeek)
-                    ->whereTime('start_time', $timeSlot->start_time) // start_time đã là chuỗi thời gian
+                // Không sử dụng day_of_week vì cột này không tồn tại
+                $dayTimeSlot = TimeSlot::whereTime('start_time', $timeSlot->start_time)
                     ->first();
 
                 $dayTimeSlotId = $dayTimeSlot ? $dayTimeSlot->id : null;
 
                 $dayAppointments = $appointments->filter(function ($appointment) use ($currentDate, $dayTimeSlotId) {
                     return $appointment->date_appointments->isSameDay($currentDate) &&
-                           $appointment->time_slot_id == $dayTimeSlotId;
+                           $appointment->time_appointments_id == $dayTimeSlotId;
                 });
 
                 $schedule[$scheduleKey]['days'][$day] = [
@@ -83,11 +83,11 @@ class ScheduleController extends Controller
      */
     public function assignedAppointments(Request $request)
     {
-        $appointments = Appointment::with(['customer', 'service', 'timeSlot'])
+        $appointments = Appointment::with(['customer', 'service', 'timeAppointment'])
             ->where('employee_id', Auth::id())
             ->where('status', 'confirmed')
             ->orderBy('date_appointments')
-            ->orderBy('time_slot_id')
+            ->orderBy('time_appointments_id')
             ->paginate(10);
 
         return view('nvkt.schedule.assigned', compact('appointments'));

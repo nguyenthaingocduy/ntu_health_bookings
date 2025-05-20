@@ -328,6 +328,21 @@ class AppointmentController extends Controller
             ->where('customer_id', Auth::id())
             ->findOrFail($id);
 
+        // Kiểm tra xem có mã khuyến mãi từ query string không
+        $promotionCodeFromQuery = request()->query('promotion_code');
+
+        // Nếu có mã khuyến mãi mới từ query string, cập nhật vào appointment
+        if (!empty($promotionCodeFromQuery) && $promotionCodeFromQuery != $appointment->promotion_code) {
+            \Illuminate\Support\Facades\Log::info('Cập nhật mã khuyến mãi mới từ query string', [
+                'appointment_id' => $appointment->id,
+                'old_promotion_code' => $appointment->promotion_code,
+                'new_promotion_code' => $promotionCodeFromQuery
+            ]);
+
+            $appointment->promotion_code = $promotionCodeFromQuery;
+            $appointment->save();
+        }
+
         // Đảm bảo giá sau khuyến mãi được tính đúng
         if ($appointment->service) {
             // Sử dụng PricingService để tính giá
@@ -344,37 +359,45 @@ class AppointmentController extends Controller
             $discountAmount = $priceDetails['total_discount_amount'];
             $directDiscountPercent = $priceDetails['total_discount_percentage'];
 
-            // Log thông tin chi tiết về giá và giảm giá
-            \Illuminate\Support\Facades\Log::info('Chi tiết giá và giảm giá trong show()', $priceDetails);
+            // Log chi tiết về giá và giảm giá trước khi cập nhật
+            \Illuminate\Support\Facades\Log::info('Chi tiết giá và giảm giá trước khi cập nhật', [
+                'appointment_id' => $appointment->id,
+                'promotion_code' => $appointment->promotion_code,
+                'original_price' => $originalPrice,
+                'current_final_price' => $appointment->final_price,
+                'calculated_final_price' => $finalPrice,
+                'current_discount_amount' => $appointment->discount_amount,
+                'calculated_discount_amount' => $discountAmount,
+                'current_discount_percent' => $appointment->direct_discount_percent,
+                'calculated_discount_percent' => $directDiscountPercent,
+                'price_details' => $priceDetails
+            ]);
 
-            // Cập nhật giá sau khuyến mãi vào cơ sở dữ liệu
-            if ($finalPrice != $appointment->final_price ||
-                $discountAmount != $appointment->discount_amount ||
-                $directDiscountPercent != $appointment->direct_discount_percent) {
-                try {
-                    $appointment->final_price = $finalPrice;
-                    $appointment->discount_amount = $discountAmount;
-                    $appointment->direct_discount_percent = $directDiscountPercent;
-                    $appointment->save();
+            // Luôn cập nhật giá sau khuyến mãi vào cơ sở dữ liệu để đảm bảo hiển thị đúng
+            try {
+                $appointment->update([
+                    'final_price' => $finalPrice,
+                    'discount_amount' => $discountAmount,
+                    'direct_discount_percent' => $directDiscountPercent
+                ]);
 
-                    // Tải lại đối tượng appointment sau khi cập nhật
-                    $appointment = Appointment::with(['service', 'employee', 'customer', 'timeAppointment'])
-                        ->where('customer_id', Auth::id())
-                        ->findOrFail($id);
+                // Tải lại đối tượng appointment sau khi cập nhật
+                $appointment = Appointment::with(['service', 'employee', 'customer', 'timeAppointment'])
+                    ->where('customer_id', Auth::id())
+                    ->findOrFail($id);
 
-                    // Log để debug
-                    \Illuminate\Support\Facades\Log::info('Đã cập nhật giá sau khuyến mãi trong show()', [
-                        'appointment_id' => $appointment->id,
-                        'original_price' => $originalPrice,
-                        'final_price' => $finalPrice,
-                        'promotion_code' => $appointment->promotion_code,
-                        'direct_discount_percent' => $directDiscountPercent,
-                        'discount_amount' => $discountAmount,
-                        'calculated_discount_percent' => $originalPrice > 0 ? round(($originalPrice - $finalPrice) / $originalPrice * 100, 2) : 0
-                    ]);
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('Không thể cập nhật giá sau khuyến mãi: ' . $e->getMessage());
-                }
+                // Log để debug
+                \Illuminate\Support\Facades\Log::info('Đã cập nhật giá sau khuyến mãi trong show()', [
+                    'appointment_id' => $appointment->id,
+                    'original_price' => $originalPrice,
+                    'final_price' => $finalPrice,
+                    'promotion_code' => $appointment->promotion_code,
+                    'direct_discount_percent' => $directDiscountPercent,
+                    'discount_amount' => $discountAmount,
+                    'calculated_discount_percent' => $originalPrice > 0 ? round(($originalPrice - $finalPrice) / $originalPrice * 100, 2) : 0
+                ]);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Không thể cập nhật giá sau khuyến mãi: ' . $e->getMessage());
             }
         }
 

@@ -5,22 +5,20 @@ namespace App\Models;
 use App\Helpers\TimeHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
 
 class TimeSlot extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory;
 
     protected $fillable = [
         'start_time',
         'end_time',
-        'day_of_week',
-        'is_available',
-        'max_appointments',
+        'is_active',
     ];
 
     protected $casts = [
-        'is_available' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     public function appointments()
@@ -36,23 +34,19 @@ class TimeSlot extends Model
 
     public function isAvailableForDate($date)
     {
-        // Check if this time slot is available for the given date
-        if (!$this->is_available) {
-            return false;
-        }
-
-        // Check if the day of week matches
-        if ($this->day_of_week !== null && $this->day_of_week != $date->dayOfWeek) {
+        // Check if this time slot is active
+        if (!$this->is_active) {
             return false;
         }
 
         // Check if we've reached the maximum number of appointments for this slot
+        // Since max_appointments doesn't exist, we'll use a default value of 10
         $appointmentsCount = $this->appointments()
             ->whereDate('date_appointments', $date->toDateString())
             ->whereIn('status', ['pending', 'confirmed'])
             ->count();
 
-        return $appointmentsCount < $this->max_appointments;
+        return $appointmentsCount < 10; // Default max appointments
     }
 
     /**
@@ -69,8 +63,8 @@ class TimeSlot extends Model
             ->whereIn('status', ['pending', 'confirmed'])
             ->count();
 
-        // Trả về true nếu số lượng cuộc hẹn nhỏ hơn số lượng tối đa
-        return $appointmentsCount < $this->max_appointments;
+        // Trả về true nếu số lượng cuộc hẹn nhỏ hơn số lượng tối đa (mặc định là 10)
+        return $appointmentsCount < 10;
     }
 
     /**
@@ -87,8 +81,8 @@ class TimeSlot extends Model
             ->whereIn('status', ['pending', 'confirmed'])
             ->count();
 
-        // Trả về số lượng chỗ trống còn lại
-        return max(0, $this->max_appointments - $appointmentsCount);
+        // Trả về số lượng chỗ trống còn lại (mặc định tối đa là 10)
+        return max(0, 10 - $appointmentsCount);
     }
 
 

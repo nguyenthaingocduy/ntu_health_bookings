@@ -23,7 +23,7 @@ class TimeSlotSeeder extends Seeder
             ['start_time' => '10:00', 'end_time' => '10:30'],
             ['start_time' => '10:30', 'end_time' => '11:00'],
             ['start_time' => '11:00', 'end_time' => '11:30'],
-            
+
             // Afternoon slots
             ['start_time' => '13:30', 'end_time' => '14:00'],
             ['start_time' => '14:00', 'end_time' => '14:30'],
@@ -38,12 +38,9 @@ class TimeSlotSeeder extends Seeder
             // Create slots for weekdays (Monday = 1, Friday = 5)
             for ($day = 1; $day <= 5; $day++) {
                 TimeSlot::create([
-                    'id' => Str::uuid(),
                     'start_time' => $slot['start_time'],
                     'end_time' => $slot['end_time'],
-                    'day_of_week' => $day,
-                    'is_available' => true,
-                    'max_appointments' => 3, // Allow multiple staff to book the same time slot
+                    'is_active' => true,
                 ]);
             }
         }

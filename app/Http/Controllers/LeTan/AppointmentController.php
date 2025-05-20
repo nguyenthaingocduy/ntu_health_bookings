@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\User;
 use App\Models\Service;
-use App\Models\TimeSlot;
+use App\Models\Time;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -49,9 +49,8 @@ class AppointmentController extends Controller
         $today = now();
         $dayOfWeek = $today->dayOfWeek == 0 ? 7 : $today->dayOfWeek; // Chuyển đổi 0 (Chủ nhật) thành 7
 
-        // Lấy các khung giờ phù hợp với ngày trong tuần hiện tại
-        $timeSlots = TimeSlot::where('day_of_week', $dayOfWeek)
-            ->orderBy('start_time')
+        // Lấy các khung giờ có sẵn
+        $timeSlots = \App\Models\Time::orderBy('started_time')
             ->get();
 
         return view('le-tan.appointments.create', compact('customers', 'services', 'timeSlots', 'technicians'));
@@ -69,26 +68,26 @@ class AppointmentController extends Controller
             'customer_id' => 'required|exists:users,id',
             'service_id' => 'required|exists:services,id',
             'appointment_date' => 'required|date|after_or_equal:today',
-            'time_slot_id' => 'required|exists:time_slots,id',
+            'time_appointments_id' => 'required|exists:times,id',
             'employee_id' => 'nullable|exists:users,id',
         ]);
 
         // Kiểm tra xem khung giờ đã đầy chưa
         $appointmentDate = Carbon::parse($request->appointment_date);
         $existingAppointments = Appointment::where('date_appointments', $appointmentDate->format('Y-m-d'))
-            ->where('time_slot_id', $request->time_slot_id)
+            ->where('time_appointments_id', $request->time_appointments_id)
             ->where('status', '!=', 'cancelled')
             ->count();
 
-        $timeSlot = TimeSlot::find($request->time_slot_id);
-        if ($existingAppointments >= $timeSlot->max_appointments) {
+        $timeAppointment = \App\Models\Time::find($request->time_appointments_id);
+        if ($timeAppointment && $existingAppointments >= $timeAppointment->capacity) {
             return back()->with('error', 'Khung giờ này đã đầy. Vui lòng chọn khung giờ khác.');
         }
 
         // Nếu phân công nhân viên kỹ thuật, kiểm tra xem nhân viên đã có lịch hẹn khác trong cùng khung giờ chưa
         if ($request->filled('employee_id')) {
             $existingTechnicianAppointments = Appointment::where('date_appointments', $appointmentDate->format('Y-m-d'))
-                ->where('time_slot_id', $request->time_slot_id)
+                ->where('time_appointments_id', $request->time_appointments_id)
                 ->where('employee_id', $request->employee_id)
                 ->where('status', '!=', 'cancelled')
                 ->count();
@@ -103,8 +102,7 @@ class AppointmentController extends Controller
         $appointment->service_id = $request->service_id;
         $appointment->date_appointments = $appointmentDate;
         $appointment->date_register = now(); // Thêm giá trị cho trường date_register
-        $appointment->time_slot_id = $request->time_slot_id;
-        $appointment->time_appointments_id = $request->time_slot_id; // Gán giá trị cho trường time_appointments_id
+        $appointment->time_appointments_id = $request->time_appointments_id;
         $appointment->status = 'pending';
         $appointment->notes = $request->notes;
         $appointment->created_by = Auth::id();
@@ -247,11 +245,8 @@ class AppointmentController extends Controller
                 $appointmentDate = \Carbon\Carbon::parse($appointment->date_appointments);
             }
 
-            $dayOfWeek = $appointmentDate->dayOfWeek === 0 ? 7 : $appointmentDate->dayOfWeek; // Chuyển đổi 0 (Chủ nhật) thành 7
-
-            // Lấy các khung giờ phù hợp với ngày trong tuần của lịch hẹn
-            $timeSlots = TimeSlot::where('day_of_week', $dayOfWeek)
-                ->orderBy('start_time')
+            // Lấy tất cả các khung giờ có sẵn
+            $timeSlots = \App\Models\Time::orderBy('started_time')
                 ->get();
 
             // Thêm ngày đã định dạng vào dữ liệu
@@ -264,9 +259,8 @@ class AppointmentController extends Controller
 
             // Sử dụng ngày hiện tại nếu có lỗi
             $appointmentDate = now();
-            $dayOfWeek = $appointmentDate->dayOfWeek === 0 ? 7 : $appointmentDate->dayOfWeek;
-            $timeSlots = TimeSlot::where('day_of_week', $dayOfWeek)
-                ->orderBy('start_time')
+            // Lấy tất cả các khung giờ có sẵn
+            $timeSlots = \App\Models\Time::orderBy('started_time')
                 ->get();
             $appointment->formatted_date = $appointmentDate->format('Y-m-d');
         }
@@ -287,7 +281,7 @@ class AppointmentController extends Controller
             'customer_id' => 'required|exists:users,id',
             'service_id' => 'required|exists:services,id',
             'appointment_date' => 'required|date',
-            'time_slot_id' => 'required|exists:time_slots,id',
+            'time_appointments_id' => 'required|exists:times,id',
             'status' => 'required|in:pending,confirmed,completed,cancelled',
             'employee_id' => 'nullable|exists:users,id',
         ]);
@@ -296,17 +290,17 @@ class AppointmentController extends Controller
 
         // Nếu thay đổi ngày hoặc khung giờ, kiểm tra xem khung giờ đã đầy chưa
         if ($appointment->date_appointments->format('Y-m-d') != $request->appointment_date ||
-            $appointment->time_slot_id != $request->time_slot_id) {
+            $appointment->time_appointments_id != $request->time_appointments_id) {
 
             $appointmentDate = Carbon::parse($request->appointment_date);
             $existingAppointments = Appointment::where('date_appointments', $appointmentDate->format('Y-m-d'))
-                ->where('time_slot_id', $request->time_slot_id)
+                ->where('time_appointments_id', $request->time_appointments_id)
                 ->where('status', '!=', 'cancelled')
                 ->where('id', '!=', $id)
                 ->count();
 
-            $timeSlot = TimeSlot::find($request->time_slot_id);
-            if ($existingAppointments >= $timeSlot->max_appointments) {
+            $timeAppointment = \App\Models\Time::find($request->time_appointments_id);
+            if ($timeAppointment && $existingAppointments >= $timeAppointment->capacity) {
                 return back()->with('error', 'Khung giờ này đã đầy. Vui lòng chọn khung giờ khác.');
             }
         }
@@ -315,11 +309,11 @@ class AppointmentController extends Controller
         if ($request->filled('employee_id') &&
             ($appointment->employee_id != $request->employee_id ||
              $appointment->date_appointments->format('Y-m-d') != $request->appointment_date ||
-             $appointment->time_slot_id != $request->time_slot_id)) {
+             $appointment->time_appointments_id != $request->time_appointments_id)) {
 
             $appointmentDate = Carbon::parse($request->appointment_date);
             $existingTechnicianAppointments = Appointment::where('date_appointments', $appointmentDate->format('Y-m-d'))
-                ->where('time_slot_id', $request->time_slot_id)
+                ->where('time_appointments_id', $request->time_appointments_id)
                 ->where('employee_id', $request->employee_id)
                 ->where('status', '!=', 'cancelled')
                 ->where('id', '!=', $id)
@@ -333,7 +327,7 @@ class AppointmentController extends Controller
         $appointment->customer_id = $request->customer_id;
         $appointment->service_id = $request->service_id;
         $appointment->date_appointments = Carbon::parse($request->appointment_date);
-        $appointment->time_slot_id = $request->time_slot_id;
+        $appointment->time_appointments_id = $request->time_appointments_id;
         $appointment->status = $request->status;
         $appointment->notes = $request->notes;
         $appointment->updated_by = Auth::id();
@@ -407,7 +401,7 @@ class AppointmentController extends Controller
             $appointment->save();
 
             // Tạo lịch làm việc cho nhân viên kỹ thuật
-            if ($appointment->timeSlot) {
+            if ($appointment->timeAppointment) {
                 \App\Models\WorkSchedule::updateOrCreate(
                     [
                         'user_id' => $request->employee_id,
@@ -416,7 +410,6 @@ class AppointmentController extends Controller
                             : (is_string($appointment->date_appointments)
                                 ? \Carbon\Carbon::parse($appointment->date_appointments)->format('Y-m-d')
                                 : date('Y-m-d')),
-                        'time_slot_id' => $appointment->timeSlot->id,
                     ],
                     [
                         'status' => 'scheduled',

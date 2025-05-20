@@ -65,7 +65,7 @@
                     </h3>
                 </div>
                 <div class="p-6">
-                    <form action="{{ route('admin.permissions.role-permissions') }}" method="POST" id="permissionsForm">
+                    <form action="{{ route('admin.permissions.update-user-permissions', $user->id) }}" method="POST" id="permissionsForm">
                         @csrf
                         @method('PUT')
 
@@ -122,7 +122,9 @@
                                                     </div>
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="text-sm text-gray-900">{{ $group }}</div>
+                                                    <div class="text-sm font-medium text-gray-900">
+                                                        <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-lg">{{ $permission->translated_group ?? $permission->group }}</span>
+                                                    </div>
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                                     <input type="checkbox" name="permissions[{{ $loop->parent->index * 100 + $loop->index }}][can_view]" value="1" class="permission-checkbox w-5 h-5 text-pink-600 border-gray-300 rounded focus:ring-pink-500"

@@ -73,26 +73,47 @@
                                     ]);
                                 @endphp
 
-                                @if($appointment->final_price < $appointment->service->price)
-                                    <p class="font-semibold text-pink-500 text-xl">{{ number_format($appointment->final_price, 0, ',', '.') }}đ</p>
-                                    <p class="text-gray-500 line-through text-base font-medium">{{ number_format($appointment->service->price, 0, ',', '.') }}đ</p>
+                                @php
+                                    // Tính toán lại giá trị giảm giá để đảm bảo hiển thị đúng
+                                    $originalPrice = $appointment->service->price;
+                                    $finalPrice = $appointment->final_price;
+                                    $discountAmount = $originalPrice - $finalPrice;
+                                    $discountPercent = $originalPrice > 0 ? round(($discountAmount / $originalPrice) * 100, 1) : 0;
+                                    $hasDiscount = $finalPrice < $originalPrice;
+
+                                    // Log để debug
+                                    \Illuminate\Support\Facades\Log::info('Hiển thị giá trong view', [
+                                        'appointment_id' => $appointment->id,
+                                        'original_price' => $originalPrice,
+                                        'final_price' => $finalPrice,
+                                        'discount_amount' => $discountAmount,
+                                        'discount_percent' => $discountPercent,
+                                        'has_discount' => $hasDiscount,
+                                        'promotion_code' => $appointment->promotion_code,
+                                        'direct_discount_percent' => $appointment->direct_discount_percent
+                                    ]);
+                                @endphp
+
+                                @if($hasDiscount)
+                                    <p class="font-semibold text-pink-500 text-xl">{{ number_format($finalPrice, 0, ',', '.') }}đ</p>
+                                    <p class="text-gray-500 line-through text-base font-medium">{{ number_format($originalPrice, 0, ',', '.') }}đ</p>
                                     <p class="mt-1">
                                         <span class="bg-pink-100 text-pink-800 text-sm font-semibold px-2 py-1 rounded-full">
-                                            Giảm {{ $appointment->direct_discount_percent ?? round(($appointment->service->price - $appointment->final_price) / $appointment->service->price * 100) }}%
+                                            Giảm {{ $discountPercent }}%
                                         </span>
                                     </p>
 
-                                    <div class="mt-2 bg-gray-50 p-2 rounded-md text-xs">
+                                    <div class="mt-2 bg-gray-50 p-3 rounded-md text-sm">
                                         <div class="flex items-center text-gray-700">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-2 w-3 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                             </svg>
-                                            <span>Tiết kiệm: <span class="font-semibold">{{ number_format($appointment->service->price - $appointment->final_price, 0, ',', '.') }}đ ({{ round(($appointment->service->price - $appointment->final_price) / $appointment->service->price * 100, 1) }}%)</span></span>
+                                            <span>Tiết kiệm: <span class="font-semibold">{{ number_format($discountAmount, 0, ',', '.') }}đ ({{ $discountPercent }}%)</span></span>
                                         </div>
 
                                         @if($appointment->direct_discount_percent > 0)
-                                        <div class="flex items-center text-gray-700 mt-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <div class="flex items-center text-gray-700 mt-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-2 w-3 mr-1 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                             </svg>
                                             <span>Giảm giá trực tiếp: <span class="font-semibold">{{ $appointment->direct_discount_percent }}%</span></span>
@@ -100,16 +121,31 @@
                                         @endif
 
                                         @if($appointment->promotion_code)
-                                        <div class="flex items-center text-gray-700 mt-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <div class="flex items-center text-gray-700 mt-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-2 w-3 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                             </svg>
-                                            <span>Mã đã áp dụng: <span class="font-mono font-semibold">{{ $appointment->promotion_code }}</span></span>
+                                            <span>Mã khuyến mãi: <span class="font-mono font-semibold bg-blue-50 text-blue-700 px-2 py-0.5 rounded">{{ $appointment->promotion_code }}</span></span>
                                         </div>
                                         @endif
+
+                                        <div class="mt-3 pt-2 border-t border-gray-200">
+                                            <div class="flex justify-between text-gray-700">
+                                                <span>Giá gốc:</span>
+                                                <span class="font-medium">{{ number_format($originalPrice, 0, ',', '.') }}đ</span>
+                                            </div>
+                                            <div class="flex justify-between text-gray-700 mt-1">
+                                                <span>Giảm giá:</span>
+                                                <span class="font-medium text-pink-600">-{{ number_format($discountAmount, 0, ',', '.') }}đ</span>
+                                            </div>
+                                            <div class="flex justify-between font-semibold mt-1">
+                                                <span>Thành tiền:</span>
+                                                <span class="text-pink-600">{{ number_format($finalPrice, 0, ',', '.') }}đ</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 @else
-                                    <p class="font-semibold text-pink-500">{{ number_format($appointment->service->price, 0, ',', '.') }}đ</p>
+                                    <p class="font-semibold text-pink-500 text-xl">{{ number_format($originalPrice, 0, ',', '.') }}đ</p>
                                 @endif
                             </div>
                             @endif
@@ -203,6 +239,36 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Mã khuyến mãi -->
+                <div class="mt-8 border-t pt-6">
+                    <h3 class="font-semibold mb-4">Mã khuyến mãi</h3>
+
+                    @if($appointment->promotion_code)
+                        <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                <span class="text-blue-700 font-semibold">Đã áp dụng mã: <span class="font-mono bg-blue-100 px-2 py-0.5 rounded">{{ $appointment->promotion_code }}</span></span>
+                            </div>
+                            <p class="text-blue-600 mt-2 text-sm">Giảm giá {{ $appointment->direct_discount_percent }}% ({{ number_format($appointment->discount_amount, 0, ',', '.') }}đ)</p>
+                        </div>
+                    @endif
+
+                    {{-- @if(in_array($appointment->status, ['pending', 'confirmed']))
+                        <form action="{{ route('customer.appointments.show', $appointment->id) }}" method="GET" class="mb-4">
+                            <div class="flex flex-wrap gap-2">
+                                <input type="text" name="promotion_code" placeholder="Nhập mã khuyến mãi"
+                                    class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                    value="{{ request()->query('promotion_code') }}">
+                                <button type="submit" class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition">
+                                    <i class="fas fa-tag mr-2"></i> Áp dụng mã
+                                </button>
+                            </div>
+                        </form>
+                    @endif --}}
                 </div>
 
                 <!-- Hành động -->

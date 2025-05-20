@@ -16,15 +16,52 @@ class Payment extends Model
      */
     protected $fillable = [
         'appointment_id',
-        'customer_id',
+        'invoice_id',
+        'user_id',
         'amount',
         'payment_method',
         'payment_status',
-        'transaction_id',
         'notes',
         'created_by',
         'updated_by',
     ];
+
+    /**
+     * Indicates if the model's ID is auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+
+    /**
+     * The data type of the auto-incrementing ID.
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'amount' => 'decimal:2',
+    ];
+
+    /**
+     * Boot function from Laravel.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
 
     /**
      * Get the appointment that owns the payment.
@@ -35,11 +72,19 @@ class Payment extends Model
     }
 
     /**
-     * Get the customer that owns the payment.
+     * Get the user that owns the payment.
      */
-    public function customer()
+    public function user()
     {
-        return $this->belongsTo(User::class, 'customer_id');
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Get the invoice associated with the payment.
+     */
+    public function invoice()
+    {
+        return $this->belongsTo(Invoice::class);
     }
 
     /**

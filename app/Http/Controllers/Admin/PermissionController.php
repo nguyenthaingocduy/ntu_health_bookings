@@ -383,7 +383,49 @@ class PermissionController extends Controller
         // Kiểm tra xem cột 'group' có tồn tại trong bảng permissions không
         try {
             if (Schema::hasColumn('permissions', 'group')) {
-                $permissions = Permission::orderBy('group')->orderBy('name')->get()->groupBy('group');
+                // Lấy danh sách quyền và nhóm theo nhóm
+                $allPermissions = Permission::orderBy('group')->orderBy('name')->get();
+
+                // Tạo một mảng để lưu trữ quyền theo nhóm với tên nhóm đã được dịch
+                $permissions = [];
+
+                // Ánh xạ tên nhóm tiếng Anh sang tiếng Việt
+                $groupTranslations = [
+                    'general' => 'Chung',
+                    'users' => 'Người dùng',
+                    'roles' => 'Vai trò',
+                    'permissions' => 'Quyền hạn',
+                    'services' => 'Dịch vụ',
+                    'appointments' => 'Lịch hẹn',
+                    'invoices' => 'Hóa đơn',
+                    'posts' => 'Tin tức',
+                    'promotions' => 'Khuyến mãi',
+                    'settings' => 'Cài đặt',
+                    'reports' => 'Báo cáo',
+                    'customers' => 'Khách hàng',
+                    'employees' => 'Nhân viên',
+                    'clinics' => 'Phòng khám',
+                    'categories' => 'Danh mục',
+                    'professional_notes' => 'Ghi chú chuyên môn',
+                    'payments' => 'Thanh toán',
+                    'notifications' => 'Thông báo',
+                    'work_schedule' => 'Lịch làm việc',
+                    'treatment_progress' => 'Tiến trình điều trị',
+                    'session_status' => 'Trạng thái phiên',
+                    'service_packages' => 'Gói dịch vụ',
+                ];
+
+                // Thay đổi cách tiếp cận: Không nhóm quyền theo nhóm mà thay vào đó gán trực tiếp tên nhóm đã dịch vào thuộc tính của đối tượng
+                foreach ($allPermissions as $permission) {
+                    $groupName = $permission->group;
+                    $translatedGroupName = $groupTranslations[$groupName] ?? ucfirst($groupName);
+
+                    // Gán tên nhóm đã dịch vào thuộc tính translated_group của đối tượng
+                    $permission->translated_group = $translatedGroupName;
+                }
+
+                // Nhóm quyền theo nhóm gốc để duy trì cấu trúc dữ liệu hiện tại
+                $permissions = $allPermissions->groupBy('group');
             } else {
                 $allPermissions = Permission::orderBy('name')->get();
                 $permissions = ['Tất cả quyền' => $allPermissions];
@@ -512,7 +554,49 @@ class PermissionController extends Controller
         // Kiểm tra xem cột 'group' có tồn tại trong bảng permissions không
         try {
             if (Schema::hasColumn('permissions', 'group')) {
-                $permissions = Permission::orderBy('group')->orderBy('name')->get()->groupBy('group');
+                // Lấy danh sách quyền và nhóm theo nhóm
+                $allPermissions = Permission::orderBy('group')->orderBy('name')->get();
+
+                // Tạo một mảng để lưu trữ quyền theo nhóm với tên nhóm đã được dịch
+                $permissions = [];
+
+                // Ánh xạ tên nhóm tiếng Anh sang tiếng Việt
+                $groupTranslations = [
+                    'general' => 'Chung',
+                    'users' => 'Người dùng',
+                    'roles' => 'Vai trò',
+                    'permissions' => 'Quyền hạn',
+                    'services' => 'Dịch vụ',
+                    'appointments' => 'Lịch hẹn',
+                    'invoices' => 'Hóa đơn',
+                    'posts' => 'Tin tức',
+                    'promotions' => 'Khuyến mãi',
+                    'settings' => 'Cài đặt',
+                    'reports' => 'Báo cáo',
+                    'customers' => 'Khách hàng',
+                    'employees' => 'Nhân viên',
+                    'clinics' => 'Phòng khám',
+                    'categories' => 'Danh mục',
+                    'professional_notes' => 'Ghi chú chuyên môn',
+                    'payments' => 'Thanh toán',
+                    'notifications' => 'Thông báo',
+                    'work_schedule' => 'Lịch làm việc',
+                    'treatment_progress' => 'Tiến trình điều trị',
+                    'session_status' => 'Trạng thái phiên',
+                    'service_packages' => 'Gói dịch vụ',
+                ];
+
+                // Thay đổi cách tiếp cận: Không nhóm quyền theo nhóm mà thay vào đó gán trực tiếp tên nhóm đã dịch vào thuộc tính của đối tượng
+                foreach ($allPermissions as $permission) {
+                    $groupName = $permission->group;
+                    $translatedGroupName = $groupTranslations[$groupName] ?? ucfirst($groupName);
+
+                    // Gán tên nhóm đã dịch vào thuộc tính translated_group của đối tượng
+                    $permission->translated_group = $translatedGroupName;
+                }
+
+                // Nhóm quyền theo nhóm gốc để duy trì cấu trúc dữ liệu hiện tại
+                $permissions = $allPermissions->groupBy('group');
             } else {
                 $allPermissions = Permission::orderBy('name')->get();
                 $permissions = ['Tất cả quyền' => $allPermissions];

@@ -38,11 +38,11 @@ class DashboardController extends Controller
         $todayPaymentsCount = Payment::whereDate('created_at', Carbon::today())->count();
 
         // Lấy danh sách lịch hẹn sắp tới
-        $upcomingAppointments = Appointment::with(['customer', 'service', 'timeSlot'])
+        $upcomingAppointments = Appointment::with(['customer', 'service', 'timeAppointment'])
             ->whereDate('date_appointments', '>=', Carbon::today())
             ->where('status', '!=', 'cancelled')
             ->orderBy('date_appointments')
-            ->orderBy('time_slot_id')
+            ->orderBy('time_appointments_id')
             ->limit(5)
             ->get();
 
@@ -52,12 +52,20 @@ class DashboardController extends Controller
             ->get();
 
         // Lấy số lượng tư vấn dịch vụ đang chờ
-        $pendingConsultationsCount = ServiceConsultation::where('status', 'pending')->count();
+        try {
+            $pendingConsultationsCount = ServiceConsultation::where('status', 'pending')->count();
+        } catch (\Exception $e) {
+            $pendingConsultationsCount = 0;
+        }
 
         // Lấy số lượng nhắc nhở lịch hẹn đang chờ
-        $pendingRemindersCount = Reminder::where('status', 'pending')
-            ->where('reminder_date', '>=', Carbon::now())
-            ->count();
+        try {
+            $pendingRemindersCount = Reminder::where('status', 'pending')
+                ->where('reminder_date', '>=', Carbon::now())
+                ->count();
+        } catch (\Exception $e) {
+            $pendingRemindersCount = 0;
+        }
 
         // Lấy số lượng hóa đơn đã tạo trong tháng này
         $monthlyInvoicesCount = Invoice::whereMonth('created_at', Carbon::now()->month)
@@ -81,18 +89,26 @@ class DashboardController extends Controller
             ->get();
 
         // Lấy danh sách tư vấn dịch vụ gần đây
-        $recentConsultations = ServiceConsultation::with(['customer', 'service', 'createdBy'])
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get();
+        try {
+            $recentConsultations = ServiceConsultation::with(['customer', 'service', 'createdBy'])
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get();
+        } catch (\Exception $e) {
+            $recentConsultations = collect([]);
+        }
 
         // Lấy danh sách nhắc nhở lịch hẹn sắp tới
-        $upcomingReminders = Reminder::with(['appointment', 'appointment.customer', 'appointment.service'])
-            ->where('status', 'pending')
-            ->where('reminder_date', '>=', Carbon::now())
-            ->orderBy('reminder_date')
-            ->limit(5)
-            ->get();
+        try {
+            $upcomingReminders = Reminder::with(['appointment', 'appointment.customer', 'appointment.service'])
+                ->where('status', 'pending')
+                ->where('reminder_date', '>=', Carbon::now())
+                ->orderBy('reminder_date')
+                ->limit(5)
+                ->get();
+        } catch (\Exception $e) {
+            $upcomingReminders = collect([]);
+        }
 
         return view('le-tan.dashboard', compact(
             'todayAppointmentsCount',

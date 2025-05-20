@@ -169,7 +169,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">{{ $appointment->date_appointments ? $appointment->date_appointments->format('d/m/Y') : 'N/A' }}</div>
-                                    <div class="text-sm text-gray-500">{{ $appointment->timeSlot ? $appointment->timeSlot->start_time . ' - ' . $appointment->timeSlot->end_time : 'N/A' }}</div>
+                                    <div class="text-sm text-gray-500">{{ $appointment->timeAppointment ? $appointment->timeAppointment->started_time : 'N/A' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     @can('appointments.view')
