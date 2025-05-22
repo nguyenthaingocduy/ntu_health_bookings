@@ -157,4 +157,4 @@ Dự án này được phân phối dưới giấy phép MIT. Xem file `LICENSE`
 
 ---
 
-Phát triển bởi Nhóm Sinh Viên Trường Đại học Nha Trang © 2024
+Phát triển bởi Sinh Viên Trường Đại học Nha Trang © 2025
