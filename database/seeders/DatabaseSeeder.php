@@ -14,6 +14,8 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             FixRolesSeeder::class,
             NewRolesSeeder::class,
+            UpdateRoleDescriptionsSeeder::class,
+            CleanupDuplicateRolesSeeder::class,
         ]);
 
         // Run user seeders
