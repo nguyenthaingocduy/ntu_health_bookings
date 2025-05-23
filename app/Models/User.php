@@ -181,7 +181,7 @@ class User extends Authenticatable
     /**
      * Check if user has a specific permission directly assigned
      *
-     * @param string $permissionName
+     * @param string $permissionName (e.g., 'promotions' or 'promotions.view')
      * @param string $action (view, create, edit, delete)
      * @return bool
      */
@@ -190,7 +190,14 @@ class User extends Authenticatable
         $cacheKey = 'user_direct_permission_' . $this->id . '_' . $permissionName . '_' . $action;
 
         return Cache::remember($cacheKey, 60 * 5, function () use ($permissionName, $action) {
-            $permission = Permission::where('name', $permissionName)->first();
+            // If permissionName doesn't contain dot, add action to it
+            if (!str_contains($permissionName, '.')) {
+                $fullPermissionName = $permissionName . '.' . $action;
+            } else {
+                $fullPermissionName = $permissionName;
+            }
+
+            $permission = Permission::where('name', $fullPermissionName)->first();
 
             if (!$permission) {
                 return false;
@@ -225,6 +232,30 @@ class User extends Authenticatable
 
         // Only check role permission
         return $this->hasPermissionThroughRole($permissionName);
+    }
+
+    /**
+     * Check if user has a specific permission (through role OR direct assignment)
+     *
+     * @param string $permissionName
+     * @param string $action
+     * @return bool
+     */
+    public function hasAnyPermission($permissionName, $action = 'view')
+    {
+        // Admin has all permissions
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        // Check role permission first
+        $fullPermissionName = str_contains($permissionName, '.') ? $permissionName : $permissionName . '.' . $action;
+        if ($this->hasPermissionThroughRole($fullPermissionName)) {
+            return true;
+        }
+
+        // Check direct permission
+        return $this->hasDirectPermission($permissionName, $action);
     }
 
     /**

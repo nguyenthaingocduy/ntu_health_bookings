@@ -9,6 +9,7 @@ use App\Http\Controllers\LeTan\ReminderController;
 use App\Http\Controllers\LeTan\ServiceController;
 use App\Http\Controllers\LeTan\InvoiceController;
 use App\Http\Controllers\LeTan\PromotionController;
+use App\Http\Controllers\LeTan\ReportController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -72,7 +73,12 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserRole::class.':Reception
 
     // Services
     Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
+    Route::get('/services/create', [ServiceController::class, 'create'])->name('services.create');
+    Route::post('/services', [ServiceController::class, 'store'])->name('services.store');
     Route::get('/services/{id}', [ServiceController::class, 'show'])->name('services.show');
+    Route::get('/services/{id}/edit', [ServiceController::class, 'edit'])->name('services.edit');
+    Route::put('/services/{id}', [ServiceController::class, 'update'])->name('services.update');
+    Route::delete('/services/{id}', [ServiceController::class, 'destroy'])->name('services.destroy');
 
     // Invoices
     Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
@@ -89,6 +95,13 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserRole::class.':Reception
     Route::get('/promotions/{id}/edit', [PromotionController::class, 'edit'])->name('promotions.edit');
     Route::put('/promotions/{id}', [PromotionController::class, 'update'])->name('promotions.update');
     Route::delete('/promotions/{id}', [PromotionController::class, 'destroy'])->name('promotions.destroy');
+
+    // Reports - Chỉ cho phép truy cập nếu có quyền
+    Route::middleware(['permission:reports.view'])->group(function () {
+        Route::get('/reports/revenue', [ReportController::class, 'revenue'])->name('reports.revenue');
+        Route::get('/reports/appointments', [ReportController::class, 'appointments'])->name('reports.appointments');
+        Route::get('/reports/services', [ReportController::class, 'services'])->name('reports.services');
+    });
 });
 
 // Redirect từ /receptionist sang /le-tan/dashboard

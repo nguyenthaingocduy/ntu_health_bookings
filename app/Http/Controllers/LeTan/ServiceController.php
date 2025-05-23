@@ -91,4 +91,126 @@ class ServiceController extends Controller
 
         return view('le-tan.services.show', compact('service', 'relatedServices'));
     }
+
+    /**
+     * Hiển thị form tạo dịch vụ mới
+     */
+    public function create()
+    {
+        // Kiểm tra quyền
+        if (!auth()->user()->hasAnyPermission('services', 'create')) {
+            abort(403, 'Bạn không có quyền tạo dịch vụ');
+        }
+
+        $categories = Category::orderBy('name')->get();
+
+        return view('le-tan.services.create', compact('categories'));
+    }
+
+    /**
+     * Lưu dịch vụ mới
+     */
+    public function store(Request $request)
+    {
+        // Kiểm tra quyền
+        if (!auth()->user()->hasAnyPermission('services', 'create')) {
+            abort(403, 'Bạn không có quyền tạo dịch vụ');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'duration' => 'required|integer|min:1',
+            'category_id' => 'required|exists:categories,id',
+            'is_active' => 'boolean'
+        ]);
+
+        Service::create([
+            'id' => \Illuminate\Support\Str::uuid(),
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+            'duration' => $request->duration,
+            'category_id' => $request->category_id,
+            'is_active' => $request->has('is_active'),
+        ]);
+
+        return redirect()->route('le-tan.services.index')
+            ->with('success', 'Dịch vụ đã được tạo thành công!');
+    }
+
+    /**
+     * Hiển thị form chỉnh sửa dịch vụ
+     */
+    public function edit($id)
+    {
+        // Kiểm tra quyền
+        if (!auth()->user()->hasAnyPermission('services', 'edit')) {
+            abort(403, 'Bạn không có quyền sửa dịch vụ');
+        }
+
+        $service = Service::findOrFail($id);
+        $categories = Category::orderBy('name')->get();
+
+        return view('le-tan.services.edit', compact('service', 'categories'));
+    }
+
+    /**
+     * Cập nhật dịch vụ
+     */
+    public function update(Request $request, $id)
+    {
+        // Kiểm tra quyền
+        if (!auth()->user()->hasAnyPermission('services', 'edit')) {
+            abort(403, 'Bạn không có quyền sửa dịch vụ');
+        }
+
+        $service = Service::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'duration' => 'required|integer|min:1',
+            'category_id' => 'required|exists:categories,id',
+            'is_active' => 'boolean'
+        ]);
+
+        $service->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+            'duration' => $request->duration,
+            'category_id' => $request->category_id,
+            'is_active' => $request->has('is_active'),
+        ]);
+
+        return redirect()->route('le-tan.services.index')
+            ->with('success', 'Dịch vụ đã được cập nhật thành công!');
+    }
+
+    /**
+     * Xóa dịch vụ
+     */
+    public function destroy($id)
+    {
+        // Kiểm tra quyền
+        if (!auth()->user()->hasAnyPermission('services', 'delete')) {
+            abort(403, 'Bạn không có quyền xóa dịch vụ');
+        }
+
+        $service = Service::findOrFail($id);
+
+        // Kiểm tra xem dịch vụ có đang được sử dụng không
+        if ($service->appointments()->exists()) {
+            return redirect()->route('le-tan.services.index')
+                ->with('error', 'Không thể xóa dịch vụ đã có lịch hẹn!');
+        }
+
+        $service->delete();
+
+        return redirect()->route('le-tan.services.index')
+            ->with('success', 'Dịch vụ đã được xóa thành công!');
+    }
 }

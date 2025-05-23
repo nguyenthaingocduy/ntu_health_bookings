@@ -329,22 +329,46 @@
                 <x-sidebar.dynamic-menu
                     title="Quản lý dịch vụ"
                     permissionGroup="services"
-                    :routes="['le-tan.services.index', 'le-tan.consultations.index']"
+                    :routes="['le-tan.services.index', 'le-tan.services.create', 'le-tan.services.edit', 'le-tan.consultations.index']"
                     icon='<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                     </svg>'
                 >
                     <x-sidebar.dynamic-item
                         route="le-tan.services.index"
-                        text="Xem thông tin dịch vụ"
+                        text="Xem dịch vụ"
                         permission="services.view"
                         icon='<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>'
                     />
                     <x-sidebar.dynamic-item
+                        route="le-tan.services.create"
+                        text="Thêm dịch vụ"
+                        permission="services.create"
+                        icon='<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>'
+                    />
+                    <x-sidebar.dynamic-item
+                        route="le-tan.services.index"
+                        text="Sửa dịch vụ"
+                        permission="services.edit"
+                        icon='<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>'
+                    />
+                    <x-sidebar.dynamic-item
+                        route="le-tan.services.index"
+                        text="Xóa dịch vụ"
+                        permission="services.delete"
+                        icon='<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>'
+                    />
+                    <x-sidebar.dynamic-item
                         route="le-tan.consultations.index"
-                        text="Tư vấn dịch vụ cho khách hàng"
+                        text="Tư vấn dịch vụ"
                         permission="services.view"
                         icon='<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -362,7 +386,7 @@
                     </svg>'
                 >
                     <x-sidebar.dynamic-item
-                        route="le-tan.services.index"
+                        route="le-tan.promotions.index"
                         text="Xem khuyến mãi"
                         permission="promotions.view"
                         icon='<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -370,7 +394,7 @@
                         </svg>'
                     />
                     <x-sidebar.dynamic-item
-                        route="le-tan.services.index"
+                        route="le-tan.promotions.create"
                         text="Thêm khuyến mãi"
                         permission="promotions.create"
                         icon='<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -378,7 +402,7 @@
                         </svg>'
                     />
                     <x-sidebar.dynamic-item
-                        route="le-tan.services.index"
+                        route="le-tan.promotions.index"
                         text="Sửa khuyến mãi"
                         permission="promotions.edit"
                         icon='<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -386,7 +410,7 @@
                         </svg>'
                     />
                     <x-sidebar.dynamic-item
-                        route="le-tan.services.index"
+                        route="le-tan.promotions.index"
                         text="Xóa khuyến mãi"
                         permission="promotions.delete"
                         icon='<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -434,8 +458,9 @@
                     </div>
                 </div> --}}
 
-                <!-- Báo cáo và thống kê -->
-                {{-- <div class="sidebar-dropdown-container">
+                <!-- Báo cáo và thống kê - Chỉ hiển thị nếu có quyền -->
+                <x-permission-check permission="reports.view">
+                <div class="sidebar-dropdown-container">
                     <div class="sidebar-menu-item" onclick="toggleDropdown('reports-dropdown')">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -446,26 +471,27 @@
                         </svg>
                     </div>
                     <div id="reports-dropdown" class="sidebar-dropdown">
-                        <a href="{{ route('le-tan.dashboard') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.reports.revenue') ? 'active' : '' }}">
+                        <a href="{{ route('le-tan.reports.revenue') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.reports.revenue') ? 'active' : '' }}">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                             <span>Thống kê doanh thu</span>
                         </a>
-                        <a href="{{ route('le-tan.dashboard') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.reports.appointments') ? 'active' : '' }}">
+                        <a href="{{ route('le-tan.reports.appointments') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.reports.appointments') ? 'active' : '' }}">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                             <span>Thống kê lịch hẹn</span>
                         </a>
-                        <a href="{{ route('le-tan.dashboard') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.reports.services') ? 'active' : '' }}">
+                        <a href="{{ route('le-tan.reports.services') }}" class="sidebar-submenu-item {{ request()->routeIs('le-tan.reports.services') ? 'active' : '' }}">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                             <span>Thống kê dịch vụ</span>
                         </a>
                     </div>
-                </div> --}}
+                </div>
+                </x-permission-check>
 
                 <!-- Tài khoản -->
                 {{-- <x-sidebar.section-title title="Tài khoản" />
