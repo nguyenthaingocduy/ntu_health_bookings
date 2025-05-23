@@ -31,8 +31,8 @@ class ReminderController extends Controller
             // Log lỗi
             Log::error('Error in ReminderController@index: ' . $e->getMessage());
 
-            // Trả về view với danh sách rỗng
-            $reminders = collect([]);
+            // Trả về view với paginator rỗng
+            $reminders = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
             return view('le-tan.reminders.index', compact('reminders'))
                 ->with('error', 'Có lỗi xảy ra khi tải danh sách nhắc nhở: ' . $e->getMessage());
         }
@@ -46,7 +46,7 @@ class ReminderController extends Controller
     public function create()
     {
         $appointments = Appointment::with(['customer', 'service'])
-            ->where('status', 'confirmed')
+            ->whereIn('status', ['pending', 'confirmed'])
             ->where('date_appointments', '>=', Carbon::today())
             ->get();
 
@@ -117,7 +117,7 @@ class ReminderController extends Controller
     {
         $reminder = Reminder::findOrFail($id);
         $appointments = Appointment::with(['customer', 'service'])
-            ->where('status', 'confirmed')
+            ->whereIn('status', ['pending', 'confirmed'])
             ->where('date_appointments', '>=', Carbon::today())
             ->get();
 

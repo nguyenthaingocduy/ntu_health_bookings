@@ -113,6 +113,22 @@ Route::prefix('api')->group(function () {
 // Legacy API route for backward compatibility
 Route::get('/api/check-available-slots', [\App\Http\Controllers\Api\TimeSlotController::class, 'checkAvailableSlots']);
 
+// Test route for appointment data
+Route::get('/test-appointment-data/{id}', function ($id) {
+    $appointment = \App\Models\Appointment::with(['customer', 'service'])->findOrFail($id);
+
+    return response()->json([
+        'id' => $appointment->id,
+        'promotion_code' => $appointment->promotion_code,
+        'final_price' => $appointment->final_price,
+        'discount_amount' => $appointment->discount_amount,
+        'direct_discount_percent' => $appointment->direct_discount_percent,
+        'service_price' => $appointment->service->price ?? null,
+        'customer_name' => $appointment->customer->first_name . ' ' . $appointment->customer->last_name,
+        'created_at' => $appointment->created_at,
+    ]);
+});
+
 
 
 

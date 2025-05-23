@@ -32,7 +32,7 @@
 
                 <div class="mb-6">
                     <label for="appointment_id" class="block text-sm font-medium text-gray-700 mb-2">Chọn lịch hẹn <span class="text-red-500">*</span></label>
-                    <select id="appointment_id" name="appointment_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md @error('appointment_id') border-red-500 @enderror" required>
+                    <select id="appointment_id" name="appointment_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-gray-500 focus:ring-gray-500 sm:text-sm rounded-md @error('appointment_id') border-red-500 @enderror" required>
                         <option value="">-- Chọn lịch hẹn --</option>
                         @foreach($appointments as $appointment)
                             <option value="{{ $appointment->id }}" {{ old('appointment_id') == $appointment->id ? 'selected' : '' }}>
@@ -56,7 +56,7 @@
                 <div class="mb-6">
                     <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Số tiền <span class="text-red-500">*</span></label>
                     <div class="mt-1 relative rounded-md shadow-sm">
-                        <input type="number" name="amount" id="amount" class=" w-full px-4 py-2 border border-gray-300 block pl-3 pr-12 rounded-lg focus:ring-2 focus:ring-gray-500 @error('amount') border-red-500 @enderror" placeholder="0" value="{{ old('amount') }}" required>
+                        <input type="number" name="amount" id="amount" class=" w-full px-4 py-2 border border-gray-300 block pl-3 pr-12 rounded-lg focus:ring-gray-500 focus:ring-gray-500 @error('amount') border-red-500 @enderror" placeholder="0" value="{{ old('amount') }}" required>
                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                             <span class="text-gray-500 sm:text-sm">
                                 VNĐ
@@ -71,7 +71,7 @@
 
                 <div class="mb-6">
                     <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-2">Phương thức thanh toán <span class="text-red-500">*</span></label>
-                    <select id="payment_method" name="payment_method" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md @error('payment_method') border-red-500 @enderror" required>
+                    <select id="payment_method" name="payment_method" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-gray-500 focus:ring-gray-500 sm:text-sm rounded-md @error('payment_method') border-red-500 @enderror" required>
                         <option value="cash" {{ old('payment_method') == 'cash' ? 'selected' : '' }}>Tiền mặt</option>
                         <option value="credit_card" {{ old('payment_method') == 'credit_card' ? 'selected' : '' }}>Thẻ tín dụng</option>
                         <option value="bank_transfer" {{ old('payment_method') == 'bank_transfer' ? 'selected' : '' }}>Chuyển khoản</option>
@@ -83,7 +83,7 @@
 
                 <div class="mb-6">
                     <label for="payment_status" class="block text-sm font-medium text-gray-700 mb-2">Trạng thái thanh toán <span class="text-red-500">*</span></label>
-                    <select id="payment_status" name="payment_status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md @error('payment_status') border-red-500 @enderror" required>
+                    <select id="payment_status" name="payment_status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-gray-500 focus:ring-gray-500 sm:text-sm rounded-md @error('payment_status') border-red-500 @enderror" required>
                         <option value="completed" {{ old('payment_status') == 'completed' ? 'selected' : '' }}>Hoàn thành</option>
                         <option value="pending" {{ old('payment_status') == 'pending' ? 'selected' : '' }}>Đang xử lý</option>
                         <option value="failed" {{ old('payment_status') == 'failed' ? 'selected' : '' }}>Thất bại</option>
@@ -95,7 +95,7 @@
 
                 <div class="mb-6">
                     <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Ghi chú</label>
-                    <textarea id="notes" name="notes" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 @error('notes') border-red-500 @enderror" placeholder="Nhập ghi chú nếu có">{{ old('notes') }}</textarea>
+                    <textarea id="notes" name="notes" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-gray-500 focus:ring-gray-500 @error('notes') border-red-500 @enderror" placeholder="Nhập ghi chú nếu có">{{ old('notes') }}</textarea>
                     @error('notes')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror

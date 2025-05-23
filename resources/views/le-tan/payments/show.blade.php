@@ -113,13 +113,13 @@
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <div class="grid grid-cols-2 gap-4">
                             <div class="text-sm font-medium text-gray-500">Họ tên:</div>
-                            <div class="text-sm text-gray-900">{{ $payment->customer->full_name ?? 'N/A' }}</div>
+                            <div class="text-sm text-gray-900">{{ $payment->user->full_name ?? 'N/A' }}</div>
 
                             <div class="text-sm font-medium text-gray-500">Email:</div>
-                            <div class="text-sm text-gray-900">{{ $payment->customer->email ?? 'N/A' }}</div>
+                            <div class="text-sm text-gray-900">{{ $payment->user->email ?? 'N/A' }}</div>
 
                             <div class="text-sm font-medium text-gray-500">Số điện thoại:</div>
-                            <div class="text-sm text-gray-900">{{ $payment->customer->phone ?? 'N/A' }}</div>
+                            <div class="text-sm text-gray-900">{{ $payment->user->phone ?? 'N/A' }}</div>
                         </div>
                     </div>
 
@@ -282,15 +282,15 @@
                 <table class="info-table">
                     <tr>
                         <th>Họ tên:</th>
-                        <td>{{ $payment->customer->full_name ?? 'N/A' }}</td>
+                        <td>{{ $payment->user->full_name ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <th>Email:</th>
-                        <td>{{ $payment->customer->email ?? 'N/A' }}</td>
+                        <td>{{ $payment->user->email ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <th>Số điện thoại:</th>
-                        <td>{{ $payment->customer->phone ?? 'N/A' }}</td>
+                        <td>{{ $payment->user->phone ?? 'N/A' }}</td>
                     </tr>
                 </table>
 
@@ -325,7 +325,7 @@
                 <div class="footer">
                     <p>Người thanh toán</p>
                     <br><br><br>
-                    <p>{{ $payment->customer->full_name ?? 'N/A' }}</p>
+                    <p>{{ $payment->user->full_name ?? 'N/A' }}</p>
                 </div>
             </body>
             </html>

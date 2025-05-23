@@ -151,6 +151,11 @@ class AppointmentController extends Controller
                 $pricingService = new PricingService();
                 $priceDetails = $pricingService->calculateFinalPrice($service, $promotionCode, Auth::user());
 
+                // Kiểm tra xem mã khuyến mãi có hợp lệ không
+                if (!empty($promotionCode) && isset($priceDetails['discounts']['promotion_code']['error'])) {
+                    return back()->withInput()->with('error', $priceDetails['discounts']['promotion_code']['error']);
+                }
+
                 // Lấy các giá trị từ kết quả tính toán
                 $originalPrice = $priceDetails['original_price'];
                 $finalPrice = $priceDetails['final_price'];

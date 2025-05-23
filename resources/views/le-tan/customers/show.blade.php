@@ -65,10 +65,7 @@
                                 @endif
                             </p>
                         </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Ngày sinh</p>
-                            <p class="text-sm text-gray-900">{{ $customer->date_of_birth ? \Carbon\Carbon::parse($customer->date_of_birth)->format('d/m/Y') : 'N/A' }}</p>
-                        </div>
+
                         <div>
                             <p class="text-sm font-medium text-gray-500">Địa chỉ</p>
                             <p class="text-sm text-gray-900">{{ $customer->address ?? 'N/A' }}</p>
@@ -121,7 +118,7 @@
                                 @foreach($customer->appointments as $appointment)
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ $appointment->code ?? 'N/A' }}
+                                        {{ $appointment->id }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {{ $appointment->service->name ?? 'N/A' }}

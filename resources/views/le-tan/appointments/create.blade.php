@@ -74,22 +74,24 @@
                     </div>
 
                     <div>
-                        <label for="time_slot_id" class="block text-sm font-medium text-gray-700 mb-2">Giờ hẹn <span class="text-red-500">*</span></label>
-                        <select id="time_slot_id" name="time_slot_id" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('time_slot_id') border-red-500 @enderror" required>
+                        <label for="time_appointments_id" class="block text-sm font-medium text-gray-700 mb-2">Giờ hẹn <span class="text-red-500">*</span></label>
+                        <select id="time_appointments_id" name="time_appointments_id" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('time_appointments_id') border-red-500 @enderror" required>
                             <option value="">-- Chọn giờ hẹn --</option>
                             @foreach($timeSlots as $timeSlot)
-                                <option value="{{ $timeSlot->id }}" {{ old('time_slot_id') == $timeSlot->id ? 'selected' : '' }}>
-                                    @if($timeSlot->start_time instanceof \DateTime)
-                                        {{ $timeSlot->start_time->format('H:i') }} - {{ $timeSlot->end_time->format('H:i') }}
-                                    @elseif(is_string($timeSlot->start_time))
-                                        {{ \Carbon\Carbon::parse($timeSlot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($timeSlot->end_time)->format('H:i') }}
+                                <option value="{{ $timeSlot->id }}" {{ old('time_appointments_id') == $timeSlot->id ? 'selected' : '' }}>
+                                    @if($timeSlot->started_time)
+                                        {{ \Carbon\Carbon::parse($timeSlot->started_time)->format('H:i') }}
+                                        @if($timeSlot->ended_time)
+                                            - {{ \Carbon\Carbon::parse($timeSlot->ended_time)->format('H:i') }}
+                                        @endif
+                                        ({{ $timeSlot->capacity }} chỗ)
                                     @else
-                                        {{ $timeSlot->start_time }} - {{ $timeSlot->end_time }}
+                                        {{ $timeSlot->started_time }}
                                     @endif
                                 </option>
                             @endforeach
                         </select>
-                        @error('time_slot_id')
+                        @error('time_appointments_id')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
@@ -172,12 +174,12 @@
     // Hàm kiểm tra tính khả dụng của nhân viên kỹ thuật
     function checkTechnicianAvailability() {
         const selectedDate = document.getElementById('appointment_date').value;
-        const selectedTimeSlot = document.getElementById('time_slot_id').value;
+        const selectedTimeSlot = document.getElementById('time_appointments_id').value;
         const selectedTechnician = document.getElementById('employee_id').value;
 
         if (selectedDate && selectedTimeSlot && selectedTechnician) {
             // Gọi API để kiểm tra tính khả dụng của nhân viên
-            fetch(`/api/check-technician-availability?date=${selectedDate}&time_slot_id=${selectedTimeSlot}&technician_id=${selectedTechnician}`)
+            fetch(`/api/check-technician-availability?date=${selectedDate}&time_appointments_id=${selectedTimeSlot}&technician_id=${selectedTechnician}`)
                 .then(response => response.json())
                 .then(data => {
                     if (!data.available) {
@@ -191,65 +193,16 @@
         }
     }
 
-    // Khi chọn ngày, kiểm tra và lọc các khung giờ phù hợp
+    // Khi chọn ngày, kiểm tra tính khả dụng của nhân viên kỹ thuật
     document.getElementById('appointment_date').addEventListener('change', function() {
-        const selectedDate = this.value;
-        let dayOfWeek = new Date(selectedDate).getDay(); // 0 = Chủ nhật, 1 = Thứ 2, ...
-
-        // Chuyển đổi 0 (Chủ nhật) thành 7 để phù hợp với hệ thống của chúng ta
-        if (dayOfWeek === 0) dayOfWeek = 7;
-
-        // Gọi API để lấy các khung giờ còn trống cho ngày đã chọn
-        fetch(`/api/time-slots?day=${dayOfWeek}&date=${selectedDate}`)
-            .then(response => response.json())
-            .then(data => {
-                const timeSlotSelect = document.getElementById('time_slot_id');
-                const currentValue = timeSlotSelect.value;
-
-                // Xóa tất cả các option hiện tại
-                timeSlotSelect.innerHTML = '<option value="">-- Chọn giờ hẹn --</option>';
-
-                // Thêm các option mới
-                data.forEach(slot => {
-                    const option = document.createElement('option');
-                    option.value = slot.id;
-
-                    // Hiển thị thông tin về số lượng chỗ trống
-                    let slotText = `${slot.start_time} - ${slot.end_time}`;
-
-                    // Thêm thông tin về số lượng chỗ trống
-                    if (slot.hasOwnProperty('available_slots')) {
-                        slotText += ` (${slot.available_slots}/${slot.max_appointments} chỗ trống)`;
-
-                        // Nếu đã đầy, thêm thông báo và vô hiệu hóa option
-                        if (slot.is_full) {
-                            slotText += ' - ĐÃ ĐẦY';
-                            option.disabled = true;
-                        }
-                    }
-
-                    option.textContent = slotText;
-
-                    // Nếu option này trùng với giá trị đã chọn trước đó, đánh dấu là selected
-                    if (slot.id === currentValue && !slot.is_full) {
-                        option.selected = true;
-                    }
-
-                    timeSlotSelect.appendChild(option);
-                });
-
-                // Kiểm tra lại tính khả dụng của nhân viên kỹ thuật
-                if (document.getElementById('employee_id').value) {
-                    checkTechnicianAvailability();
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching time slots:', error);
-            });
+        // Kiểm tra lại tính khả dụng của nhân viên kỹ thuật nếu đã chọn
+        if (document.getElementById('employee_id').value) {
+            checkTechnicianAvailability();
+        }
     });
 
     // Khi chọn khung giờ, kiểm tra tính khả dụng của nhân viên kỹ thuật
-    document.getElementById('time_slot_id').addEventListener('change', function() {
+    document.getElementById('time_appointments_id').addEventListener('change', function() {
         if (document.getElementById('employee_id').value) {
             checkTechnicianAvailability();
         }

@@ -93,3 +93,15 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserRole::class.':Reception
 
 // Redirect từ /receptionist sang /le-tan/dashboard
 Route::redirect('/receptionist', '/le-tan/dashboard');
+
+// Test route for debugging
+Route::get('/test-customers', function() {
+    $customers = \App\Models\User::with('role')
+        ->whereHas('role', function($query) {
+            $query->where('name', 'Customer');
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
+
+    return view('le-tan.customers.index', compact('customers'));
+})->name('test.customers');

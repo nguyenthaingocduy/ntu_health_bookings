@@ -18,7 +18,8 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customers = User::whereHas('role', function($query) {
+        $customers = User::with('role')
+            ->whereHas('role', function($query) {
                 $query->where('name', 'Customer');
             })
             ->orderBy('created_at', 'desc')
@@ -52,7 +53,6 @@ class CustomerController extends Controller
             'phone' => 'required|string|max:20',
             'password' => 'required|string|min:8|confirmed',
             'address' => 'nullable|string|max:255',
-            'date_of_birth' => 'nullable|date|before:today',
             'gender' => 'required|in:male,female,other',
         ]);
 
@@ -68,10 +68,9 @@ class CustomerController extends Controller
         $customer->phone = $request->phone;
         $customer->password = Hash::make($request->password);
         $customer->address = $request->address;
-        $customer->date_of_birth = $request->date_of_birth;
         $customer->gender = $request->gender;
         $customer->role_id = $customerRole->id;
-        $customer->created_by = Auth::id();
+
         $customer->save();
 
         return redirect()->route('le-tan.customers.index')
@@ -87,7 +86,7 @@ class CustomerController extends Controller
     public function show($id)
     {
         $customer = User::with(['appointments' => function($query) {
-                $query->orderBy('date_appointments', 'desc');
+                $query->with('service')->orderBy('date_appointments', 'desc');
             }])
             ->findOrFail($id);
 
@@ -121,22 +120,26 @@ class CustomerController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,'.$id,
             'phone' => 'required|string|max:20',
             'address' => 'nullable|string|max:255',
-            'date_of_birth' => 'nullable|date|before:today',
             'gender' => 'required|in:male,female,other',
         ]);
 
-        $customer = User::findOrFail($id);
-        $customer->first_name = $request->first_name;
-        $customer->last_name = $request->last_name;
-        $customer->email = $request->email;
-        $customer->phone = $request->phone;
-        $customer->address = $request->address;
-        $customer->date_of_birth = $request->date_of_birth;
-        $customer->gender = $request->gender;
-        $customer->updated_by = Auth::id();
-        $customer->save();
+        try {
+            $customer = User::findOrFail($id);
+            $customer->first_name = $request->first_name;
+            $customer->last_name = $request->last_name;
+            $customer->email = $request->email;
+            $customer->phone = $request->phone;
+            $customer->address = $request->address;
+            $customer->gender = $request->gender;
 
-        return redirect()->route('le-tan.customers.index')
-            ->with('success', 'Thông tin khách hàng đã được cập nhật thành công.');
+            $customer->save();
+
+            return redirect()->route('le-tan.customers.index')
+                ->with('success', 'Thông tin khách hàng đã được cập nhật thành công.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Có lỗi xảy ra khi cập nhật thông tin khách hàng: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 }

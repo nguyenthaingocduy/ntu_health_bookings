@@ -18,7 +18,7 @@ class PaymentController extends Controller
      */
     public function index()
     {
-        $payments = Payment::with(['appointment', 'customer', 'appointment.service'])
+        $payments = Payment::with(['appointment', 'user', 'appointment.service'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -84,7 +84,7 @@ class PaymentController extends Controller
 
         $payment = new Payment();
         $payment->appointment_id = $request->appointment_id;
-        $payment->customer_id = $appointment->customer_id;
+        $payment->user_id = $appointment->customer_id; // Use user_id instead of customer_id
         $payment->amount = $amount; // Sử dụng giá đã tính toán
         $payment->payment_method = $request->payment_method;
         $payment->payment_status = $request->payment_status;
@@ -110,7 +110,7 @@ class PaymentController extends Controller
      */
     public function show($id)
     {
-        $payment = Payment::with(['appointment', 'customer', 'appointment.service'])
+        $payment = Payment::with(['appointment', 'user', 'appointment.service'])
             ->findOrFail($id);
 
         return view('le-tan.payments.show', compact('payment'));

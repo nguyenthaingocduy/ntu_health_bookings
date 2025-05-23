@@ -49,7 +49,7 @@ class AppointmentController extends Controller
         $today = now();
         $dayOfWeek = $today->dayOfWeek == 0 ? 7 : $today->dayOfWeek; // Chuyển đổi 0 (Chủ nhật) thành 7
 
-        // Lấy các khung giờ có sẵn
+        // Lấy các khung giờ có sẵn từ Time model
         $timeSlots = \App\Models\Time::orderBy('started_time')
             ->get();
 
@@ -105,7 +105,6 @@ class AppointmentController extends Controller
         $appointment->time_appointments_id = $request->time_appointments_id;
         $appointment->status = 'pending';
         $appointment->notes = $request->notes;
-        $appointment->created_by = Auth::id();
 
         // Phân công nhân viên kỹ thuật nếu được chọn
         if ($request->filled('employee_id')) {
@@ -330,7 +329,6 @@ class AppointmentController extends Controller
         $appointment->time_appointments_id = $request->time_appointments_id;
         $appointment->status = $request->status;
         $appointment->notes = $request->notes;
-        $appointment->updated_by = Auth::id();
 
         // Cập nhật nhân viên kỹ thuật nếu được chọn
         if ($request->filled('employee_id')) {
@@ -397,7 +395,6 @@ class AppointmentController extends Controller
             // Cập nhật trạng thái và nhân viên phục vụ
             $appointment->status = 'confirmed';
             $appointment->employee_id = $request->employee_id;
-            $appointment->updated_by = Auth::id();
             $appointment->save();
 
             // Tạo lịch làm việc cho nhân viên kỹ thuật
@@ -462,7 +459,6 @@ class AppointmentController extends Controller
 
             // Cập nhật trạng thái lịch hẹn
             $appointment->status = 'cancelled';
-            $appointment->updated_by = Auth::id();
             $appointment->cancellation_reason = 'Hủy bởi lễ tân';
             $appointment->save();
 
@@ -491,7 +487,6 @@ class AppointmentController extends Controller
         try {
             // Cập nhật trạng thái lịch hẹn thành hoàn thành
             $appointment->status = 'completed';
-            $appointment->updated_by = Auth::id();
             $appointment->save();
 
             return redirect()->route('le-tan.appointments.index')

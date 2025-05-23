@@ -13,7 +13,7 @@ class PricingService
 {
     /**
      * Tính giá dịch vụ sau khi áp dụng tất cả các loại giảm giá
-     * 
+     *
      * @param Service $service Dịch vụ cần tính giá
      * @param string|null $promotionCode Mã khuyến mãi (nếu có)
      * @param User|null $user Người dùng (nếu không cung cấp, sẽ lấy người dùng hiện tại)
@@ -25,11 +25,11 @@ class PricingService
         if (!$user && Auth::check()) {
             $user = Auth::user();
         }
-        
+
         // Giá gốc
         $originalPrice = $service->price;
         $finalPrice = $originalPrice;
-        
+
         // Khởi tạo các biến theo dõi giảm giá
         $discounts = [
             'service_promotion' => [
@@ -51,7 +51,7 @@ class PricingService
                 'name' => 'Loại khách hàng'
             ]
         ];
-        
+
         // 1. Áp dụng khuyến mãi dịch vụ (nếu có)
         if ($service->hasActivePromotion()) {
             $servicePromotion = $service->promotions()
@@ -59,10 +59,10 @@ class PricingService
                 ->where('start_date', '<=', now())
                 ->where('end_date', '>=', now())
                 ->first();
-                
+
             if ($servicePromotion) {
                 $discounts['service_promotion']['applied'] = true;
-                
+
                 if ($servicePromotion->discount_type == 'percentage') {
                     $discounts['service_promotion']['percentage'] = $servicePromotion->discount_value;
                     $discounts['service_promotion']['amount'] = $originalPrice * ($servicePromotion->discount_value / 100);
@@ -70,11 +70,11 @@ class PricingService
                     $discounts['service_promotion']['amount'] = $servicePromotion->discount_value;
                     $discounts['service_promotion']['percentage'] = round(($servicePromotion->discount_value / $originalPrice) * 100, 2);
                 }
-                
+
                 $finalPrice -= $discounts['service_promotion']['amount'];
             }
         }
-        
+
         // 2. Áp dụng mã khuyến mãi (nếu có)
         if ($promotionCode) {
             $promotion = Promotion::where('code', strtoupper($promotionCode))
@@ -82,43 +82,69 @@ class PricingService
                 ->where('start_date', '<=', now())
                 ->where('end_date', '>=', now())
                 ->first();
-                
+
             if ($promotion) {
-                $discounts['promotion_code']['applied'] = true;
-                
-                if ($promotion->discount_type == 'percentage') {
-                    $discounts['promotion_code']['percentage'] = $promotion->discount_value;
-                    $discounts['promotion_code']['amount'] = $originalPrice * ($promotion->discount_value / 100);
-                } else {
-                    $discounts['promotion_code']['amount'] = $promotion->discount_value;
-                    $discounts['promotion_code']['percentage'] = round(($promotion->discount_value / $originalPrice) * 100, 2);
+                // Kiểm tra giới hạn sử dụng
+                $canUse = true;
+                if ($promotion->usage_limit !== null && $promotion->usage_count >= $promotion->usage_limit) {
+                    $canUse = false;
+                    Log::info('Mã khuyến mãi đã hết lượt sử dụng', [
+                        'code' => $promotionCode,
+                        'usage_count' => $promotion->usage_count,
+                        'usage_limit' => $promotion->usage_limit
+                    ]);
                 }
-                
-                $finalPrice -= $discounts['promotion_code']['amount'];
+
+                if ($canUse) {
+                    $discounts['promotion_code']['applied'] = true;
+
+                    if ($promotion->discount_type == 'percentage') {
+                        $discounts['promotion_code']['percentage'] = $promotion->discount_value;
+                        $discounts['promotion_code']['amount'] = $originalPrice * ($promotion->discount_value / 100);
+                    } else {
+                        $discounts['promotion_code']['amount'] = $promotion->discount_value;
+                        $discounts['promotion_code']['percentage'] = round(($promotion->discount_value / $originalPrice) * 100, 2);
+                    }
+
+                    $finalPrice -= $discounts['promotion_code']['amount'];
+                } else {
+                    // Mã khuyến mãi đã hết lượt sử dụng
+                    $discounts['promotion_code']['applied'] = false;
+                    $discounts['promotion_code']['error'] = 'Mã khuyến mãi đã hết lượt sử dụng';
+                }
+            } else {
+                // Mã khuyến mãi không tồn tại hoặc không hợp lệ
+                $discounts['promotion_code']['applied'] = false;
+                $discounts['promotion_code']['error'] = 'Mã khuyến mãi không hợp lệ hoặc đã hết hạn';
+
+                Log::info('Mã khuyến mãi không hợp lệ', [
+                    'code' => $promotionCode,
+                    'message' => 'Không tìm thấy mã khuyến mãi hoặc đã hết hạn'
+                ]);
             }
         }
-        
+
         // 3. Áp dụng giảm giá theo loại khách hàng (nếu có)
         if ($user && $user->type_id) {
             $customerType = CustomerType::find($user->type_id);
-            
+
             if ($customerType && $customerType->is_active && $customerType->discount_percentage > 0) {
                 $discounts['customer_type']['applied'] = true;
                 $discounts['customer_type']['percentage'] = $customerType->discount_percentage;
                 $discounts['customer_type']['amount'] = $originalPrice * ($customerType->discount_percentage / 100);
                 $discounts['customer_type']['name'] = "Khách hàng {$customerType->type_name}";
-                
+
                 $finalPrice -= $discounts['customer_type']['amount'];
             }
         }
-        
+
         // Đảm bảo giá không âm
         $finalPrice = max(0, $finalPrice);
-        
+
         // Tính tổng giảm giá
         $totalDiscountAmount = $originalPrice - $finalPrice;
         $totalDiscountPercentage = $originalPrice > 0 ? round(($totalDiscountAmount / $originalPrice) * 100, 2) : 0;
-        
+
         return [
             'original_price' => $originalPrice,
             'final_price' => $finalPrice,

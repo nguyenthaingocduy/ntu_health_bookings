@@ -15,12 +15,12 @@ return new class extends Migration
         if (!Schema::hasTable('reminders')) {
             Schema::create('reminders', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedBigInteger('appointment_id');
+                $table->string('appointment_id'); // Changed to string to match appointments.id (UUID)
                 $table->dateTime('reminder_date');
                 $table->text('message');
                 $table->enum('reminder_type', ['email', 'sms', 'both'])->default('email');
                 $table->enum('status', ['pending', 'sent', 'failed'])->default('pending');
-                $table->unsignedBigInteger('created_by');
+                $table->string('created_by'); // Changed to string to match users.id (UUID)
                 $table->dateTime('sent_at')->nullable();
                 $table->timestamps();
                 $table->softDeletes();

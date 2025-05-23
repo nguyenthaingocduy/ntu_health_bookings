@@ -83,10 +83,10 @@
                                 <div class="flex items-center">
                                     <div class="ml-4">
                                         <div class="text-sm font-medium text-gray-900">
-                                            {{ $payment->customer->full_name ?? 'N/A' }}
+                                            {{ $payment->user->full_name ?? 'N/A' }}
                                         </div>
                                         <div class="text-sm text-gray-500">
-                                            {{ $payment->customer->email ?? 'N/A' }}
+                                            {{ $payment->user->email ?? 'N/A' }}
                                         </div>
                                     </div>
                                 </div>

@@ -9,6 +9,7 @@ use App\Http\Controllers\NVKT\CustomerController;
 use App\Http\Controllers\NVKT\WorkStatusController;
 use App\Http\Controllers\NVKT\ReportController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['auth', \App\Http\Middleware\CheckUserRole::class.':Technician'])->prefix('nvkt')->name('nvkt.')->group(function () {
+Route::middleware(['auth'])->prefix('nvkt')->name('nvkt.')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -54,6 +55,61 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserRole::class.':Technicia
 
     // Work Status
     Route::get('/work-status', [WorkStatusController::class, 'index'])->name('work-status.index');
+    Route::get('/work-status-test', function() {
+        try {
+            $userId = Auth::id();
+
+            $pendingAppointments = \App\Models\Appointment::with(['customer', 'service', 'timeAppointment'])
+                ->where('employee_id', $userId)
+                ->whereIn('status', ['confirmed', 'pending'])
+                ->orderBy('date_appointments')
+                ->orderBy('time_appointments_id')
+                ->paginate(10);
+
+            $inProgressAppointments = \App\Models\Appointment::with(['customer', 'service', 'timeAppointment'])
+                ->where('employee_id', $userId)
+                ->where('status', 'in_progress')
+                ->orderBy('date_appointments')
+                ->orderBy('time_appointments_id')
+                ->paginate(10);
+
+            return view('nvkt.work-status.test', compact('pendingAppointments', 'inProgressAppointments'));
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()]);
+        }
+    })->name('work-status.test');
+
+    Route::get('/create-test-appointment', function() {
+        try {
+            $employee = Auth::user();
+            $customer = \App\Models\User::where('role_id', '!=', $employee->role_id)->first();
+            $service = \App\Models\Service::first();
+            $timeSlot = \App\Models\Time::first();
+
+            if (!$customer || !$service || !$timeSlot) {
+                return response()->json(['error' => 'Missing required data']);
+            }
+
+            $appointment = \App\Models\Appointment::create([
+                'customer_id' => $customer->id,
+                'employee_id' => $employee->id,
+                'service_id' => $service->id,
+                'time_appointments_id' => $timeSlot->id,
+                'date_appointments' => \Carbon\Carbon::tomorrow(),
+                'status' => 'confirmed',
+                'notes' => 'Test appointment for work status',
+                'appointment_code' => 'TEST-' . time()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'appointment_id' => $appointment->id,
+                'message' => 'Test appointment created successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()]);
+        }
+    });
     Route::put('/work-status/{id}', [WorkStatusController::class, 'update'])->name('work-status.update');
 
     // Reports
