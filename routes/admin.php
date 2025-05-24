@@ -46,6 +46,8 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix
     Route::post('appointments/{id}/confirm', [AppointmentController::class, 'confirm'])->name('appointments.confirm');
     Route::post('appointments/{id}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::post('appointments/{id}/complete', [AppointmentController::class, 'complete'])->name('appointments.complete');
+    Route::post('appointments/bulk-delete', [AppointmentController::class, 'bulkDelete'])->name('appointments.bulk-delete');
+    Route::get('appointments/export', [AppointmentController::class, 'export'])->name('appointments.export');
 
     // Health Check-up Management
     Route::prefix('health-checkups')->name('health-checkups.')->group(function () {

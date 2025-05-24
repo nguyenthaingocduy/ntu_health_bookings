@@ -2340,3 +2340,551 @@ public function sendMonthlyReminders()
         ->dispatch();
 }
 ```
+
+### **📊 GIẢI THÍCH EVENT-DRIVEN ARCHITECTURE CHI TIẾT**
+
+#### **1. Events và Listeners System**
+```php
+// Event Classes - Định nghĩa các sự kiện
+class AppointmentBooked
+{
+    public function __construct(
+        public Appointment $appointment,
+        public array $metadata = []
+    ) {}
+}
+
+class AppointmentCancelled
+{
+    public function __construct(
+        public Appointment $appointment,
+        public string $reason,
+        public ?User $cancelledBy = null
+    ) {}
+}
+
+class ServiceUpdated
+{
+    public function __construct(
+        public Service $service,
+        public array $oldData,
+        public array $newData
+    ) {}
+}
+
+// Listener Classes - Xử lý sự kiện
+class SendBookingConfirmation
+{
+    public function handle(AppointmentBooked $event)
+    {
+        $appointment = $event->appointment;
+
+        // Gửi email cho khách hàng
+        Mail::to($appointment->user)->send(
+            new AppointmentConfirmationMail($appointment)
+        );
+
+        // Gửi email cho staff
+        if ($appointment->staff) {
+            Mail::to($appointment->staff)->send(
+                new StaffAppointmentNotificationMail($appointment)
+            );
+        }
+
+        // Log activity
+        ActivityLog::create([
+            'user_id' => $appointment->user_id,
+            'action' => 'appointment_booked',
+            'description' => "Đặt lịch {$appointment->code}",
+            'metadata' => $event->metadata
+        ]);
+    }
+}
+
+class UpdateAppointmentStatistics
+{
+    public function handle(AppointmentBooked $event)
+    {
+        $appointment = $event->appointment;
+        $date = $appointment->date;
+
+        // Cập nhật thống kê ngày
+        DailyStatistic::updateOrCreate(
+            ['date' => $date],
+            [
+                'total_appointments' => DB::raw('total_appointments + 1'),
+                'total_revenue' => DB::raw("total_revenue + {$appointment->total_amount}"),
+                'updated_at' => now()
+            ]
+        );
+
+        // Cập nhật thống kê dịch vụ
+        foreach ($appointment->services as $service) {
+            ServiceStatistic::updateOrCreate(
+                ['service_id' => $service->id, 'date' => $date],
+                [
+                    'booking_count' => DB::raw('booking_count + 1'),
+                    'revenue' => DB::raw("revenue + {$service->price}"),
+                    'updated_at' => now()
+                ]
+            );
+        }
+    }
+}
+
+class ClearRelatedCache
+{
+    public function handle($event)
+    {
+        // Xóa cache liên quan dựa trên loại event
+        if ($event instanceof AppointmentBooked || $event instanceof AppointmentCancelled) {
+            Cache::tags(['appointments', 'statistics'])->flush();
+            Cache::forget("user_appointments_{$event->appointment->user_id}");
+        }
+
+        if ($event instanceof ServiceUpdated) {
+            Cache::tags(['services'])->flush();
+            Cache::forget("service_{$event->service->id}");
+        }
+    }
+}
+
+// Event Service Provider - Đăng ký events
+class EventServiceProvider extends ServiceProvider
+{
+    protected $listen = [
+        AppointmentBooked::class => [
+            SendBookingConfirmation::class,
+            UpdateAppointmentStatistics::class,
+            ClearRelatedCache::class,
+            CreateNotification::class,
+        ],
+        AppointmentCancelled::class => [
+            SendCancellationNotification::class,
+            RestoreSlotAvailability::class,
+            UpdateCancellationStatistics::class,
+            ClearRelatedCache::class,
+        ],
+        ServiceUpdated::class => [
+            ClearRelatedCache::class,
+            NotifyAffectedAppointments::class,
+        ],
+    ];
+}
+
+// Sử dụng Events trong Controllers
+class AppointmentController extends Controller
+{
+    public function store(Request $request)
+    {
+        $appointment = DB::transaction(function () use ($request) {
+            $appointment = $this->bookAppointment($request->validated());
+
+            // Fire event với metadata
+            event(new AppointmentBooked($appointment, [
+                'source' => 'web',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]));
+
+            return $appointment;
+        });
+
+        return response()->json([
+            'message' => 'Đặt lịch thành công',
+            'appointment' => $appointment->load(['services', 'timeSlot'])
+        ]);
+    }
+
+    public function cancel(Request $request, Appointment $appointment)
+    {
+        $this->authorize('cancel', $appointment);
+
+        $appointment->update(['status' => 'cancelled']);
+
+        // Fire cancellation event
+        event(new AppointmentCancelled(
+            $appointment,
+            $request->input('reason', 'Khách hàng hủy'),
+            auth()->user()
+        ));
+
+        return response()->json(['message' => 'Hủy lịch thành công']);
+    }
+}
+```
+
+#### **2. Observer Pattern cho Model Events**
+```php
+// Model Observer
+class AppointmentObserver
+{
+    public function creating(Appointment $appointment)
+    {
+        // Auto-generate appointment code
+        $appointment->code = $this->generateAppointmentCode();
+
+        // Set default values
+        $appointment->status = 'pending';
+        $appointment->created_by = auth()->id();
+    }
+
+    public function created(Appointment $appointment)
+    {
+        // Log creation
+        Log::info('Appointment created', [
+            'appointment_id' => $appointment->id,
+            'user_id' => $appointment->user_id,
+            'created_by' => auth()->id()
+        ]);
+    }
+
+    public function updating(Appointment $appointment)
+    {
+        // Track status changes
+        if ($appointment->isDirty('status')) {
+            $oldStatus = $appointment->getOriginal('status');
+            $newStatus = $appointment->status;
+
+            // Log status change
+            AppointmentStatusHistory::create([
+                'appointment_id' => $appointment->id,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'changed_by' => auth()->id(),
+                'changed_at' => now(),
+                'reason' => request()->input('status_change_reason')
+            ]);
+        }
+    }
+
+    public function updated(Appointment $appointment)
+    {
+        // Clear cache
+        Cache::forget("appointment_{$appointment->id}");
+        Cache::tags(['appointments'])->flush();
+    }
+
+    public function deleting(Appointment $appointment)
+    {
+        // Prevent deletion of completed appointments
+        if ($appointment->status === 'completed') {
+            throw new \Exception('Không thể xóa lịch hẹn đã hoàn thành');
+        }
+    }
+
+    private function generateAppointmentCode(): string
+    {
+        $today = today();
+        $dailyCount = Appointment::whereDate('created_at', $today)->count();
+
+        return 'APT' . $today->format('Ymd') . str_pad($dailyCount + 1, 4, '0', STR_PAD_LEFT);
+    }
+}
+
+// Đăng ký Observer
+class AppServiceProvider extends ServiceProvider
+{
+    public function boot()
+    {
+        Appointment::observe(AppointmentObserver::class);
+        Service::observe(ServiceObserver::class);
+        User::observe(UserObserver::class);
+    }
+}
+```
+
+### **🧪 GIẢI THÍCH TESTING STRATEGY CHI TIẾT**
+
+#### **1. Unit Tests - Test từng component riêng lẻ**
+```php
+// Test business logic
+class AppointmentServiceTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_can_calculate_total_amount_with_discounts()
+    {
+        // Arrange
+        $service1 = Service::factory()->create(['price' => 100000]);
+        $service2 = Service::factory()->create(['price' => 150000]);
+        $user = User::factory()->create();
+        $user->customerType()->associate(
+            CustomerType::factory()->create(['discount_percentage' => 10])
+        );
+
+        $appointmentService = new AppointmentService();
+
+        // Act
+        $total = $appointmentService->calculateTotalAmount(
+            [$service1->id, $service2->id],
+            $user
+        );
+
+        // Assert
+        $expectedTotal = (100000 + 150000) * 0.9; // 10% discount
+        $this->assertEquals($expectedTotal, $total);
+    }
+
+    public function test_throws_exception_when_time_slot_unavailable()
+    {
+        // Arrange
+        $timeSlot = TimeSlot::factory()->create(['max_capacity' => 1]);
+        $existingAppointment = Appointment::factory()->create([
+            'time_slot_id' => $timeSlot->id,
+            'date' => '2024-01-15',
+            'status' => 'confirmed'
+        ]);
+
+        $appointmentService = new AppointmentService();
+
+        // Act & Assert
+        $this->expectException(BookingConflictException::class);
+        $appointmentService->bookAppointment([
+            'time_slot_id' => $timeSlot->id,
+            'date' => '2024-01-15',
+            'user_id' => User::factory()->create()->id
+        ]);
+    }
+}
+
+// Test Repository Pattern
+class AppointmentRepositoryTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private AppointmentRepository $repository;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->repository = new AppointmentRepository();
+    }
+
+    public function test_can_find_appointments_by_date_range()
+    {
+        // Arrange
+        $user = User::factory()->create();
+        $appointment1 = Appointment::factory()->create([
+            'user_id' => $user->id,
+            'date' => '2024-01-15'
+        ]);
+        $appointment2 = Appointment::factory()->create([
+            'user_id' => $user->id,
+            'date' => '2024-01-20'
+        ]);
+        $appointment3 = Appointment::factory()->create([
+            'user_id' => $user->id,
+            'date' => '2024-02-01' // Outside range
+        ]);
+
+        // Act
+        $appointments = $this->repository->findByDateRange(
+            Carbon::parse('2024-01-01'),
+            Carbon::parse('2024-01-31')
+        );
+
+        // Assert
+        $this->assertCount(2, $appointments);
+        $this->assertTrue($appointments->contains($appointment1));
+        $this->assertTrue($appointments->contains($appointment2));
+        $this->assertFalse($appointments->contains($appointment3));
+    }
+}
+```
+
+#### **2. Feature Tests - Test complete workflows**
+```php
+class BookingWorkflowTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_user_can_complete_booking_workflow()
+    {
+        // Arrange
+        $user = User::factory()->create();
+        $service = Service::factory()->create(['price' => 100000]);
+        $timeSlot = TimeSlot::factory()->create();
+
+        // Act & Assert - Step 1: View booking page
+        $response = $this->actingAs($user)->get('/booking');
+        $response->assertStatus(200)
+                ->assertSee($service->name)
+                ->assertSee($timeSlot->start_time);
+
+        // Act & Assert - Step 2: Submit booking
+        $response = $this->actingAs($user)->post('/appointments', [
+            'service_ids' => [$service->id],
+            'time_slot_id' => $timeSlot->id,
+            'date' => '2024-01-15',
+            'notes' => 'Test booking'
+        ]);
+
+        $response->assertRedirect('/appointments')
+                ->assertSessionHas('success');
+
+        // Assert database
+        $this->assertDatabaseHas('appointments', [
+            'user_id' => $user->id,
+            'time_slot_id' => $timeSlot->id,
+            'date' => '2024-01-15',
+            'status' => 'pending'
+        ]);
+
+        // Assert pivot table
+        $appointment = Appointment::where('user_id', $user->id)->first();
+        $this->assertTrue($appointment->services->contains($service));
+
+        // Act & Assert - Step 3: View appointment
+        $response = $this->actingAs($user)->get('/appointments');
+        $response->assertStatus(200)
+                ->assertSee($appointment->code)
+                ->assertSee($service->name);
+    }
+
+    public function test_prevents_double_booking()
+    {
+        // Arrange
+        $user1 = User::factory()->create();
+        $user2 = User::factory()->create();
+        $service = Service::factory()->create();
+        $timeSlot = TimeSlot::factory()->create(['max_capacity' => 1]);
+
+        // User 1 books first
+        $this->actingAs($user1)->post('/appointments', [
+            'service_ids' => [$service->id],
+            'time_slot_id' => $timeSlot->id,
+            'date' => '2024-01-15'
+        ]);
+
+        // User 2 tries to book same slot
+        $response = $this->actingAs($user2)->post('/appointments', [
+            'service_ids' => [$service->id],
+            'time_slot_id' => $timeSlot->id,
+            'date' => '2024-01-15'
+        ]);
+
+        // Assert conflict
+        $response->assertStatus(422)
+                ->assertJsonValidationErrors(['time_slot_id']);
+
+        // Assert only one appointment exists
+        $this->assertEquals(1, Appointment::count());
+    }
+}
+
+// Test API endpoints
+class AppointmentApiTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_api_requires_authentication()
+    {
+        $response = $this->getJson('/api/appointments');
+        $response->assertStatus(401);
+    }
+
+    public function test_api_returns_user_appointments()
+    {
+        // Arrange
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token')->plainTextToken;
+        $appointments = Appointment::factory()->count(3)->create(['user_id' => $user->id]);
+
+        // Act
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->getJson('/api/appointments');
+
+        // Assert
+        $response->assertStatus(200)
+                ->assertJsonCount(3, 'data')
+                ->assertJsonStructure([
+                    'data' => [
+                        '*' => ['id', 'code', 'date', 'status', 'services']
+                    ]
+                ]);
+    }
+}
+```
+
+#### **3. Browser Tests với Laravel Dusk**
+```php
+class BookingBrowserTest extends DuskTestCase
+{
+    public function test_user_can_book_appointment_through_ui()
+    {
+        $user = User::factory()->create();
+        $service = Service::factory()->create(['name' => 'Cắt tóc nam']);
+        $timeSlot = TimeSlot::factory()->create(['start_time' => '09:00']);
+
+        $this->browse(function (Browser $browser) use ($user, $service, $timeSlot) {
+            $browser->loginAs($user)
+                    ->visit('/booking')
+                    ->waitFor('.service-card')
+                    ->click('.service-card[data-service-id="' . $service->id . '"]')
+                    ->waitFor('.time-slot-grid')
+                    ->click('.time-slot[data-slot-id="' . $timeSlot->id . '"]')
+                    ->type('date', '2024-01-15')
+                    ->type('notes', 'Cắt tóc ngắn')
+                    ->press('Đặt lịch')
+                    ->waitForText('Đặt lịch thành công')
+                    ->assertSee('Đặt lịch thành công');
+        });
+
+        // Verify in database
+        $this->assertDatabaseHas('appointments', [
+            'user_id' => $user->id,
+            'notes' => 'Cắt tóc ngắn'
+        ]);
+    }
+
+    public function test_real_time_slot_availability_updates()
+    {
+        $user1 = User::factory()->create();
+        $user2 = User::factory()->create();
+        $timeSlot = TimeSlot::factory()->create(['max_capacity' => 1]);
+
+        $this->browse(function (Browser $first, Browser $second) use ($user1, $user2, $timeSlot) {
+            // Both users open booking page
+            $first->loginAs($user1)->visit('/booking');
+            $second->loginAs($user2)->visit('/booking');
+
+            // Both see available slot
+            $first->waitFor('.time-slot.available');
+            $second->waitFor('.time-slot.available');
+
+            // User 1 books the slot
+            $first->click('.time-slot[data-slot-id="' . $timeSlot->id . '"]')
+                  ->press('Đặt lịch')
+                  ->waitForText('Đặt lịch thành công');
+
+            // User 2 should see slot as unavailable
+            $second->waitFor('.time-slot.unavailable', 5)
+                   ->assertSeeIn('.time-slot[data-slot-id="' . $timeSlot->id . '"]', 'Đã đầy');
+        });
+    }
+}
+```
+
+---
+
+## 🎓 TỔNG KẾT VÀ ĐÁNH GIÁ
+
+### **Điểm mạnh của dự án:**
+1. **Architecture tốt:** MVC, Repository pattern, Event-driven
+2. **Security cao:** Multi-layer authentication, authorization
+3. **Performance tối ưu:** Caching, query optimization, lazy loading
+4. **Maintainability:** Clean code, SOLID principles, comprehensive testing
+5. **Scalability:** Microservices-ready, horizontal scaling support
+
+### **Điểm có thể cải thiện:**
+1. **API documentation:** Swagger/OpenAPI integration
+2. **Real-time features:** WebSocket cho live updates
+3. **Mobile optimization:** Progressive Web App
+4. **Analytics:** Advanced reporting và business intelligence
+
+### **Kỹ năng thể hiện:**
+- **Technical:** Full-stack development, database design, security
+- **Soft skills:** Problem-solving, project management, documentation
+- **Business:** Requirements analysis, user experience, performance optimization
