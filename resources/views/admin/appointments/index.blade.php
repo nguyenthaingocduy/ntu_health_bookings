@@ -74,7 +74,7 @@
                     <option value="">Tất cả nhân viên</option>
                     @foreach($employees as $employee)
                         <option value="{{ $employee->id }}" {{ request('employee_id') == $employee->id ? 'selected' : '' }}>
-                            {{ $employee->name }}
+                            {{ $employee->first_name }} {{ $employee->last_name }}
                         </option>
                     @endforeach
                 </select>
@@ -197,17 +197,12 @@
                         @forelse($appointments as $appointment)
                         <tr class="hover:bg-gray-50">
                             <td class="py-4">
-                                @if(in_array($appointment->status, ['cancelled', 'completed']))
+                                <!-- Admin có thể chọn tất cả lịch hẹn để xóa -->
                                 <input type="checkbox" name="appointment_ids[]" value="{{ $appointment->id }}"
                                        class="appointment-checkbox rounded border-gray-300 text-pink-600 focus:ring-pink-500">
-                                @else
-                                <span class="text-gray-400" title="Chỉ có thể xóa lịch hẹn đã hủy hoặc hoàn thành">
-                                    <i class="fas fa-lock"></i>
-                                </span>
-                                @endif
                             </td>
                             <td class="py-4">
-                                <span class="font-mono text-sm bg-gray-100 px-2 py-1 rounded">{{ $appointment->code }}</span>
+                                <span class="font-mono text-sm bg-gray-100 px-2 py-1 rounded">APT-{{ str_pad($appointment->id, 6, '0', STR_PAD_LEFT) }}</span>
                             </td>
                             <td class="py-4">
                                 <div>
@@ -221,7 +216,7 @@
                                     <p class="font-semibold">{{ $appointment->service->name }}</p>
                                     <p class="text-sm text-gray-600">{{ number_format($appointment->service->price) }}đ</p>
                                     @if($appointment->employee)
-                                        <p class="text-xs text-blue-600">NV: {{ $appointment->employee->name }}</p>
+                                        <p class="text-xs text-blue-600">NV: {{ $appointment->employee->first_name }} {{ $appointment->employee->last_name }}</p>
                                     @endif
                                 </div>
                             </td>
@@ -295,18 +290,17 @@
                                     </form>
                                     @endif
 
-                                    @if(in_array($appointment->status, ['cancelled', 'completed']))
+                                    <!-- Admin có thể xóa mọi lịch hẹn -->
                                     <form action="{{ route('admin.appointments.destroy', $appointment) }}" method="POST" class="inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
                                                 class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-100 transition-colors"
-                                                onclick="return confirm('Bạn có chắc chắn muốn xóa lịch hẹn này khỏi hệ thống?')"
+                                                onclick="return confirm('Bạn có chắc chắn muốn xóa lịch hẹn này khỏi hệ thống? Hành động này không thể hoàn tác.')"
                                                 title="Xóa lịch hẹn">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
-                                    @endif
                                 </div>
                             </td>
                         </tr>

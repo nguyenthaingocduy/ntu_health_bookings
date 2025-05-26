@@ -5,9 +5,18 @@
     $hasPermission = false;
 
     if ($user) {
-        // Sử dụng method hasAnyPermission để kiểm tra cả quyền vai trò và cá nhân
-        $permissionName = str_replace('.view', '', str_replace('.create', '', str_replace('.edit', '', str_replace('.delete', '', $permission))));
-        $hasPermission = $user->hasAnyPermission($permissionName, $action);
+        // Parse permission name to get resource and action
+        if (str_contains($permission, '.')) {
+            $parts = explode('.', $permission);
+            $resource = $parts[0];
+            $actionToCheck = $parts[1] ?? $action;
+        } else {
+            $resource = $permission;
+            $actionToCheck = $action;
+        }
+
+        // Use the improved hasAnyPermission method
+        $hasPermission = $user->hasAnyPermission($resource, $actionToCheck);
     }
 @endphp
 

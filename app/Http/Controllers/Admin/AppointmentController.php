@@ -11,77 +11,84 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class AppointmentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Appointment::with(['user', 'service', 'employee', 'timeAppointment']);
+        try {
+            $query = Appointment::with(['user', 'service', 'employee', 'timeAppointment']);
 
-        // Tìm kiếm theo từ khóa
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('code', 'like', "%{$search}%")
-                  ->orWhereHas('user', function($userQuery) use ($search) {
-                      $userQuery->where('first_name', 'like', "%{$search}%")
-                               ->orWhere('last_name', 'like', "%{$search}%")
-                               ->orWhere('email', 'like', "%{$search}%")
-                               ->orWhere('phone', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('service', function($serviceQuery) use ($search) {
-                      $serviceQuery->where('name', 'like', "%{$search}%");
-                  });
-            });
+            // Tìm kiếm theo từ khóa
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('code', 'like', "%{$search}%")
+                      ->orWhereHas('user', function($userQuery) use ($search) {
+                          $userQuery->where('first_name', 'like', "%{$search}%")
+                                   ->orWhere('last_name', 'like', "%{$search}%")
+                                   ->orWhere('email', 'like', "%{$search}%")
+                                   ->orWhere('phone', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('service', function($serviceQuery) use ($search) {
+                          $serviceQuery->where('name', 'like', "%{$search}%");
+                      });
+                });
+            }
+
+            // Lọc theo trạng thái
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            // Lọc theo ngày
+            if ($request->filled('date_from')) {
+                $query->whereDate('date_appointments', '>=', $request->date_from);
+            }
+            if ($request->filled('date_to')) {
+                $query->whereDate('date_appointments', '<=', $request->date_to);
+            }
+
+            // Lọc theo dịch vụ
+            if ($request->filled('service_id')) {
+                $query->where('service_id', $request->service_id);
+            }
+
+            // Lọc theo nhân viên
+            if ($request->filled('employee_id')) {
+                $query->where('employee_id', $request->employee_id);
+            }
+
+            // Sắp xếp
+            $sortBy = $request->get('sort_by', 'date_appointments');
+            $sortOrder = $request->get('sort_order', 'desc');
+            $query->orderBy($sortBy, $sortOrder);
+
+            // Phân trang với số lượng có thể tùy chỉnh
+            $perPage = $request->get('per_page', 10);
+            $appointments = $query->paginate($perPage);
+
+            // Calculate statistics
+            $statistics = [
+                'total' => Appointment::count(),
+                'pending' => Appointment::where('status', 'pending')->count(),
+                'confirmed' => Appointment::where('status', 'confirmed')->count(),
+                'completed' => Appointment::where('status', 'completed')->count(),
+                'cancelled' => Appointment::where('status', 'cancelled')->count(),
+            ];
+
+            // Lấy danh sách dịch vụ và nhân viên cho filter
+            $services = Service::orderBy('name')->get() ?? collect();
+            $employees = User::whereHas('role', function($query) {
+                $query->whereIn('name', ['Technician', 'Receptionist']);
+            })->orderBy('first_name')->get() ?? collect();
+
+            return view('admin.appointments.index', compact('appointments', 'statistics', 'services', 'employees'));
+        } catch (\Exception $e) {
+            Log::error('Error in AppointmentController@index: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()], 500);
         }
-
-        // Lọc theo trạng thái
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Lọc theo ngày
-        if ($request->filled('date_from')) {
-            $query->whereDate('date_appointments', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->whereDate('date_appointments', '<=', $request->date_to);
-        }
-
-        // Lọc theo dịch vụ
-        if ($request->filled('service_id')) {
-            $query->where('service_id', $request->service_id);
-        }
-
-        // Lọc theo nhân viên
-        if ($request->filled('employee_id')) {
-            $query->where('employee_id', $request->employee_id);
-        }
-
-        // Sắp xếp
-        $sortBy = $request->get('sort_by', 'date_appointments');
-        $sortOrder = $request->get('sort_order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
-
-        // Phân trang với số lượng có thể tùy chỉnh
-        $perPage = $request->get('per_page', 10);
-        $appointments = $query->paginate($perPage);
-
-        // Calculate statistics
-        $statistics = [
-            'total' => Appointment::count(),
-            'pending' => Appointment::where('status', 'pending')->count(),
-            'confirmed' => Appointment::where('status', 'confirmed')->count(),
-            'completed' => Appointment::where('status', 'completed')->count(),
-            'cancelled' => Appointment::where('status', 'cancelled')->count(),
-        ];
-
-        // Lấy danh sách dịch vụ và nhân viên cho filter
-        $services = \App\Models\Service::orderBy('name')->get();
-        $employees = \App\Models\Employee::orderBy('name')->get();
-
-        return view('admin.appointments.index', compact('appointments', 'statistics', 'services', 'employees'));
     }
 
     /**
@@ -217,10 +224,24 @@ class AppointmentController extends Controller
         try {
             $appointment = Appointment::findOrFail($id);
 
-            // Kiểm tra xem có thể xóa không (chỉ xóa được lịch hẹn đã hủy hoặc hoàn thành)
-            if (!in_array($appointment->status, ['cancelled', 'completed'])) {
-                return redirect()->route('admin.appointments.index')
-                    ->with('error', 'Chỉ có thể xóa lịch hẹn đã hủy hoặc đã hoàn thành.');
+            // Admin có thể xóa mọi lịch hẹn
+            // Nếu lịch hẹn đang active (pending/confirmed), cần giải phóng slot
+            if (in_array($appointment->status, ['pending', 'confirmed'])) {
+                // Giảm số lượng đặt chỗ cho khung giờ này
+                $timeSlot = Time::findOrFail($appointment->time_appointments_id);
+                if ($timeSlot->booked_count > 0) {
+                    $timeSlot->decrement('booked_count');
+                }
+
+                // Giảm số lượng sử dụng mã khuyến mãi nếu có
+                if (!empty($appointment->promotion_code)) {
+                    $promotion = \App\Models\Promotion::where('code', strtoupper($appointment->promotion_code))
+                        ->first();
+
+                    if ($promotion && $promotion->usage_count > 0) {
+                        $promotion->decrement('usage_count');
+                    }
+                }
             }
 
             $appointment->delete();
@@ -248,27 +269,36 @@ class AppointmentController extends Controller
 
             $appointments = Appointment::whereIn('id', $request->appointment_ids)->get();
             $deletedCount = 0;
-            $errors = [];
 
             foreach ($appointments as $appointment) {
-                // Chỉ xóa được lịch hẹn đã hủy hoặc hoàn thành
-                if (in_array($appointment->status, ['cancelled', 'completed'])) {
-                    $appointment->delete();
-                    $deletedCount++;
-                } else {
-                    $errors[] = "Lịch hẹn {$appointment->code} không thể xóa (trạng thái: {$appointment->status})";
+                // Admin có thể xóa mọi lịch hẹn
+                // Nếu lịch hẹn đang active (pending/confirmed), cần giải phóng slot
+                if (in_array($appointment->status, ['pending', 'confirmed'])) {
+                    // Giảm số lượng đặt chỗ cho khung giờ này
+                    $timeSlot = Time::findOrFail($appointment->time_appointments_id);
+                    if ($timeSlot->booked_count > 0) {
+                        $timeSlot->decrement('booked_count');
+                    }
+
+                    // Giảm số lượng sử dụng mã khuyến mãi nếu có
+                    if (!empty($appointment->promotion_code)) {
+                        $promotion = \App\Models\Promotion::where('code', strtoupper($appointment->promotion_code))
+                            ->first();
+
+                        if ($promotion && $promotion->usage_count > 0) {
+                            $promotion->decrement('usage_count');
+                        }
+                    }
                 }
+
+                $appointment->delete();
+                $deletedCount++;
             }
 
             DB::commit();
 
-            $message = "Đã xóa {$deletedCount} lịch hẹn thành công.";
-            if (!empty($errors)) {
-                $message .= " Một số lịch hẹn không thể xóa: " . implode(', ', $errors);
-            }
-
             return redirect()->route('admin.appointments.index')
-                ->with('success', $message);
+                ->with('success', "Đã xóa {$deletedCount} lịch hẹn thành công.");
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -288,11 +318,14 @@ class AppointmentController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('code', 'like', "%{$search}%")
-                  ->orWhereHas('user', function($userQuery) use ($search) {
+                $q->whereHas('user', function($userQuery) use ($search) {
                       $userQuery->where('first_name', 'like', "%{$search}%")
                                ->orWhere('last_name', 'like', "%{$search}%")
-                               ->orWhere('email', 'like', "%{$search}%");
+                               ->orWhere('email', 'like', "%{$search}%")
+                               ->orWhere('phone', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('service', function($serviceQuery) use ($search) {
+                      $serviceQuery->where('name', 'like', "%{$search}%");
                   });
             });
         }
@@ -340,14 +373,14 @@ class AppointmentController extends Controller
             // Data
             foreach ($appointments as $appointment) {
                 fputcsv($file, [
-                    $appointment->code,
+                    'APT-' . str_pad($appointment->id, 6, '0', STR_PAD_LEFT),
                     $appointment->user->first_name . ' ' . $appointment->user->last_name,
                     $appointment->user->email,
                     $appointment->user->phone ?? '',
                     $appointment->service->name ?? '',
                     $appointment->date_appointments,
                     $appointment->timeAppointment->started_time ?? '',
-                    $appointment->employee->name ?? '',
+                    ($appointment->employee->first_name ?? '') . ' ' . ($appointment->employee->last_name ?? ''),
                     $appointment->status,
                     $appointment->created_at->format('Y-m-d H:i:s')
                 ]);

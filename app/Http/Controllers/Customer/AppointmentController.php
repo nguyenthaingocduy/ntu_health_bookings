@@ -19,14 +19,71 @@ use App\Helpers\UrlHelper;
 
 class AppointmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $appointments = Appointment::with(['service', 'employee', 'timeAppointment'])
-            ->where('customer_id', Auth::id())
-            ->orderBy('date_appointments', 'desc')
-            ->paginate(10);
+        $query = Appointment::with(['service', 'employee', 'timeAppointment'])
+            ->where('customer_id', Auth::id());
 
-        return view('customer.appointments.index', compact('appointments'));
+        // Tìm kiếm theo tên dịch vụ
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('service', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
+
+        // Lọc theo trạng thái
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Lọc theo dịch vụ
+        if ($request->filled('service_id')) {
+            $query->where('service_id', $request->service_id);
+        }
+
+        // Lọc theo khoảng thời gian
+        if ($request->filled('date_filter')) {
+            $dateFilter = $request->date_filter;
+            $now = now();
+
+            switch ($dateFilter) {
+                case 'this_month':
+                    $query->whereMonth('date_appointments', $now->month)
+                          ->whereYear('date_appointments', $now->year);
+                    break;
+                case 'last_month':
+                    $lastMonth = $now->copy()->subMonth();
+                    $query->whereMonth('date_appointments', $lastMonth->month)
+                          ->whereYear('date_appointments', $lastMonth->year);
+                    break;
+                case 'last_3_months':
+                    $query->where('date_appointments', '>=', $now->copy()->subMonths(3));
+                    break;
+                case 'last_6_months':
+                    $query->where('date_appointments', '>=', $now->copy()->subMonths(6));
+                    break;
+                case 'this_year':
+                    $query->whereYear('date_appointments', $now->year);
+                    break;
+            }
+        }
+
+        // Lọc theo khoảng ngày tùy chọn
+        if ($request->filled('date_from')) {
+            $query->where('date_appointments', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->where('date_appointments', '<=', $request->date_to);
+        }
+
+        $appointments = $query->orderBy('date_appointments', 'desc')->paginate(10);
+
+        // Lấy danh sách dịch vụ để hiển thị trong dropdown
+        $services = \App\Models\Service::orderBy('name')->get();
+
+        return view('customer.appointments.index', compact('appointments', 'services'));
     }
 
     public function create(Request $request, $serviceId = null)

@@ -22,19 +22,46 @@ class ReminderController extends Controller
     public function index()
     {
         try {
+            // Trước tiên, dọn dẹp các reminders có appointment_id không hợp lệ
+            $this->cleanupInvalidReminders();
+
             $reminders = Reminder::with(['appointment', 'appointment.customer', 'createdBy'])
+                ->whereHas('appointment') // Chỉ lấy reminders có appointment tồn tại
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
 
             return view('le-tan.reminders.index', compact('reminders'));
         } catch (\Exception $e) {
             // Log lỗi
-            Log::error('Error in ReminderController@index: ' . $e->getMessage());
+            Log::error('Error in ReminderController@index: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
 
             // Trả về view với paginator rỗng
             $reminders = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
             return view('le-tan.reminders.index', compact('reminders'))
                 ->with('error', 'Có lỗi xảy ra khi tải danh sách nhắc nhở: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Dọn dẹp các reminders có appointment_id không hợp lệ
+     */
+    private function cleanupInvalidReminders()
+    {
+        try {
+            $invalidReminders = Reminder::whereNotIn('appointment_id', function($query) {
+                $query->select('id')->from('appointments');
+            })->get();
+
+            if ($invalidReminders->count() > 0) {
+                Log::info('Cleaning up ' . $invalidReminders->count() . ' invalid reminders');
+                foreach ($invalidReminders as $reminder) {
+                    $reminder->delete();
+                }
+            }
+        } catch (\Exception $e) {
+            Log::warning('Could not cleanup invalid reminders: ' . $e->getMessage());
         }
     }
 

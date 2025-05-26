@@ -11,8 +11,8 @@
                 <h2 class="text-xl font-semibold text-gray-800">Danh sách khuyến mãi</h2>
                 <p class="text-sm text-gray-600 mt-1">Quản lý các chương trình khuyến mãi</p>
             </div>
-            @if(auth()->user()->hasPermission('promotions.create') || auth()->user()->hasDirectPermission('promotions', 'create'))
-            <a href="{{ route('le-tan.promotions.create') }}" 
+            @if(auth()->user()->hasAnyPermission('promotions', 'create'))
+            <a href="{{ route('le-tan.promotions.create') }}"
                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
                 <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -90,8 +90,8 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             @php
                                 $now = now();
-                                $isActive = $promotion->is_active && 
-                                           $promotion->start_date <= $now && 
+                                $isActive = $promotion->is_active &&
+                                           $promotion->start_date <= $now &&
                                            $promotion->end_date >= $now &&
                                            (!$promotion->usage_limit || $promotion->usage_count < $promotion->usage_limit);
                             @endphp
@@ -102,16 +102,16 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
-                                <a href="{{ route('le-tan.promotions.show', $promotion->id) }}" 
+                                <a href="{{ route('le-tan.promotions.show', $promotion->id) }}"
                                    class="text-blue-600 hover:text-blue-900">Xem</a>
-                                
-                                @if(auth()->user()->hasPermission('promotions.edit') || auth()->user()->hasDirectPermission('promotions', 'edit'))
-                                <a href="{{ route('le-tan.promotions.edit', $promotion->id) }}" 
+
+                                @if(auth()->user()->hasAnyPermission('promotions', 'edit'))
+                                <a href="{{ route('le-tan.promotions.edit', $promotion->id) }}"
                                    class="text-indigo-600 hover:text-indigo-900">Sửa</a>
                                 @endif
-                                
-                                @if(auth()->user()->hasPermission('promotions.delete') || auth()->user()->hasDirectPermission('promotions', 'delete'))
-                                <form action="{{ route('le-tan.promotions.destroy', $promotion->id) }}" 
+
+                                @if(auth()->user()->hasAnyPermission('promotions', 'delete'))
+                                <form action="{{ route('le-tan.promotions.destroy', $promotion->id) }}"
                                       method="POST" class="inline"
                                       onsubmit="return confirm('Bạn có chắc chắn muốn xóa khuyến mãi này?')">
                                     @csrf
@@ -138,9 +138,9 @@
             </svg>
             <h3 class="mt-2 text-sm font-medium text-gray-900">Chưa có khuyến mãi nào</h3>
             <p class="mt-1 text-sm text-gray-500">Bắt đầu bằng cách tạo khuyến mãi đầu tiên.</p>
-            @if(auth()->user()->hasPermission('promotions.create') || auth()->user()->hasDirectPermission('promotions', 'create'))
+            @if(auth()->user()->hasAnyPermission('promotions', 'create'))
             <div class="mt-6">
-                <a href="{{ route('le-tan.promotions.create') }}" 
+                <a href="{{ route('le-tan.promotions.create') }}"
                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
                     <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>

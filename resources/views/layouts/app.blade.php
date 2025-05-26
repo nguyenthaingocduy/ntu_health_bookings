@@ -272,7 +272,7 @@
             background: rgba(255, 255, 255, 0.5);
         }
 
-        /* New Promotion Popup Styles */
+        /* Modern Promotion Popup Styles */
         #promotionPopup {
             z-index: 1100;
         }
@@ -283,12 +283,28 @@
         }
 
         #promotionContent {
-            max-height: 80vh;
+            max-height: 90vh;
             height: auto;
             overflow-y: auto;
-            transition: all 0.3s ease;
-            animation: fadeInScale 0.5s ease-out;
-            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideInUp 0.4s ease-out;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Backdrop blur effect */
+        .backdrop-blur-sm {
+            backdrop-filter: blur(4px);
         }
 
         #promotionContent::-webkit-scrollbar {

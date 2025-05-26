@@ -44,6 +44,65 @@
                 gap: 0.5rem;
             }
         }
+
+        /* Custom Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .pagination .page-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 0.75rem;
+            margin: 0 0.125rem;
+            text-decoration: none;
+            color: #6b7280;
+            background-color: white;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease-in-out;
+            min-width: 2.5rem;
+            height: 2.5rem;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #f3f4f6;
+            color: #374151;
+            border-color: #9ca3af;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #ec4899;
+            border-color: #ec4899;
+            color: white;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #d1d5db;
+            background-color: #f9fafb;
+            border-color: #e5e7eb;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-item.disabled .page-link:hover {
+            background-color: #f9fafb;
+            color: #d1d5db;
+            border-color: #e5e7eb;
+        }
+
+        /* Responsive pagination */
+        @media (max-width: 640px) {
+            .pagination .page-link {
+                padding: 0.375rem 0.5rem;
+                min-width: 2rem;
+                height: 2rem;
+                font-size: 0.875rem;
+            }
+        }
     </style>
 
     @stack('styles')
@@ -112,7 +171,7 @@
                     <i class="fas fa-file-invoice-dollar w-6"></i>
                     Quản lý hóa đơn
                 </a>
-{{-- 
+{{--
                 <div x-data="{ open: false }" class="relative">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('admin/work-schedules*') ? 'bg-gray-700' : '' }}">
                         <div class="flex items-center">
@@ -138,6 +197,12 @@
                 <div class="py-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Báo cáo & Thống kê
                 </div>
+
+                <a href="{{ route('admin.revenue.index') }}"
+                   class="block px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('admin/revenue*') ? 'bg-gray-700' : '' }}">
+                    <i class="fas fa-chart-line w-6"></i>
+                    Thống kê doanh thu
+                </a>
 
                 <a href="{{ route('admin.reports.customer-types') }}"
                    class="block px-4 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('admin/reports/customer-types*') ? 'bg-gray-700' : '' }}">

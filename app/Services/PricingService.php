@@ -96,17 +96,44 @@ class PricingService
                 }
 
                 if ($canUse) {
-                    $discounts['promotion_code']['applied'] = true;
+                    // Kiểm tra minimum purchase requirement
+                    if ($promotion->minimum_purchase && $finalPrice < $promotion->minimum_purchase) {
+                        $discounts['promotion_code']['applied'] = false;
+                        $discounts['promotion_code']['error'] = 'Giá trị đơn hàng không đủ để áp dụng mã khuyến mãi này. Tối thiểu: ' . number_format($promotion->minimum_purchase, 0, ',', '.') . ' VNĐ';
 
-                    if ($promotion->discount_type == 'percentage') {
-                        $discounts['promotion_code']['percentage'] = $promotion->discount_value;
-                        $discounts['promotion_code']['amount'] = $originalPrice * ($promotion->discount_value / 100);
+                        Log::info('Mã khuyến mãi không đủ điều kiện minimum purchase', [
+                            'code' => $promotionCode,
+                            'current_price' => $finalPrice,
+                            'minimum_purchase' => $promotion->minimum_purchase
+                        ]);
                     } else {
-                        $discounts['promotion_code']['amount'] = $promotion->discount_value;
-                        $discounts['promotion_code']['percentage'] = round(($promotion->discount_value / $originalPrice) * 100, 2);
-                    }
+                        $discounts['promotion_code']['applied'] = true;
 
-                    $finalPrice -= $discounts['promotion_code']['amount'];
+                        if ($promotion->discount_type == 'percentage') {
+                            $discounts['promotion_code']['percentage'] = $promotion->discount_value;
+                            $discounts['promotion_code']['amount'] = $finalPrice * ($promotion->discount_value / 100);
+
+                            // Áp dụng maximum discount nếu có
+                            if ($promotion->maximum_discount && $discounts['promotion_code']['amount'] > $promotion->maximum_discount) {
+                                $discounts['promotion_code']['amount'] = $promotion->maximum_discount;
+                                $discounts['promotion_code']['capped'] = true;
+                            }
+                        } else {
+                            $discounts['promotion_code']['amount'] = min($promotion->discount_value, $finalPrice);
+                            $discounts['promotion_code']['percentage'] = round(($discounts['promotion_code']['amount'] / $finalPrice) * 100, 2);
+                        }
+
+                        $finalPrice -= $discounts['promotion_code']['amount'];
+
+                        Log::info('Áp dụng mã khuyến mãi thành công', [
+                            'code' => $promotionCode,
+                            'discount_type' => $promotion->discount_type,
+                            'discount_value' => $promotion->discount_value,
+                            'calculated_discount' => $discounts['promotion_code']['amount'],
+                            'price_before' => $finalPrice + $discounts['promotion_code']['amount'],
+                            'price_after' => $finalPrice
+                        ]);
+                    }
                 } else {
                     // Mã khuyến mãi đã hết lượt sử dụng
                     $discounts['promotion_code']['applied'] = false;

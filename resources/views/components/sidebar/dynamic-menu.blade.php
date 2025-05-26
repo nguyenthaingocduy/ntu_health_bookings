@@ -1,47 +1,21 @@
 @props(['title', 'icon', 'permissionGroup', 'routes' => []])
 
 @php
-    // Lấy danh sách quyền của người dùng
     $user = auth()->user();
-    $userPermissions = [];
-    
-    // Lấy quyền từ vai trò
-    if ($user->role) {
-        $rolePermissions = $user->role->permissions()->pluck('name')->toArray();
-        $userPermissions = array_merge($userPermissions, $rolePermissions);
-    }
-    
-    // Lấy quyền trực tiếp của người dùng (nếu có)
-    if (method_exists($user, 'userPermissions')) {
-        $directPermissions = $user->userPermissions()->with('permission')->get();
-        foreach ($directPermissions as $perm) {
-            if ($perm->can_view || $perm->can_create || $perm->can_edit || $perm->can_delete) {
-                $userPermissions[] = $perm->permission->name;
+    $hasAnyPermission = false;
+
+    if ($user) {
+        // Kiểm tra xem người dùng có bất kỳ quyền nào trong nhóm không
+        $actions = ['view', 'create', 'edit', 'delete'];
+
+        foreach ($actions as $action) {
+            if ($user->hasAnyPermission($permissionGroup, $action)) {
+                $hasAnyPermission = true;
+                break;
             }
         }
     }
-    
-    // Kiểm tra xem người dùng có bất kỳ quyền nào trong nhóm không
-    $hasAnyPermission = false;
-    $permissionPrefixes = [
-        $permissionGroup . '.view',
-        $permissionGroup . '.create',
-        $permissionGroup . '.edit',
-        $permissionGroup . '.delete'
-    ];
-    
-    foreach ($permissionPrefixes as $prefix) {
-        if (in_array($prefix, $userPermissions)) {
-            $hasAnyPermission = true;
-            break;
-        }
-    }
-    
-    // Admin luôn có tất cả các quyền
-    if ($user->role && strtolower($user->role->name) === 'admin') {
-        $hasAnyPermission = true;
-    }
-    
+
     // Kiểm tra xem có route nào đang active không
     $hasActiveRoute = false;
     foreach ($routes as $route) {
@@ -50,7 +24,7 @@
             break;
         }
     }
-    
+
     // Mặc định mở dropdown nếu có route đang active
     $isOpen = $hasActiveRoute;
     $dropdownId = 'dropdown-' . str_replace(' ', '-', strtolower($title));

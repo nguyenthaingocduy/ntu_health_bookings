@@ -329,7 +329,7 @@ Bước 3: Nhân viên tự động có quyền:
 ```
 Tình huống: Nhân viên kỹ thuật cần quyền xem báo cáo
 Giải pháp: Admin cấp quyền cá nhân "reports.view"
-Kết quả: Nhân viên có thêm quyền xem báo cáo ngoài quyền cơ bản
+Kết quả: Nhân viên có thêm quyền xem báo cáo ngoài quyền cơ bảnvay ![alt text](image.png)
 ```
 
 ### 3. **Kịch Bản: Thu Hồi Quyền**

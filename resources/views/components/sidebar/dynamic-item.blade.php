@@ -3,30 +3,24 @@
 @php
     $isActive = request()->routeIs($route);
     $activeClass = $isActive ? 'active' : '';
-    
+
     // Kiểm tra quyền
     $user = auth()->user();
     $hasPermission = false;
-    
-    // Admin luôn có tất cả các quyền
-    if ($user->role && strtolower($user->role->name) === 'admin') {
-        $hasPermission = true;
-    } 
-    // Kiểm tra quyền từ vai trò
-    else if ($user->role) {
-        $rolePermissions = $user->role->permissions()->pluck('name')->toArray();
-        $hasPermission = in_array($permission, $rolePermissions);
-    }
-    
-    // Kiểm tra quyền trực tiếp của người dùng (nếu có)
-    if (!$hasPermission && method_exists($user, 'userPermissions')) {
-        $directPermissions = $user->userPermissions()->with('permission')->get();
-        foreach ($directPermissions as $perm) {
-            if ($perm->permission->name === $permission && ($perm->can_view || $perm->can_create || $perm->can_edit || $perm->can_delete)) {
-                $hasPermission = true;
-                break;
-            }
+
+    if ($user) {
+        // Parse permission name to get resource and action
+        if (str_contains($permission, '.')) {
+            $parts = explode('.', $permission);
+            $resource = $parts[0];
+            $action = $parts[1] ?? 'view';
+        } else {
+            $resource = $permission;
+            $action = 'view';
         }
+
+        // Use the improved hasAnyPermission method
+        $hasPermission = $user->hasAnyPermission($resource, $action);
     }
 @endphp
 

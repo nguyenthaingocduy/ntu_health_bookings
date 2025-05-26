@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use App\Models\Time;
+use App\Models\Employee;
 
 class Appointment extends Model
 {
@@ -72,7 +73,7 @@ class Appointment extends Model
 
     public function employee()
     {
-        return $this->belongsTo(User::class, 'employee_id');
+        return $this->belongsTo(Employee::class, 'employee_id');
     }
 
     public function healthRecord()

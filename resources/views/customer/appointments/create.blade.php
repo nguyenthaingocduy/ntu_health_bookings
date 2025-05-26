@@ -883,8 +883,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const priceElement = serviceCard.querySelector('.text-pink-500.font-semibold');
             if (priceElement) {
                 // Chuyển đổi chuỗi "1,500,000đ" thành số 1500000
-                servicePrice = parseInt(priceElement.textContent.replace(/[^\d]/g, ''));
+                const priceText = priceElement.textContent;
+                servicePrice = parseInt(priceText.replace(/[^\d]/g, ''));
+
+                console.log('Service price extraction:', {
+                    priceText: priceText,
+                    servicePrice: servicePrice,
+                    selectedServiceId: selectedService.value
+                });
+            } else {
+                console.error('Price element not found in service card');
             }
+        } else {
+            console.error('No service selected');
         }
 
         if (servicePrice === 0) {
@@ -895,6 +906,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Hiển thị trạng thái đang tải
         promotionMessage.innerHTML = '<div class="flex items-center text-gray-500"><div class="loading-spinner mr-2"></div> Đang kiểm tra mã khuyến mãi...</div>';
         promotionMessage.classList.remove('hidden');
+
+        // Debug log
+        console.log('Validating promotion:', {
+            code: code,
+            servicePrice: servicePrice,
+            csrfToken: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        });
 
         // Gọi API để kiểm tra mã khuyến mãi
         fetch('/api/validate-promotion', {
@@ -910,6 +928,8 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
+            console.log('Promotion validation response:', data);
+
             if (data.success) {
                 // Hiển thị thông tin khuyến mãi
                 const discountAmount = data.data.formatted_discount;
@@ -929,17 +949,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `, 'success');
 
-                // Thêm input ẩn để lưu mã khuyến mãi
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'promotion_code';
-                hiddenInput.value = code;
-                document.querySelector('form').appendChild(hiddenInput);
+                // Không tạo input ẩn mới, chỉ cập nhật giá trị của input hiện tại
+                promotionCodeInput.value = code.toUpperCase();
 
-                // Vô hiệu hóa input và nút áp dụng
-                promotionCodeInput.disabled = true;
+                // Thêm class để đánh dấu đã áp dụng thành công
+                promotionCodeInput.classList.add('border-green-500', 'bg-green-50');
+
+                // Cập nhật nút áp dụng
+                applyPromotionButton.textContent = 'Đã áp dụng';
                 applyPromotionButton.disabled = true;
-                applyPromotionButton.classList.add('opacity-50');
+                applyPromotionButton.classList.add('opacity-50', 'bg-green-500');
+                applyPromotionButton.classList.remove('bg-pink-500', 'hover:bg-pink-600');
             } else {
                 // Hiển thị thông báo lỗi
                 showPromotionMessage(data.message, 'error');
@@ -1159,6 +1179,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Kích hoạt kiểm tra lần đầu
     checkSubmitButton();
+
+    // Thêm sự kiện cho nút áp dụng mã khuyến mãi
+    if (applyPromotionButton) {
+        applyPromotionButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Apply promotion button clicked');
+            validatePromotionCode();
+        });
+    }
+
+    // Thêm sự kiện Enter cho input mã khuyến mãi
+    if (promotionCodeInput) {
+        promotionCodeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                console.log('Enter pressed on promotion input');
+                validatePromotionCode();
+            }
+        });
+    }
 
     // Thêm sự kiện change cho các radio button thời gian
     document.addEventListener('change', function(e) {

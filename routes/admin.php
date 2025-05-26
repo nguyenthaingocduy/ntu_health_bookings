@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\PromotionController;
+use App\Http\Controllers\Admin\RevenueController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SettingController;
 use Illuminate\Support\Facades\Route;
@@ -41,13 +42,16 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix
     Route::resource('customers', CustomerController::class)->only(['index', 'show']);
     Route::resource('clinics', ClinicController::class);
     Route::post('clinics/{id}/toggle-status', [ClinicController::class, 'toggleStatus'])->name('clinics.toggle-status');
-    Route::resource('appointments', AppointmentController::class);
+
+
+    // Appointments - specific routes first to avoid conflicts
+    Route::get('appointments/export', [AppointmentController::class, 'export'])->name('appointments.export');
+    Route::post('appointments/bulk-delete', [AppointmentController::class, 'bulkDelete'])->name('appointments.bulk-delete');
     Route::get('appointments/{id}/assign-staff', [AppointmentController::class, 'assignStaff'])->name('appointments.assign-staff');
     Route::post('appointments/{id}/confirm', [AppointmentController::class, 'confirm'])->name('appointments.confirm');
     Route::post('appointments/{id}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::post('appointments/{id}/complete', [AppointmentController::class, 'complete'])->name('appointments.complete');
-    Route::post('appointments/bulk-delete', [AppointmentController::class, 'bulkDelete'])->name('appointments.bulk-delete');
-    Route::get('appointments/export', [AppointmentController::class, 'export'])->name('appointments.export');
+    Route::resource('appointments', AppointmentController::class);
 
     // Health Check-up Management
     Route::prefix('health-checkups')->name('health-checkups.')->group(function () {
@@ -96,6 +100,15 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix
 
     // Reports
     Route::get('/reports/customer-types', [\App\Http\Controllers\Admin\CustomerTypeReportController::class, 'index'])->name('reports.customer-types');
+
+    // Revenue Statistics
+    Route::get('/revenue', [RevenueController::class, 'index'])->name('revenue.index');
+    Route::get('/revenue/export', [RevenueController::class, 'export'])->name('revenue.export');
+
+    // Test route
+    Route::get('/revenue/test', function() {
+        return 'Revenue test route works!';
+    })->name('revenue.test');
 
     // Include additional admin routes
     require __DIR__.'/admin/invoices.php';

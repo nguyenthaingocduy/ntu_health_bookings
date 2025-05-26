@@ -137,14 +137,26 @@
                             </thead>
                             <tbody>
                                 @foreach($groupPermissions as $permission)
+                                @php
+                                    // Xác định action từ tên permission
+                                    $permissionAction = null;
+                                    if (str_contains($permission->name, '.')) {
+                                        $parts = explode('.', $permission->name);
+                                        $permissionAction = end($parts);
+                                    }
+                                @endphp
                                 <tr class="permission-item" data-permission-name="{{ $permission->name }}">
                                     <td>
                                         <div>{{ $permission->display_name }}</div>
+                                        <small class="text-muted">{{ $permission->name }}</small>
                                         @if(in_array($permission->id, $rolePermissions))
                                         <div class="role-permission">quyền từ vai trò</div>
                                         @endif
                                     </td>
+
+                                    <!-- Cột XEM -->
                                     <td class="text-center">
+                                        @if($permissionAction === 'view' || !$permissionAction)
                                         <div class="form-check d-flex justify-content-center">
                                             <input class="form-check-input permission-checkbox" type="checkbox"
                                                    name="permissions[{{ $permission->id }}][can_view]" value="1"
@@ -153,30 +165,51 @@
                                                    {{ in_array($permission->id, $rolePermissions) ? 'disabled' : '' }}>
                                             <input type="hidden" name="permissions[{{ $permission->id }}][id]" value="{{ $permission->id }}">
                                         </div>
+                                        @else
+                                        <span class="text-muted">-</span>
+                                        @endif
                                     </td>
+
+                                    <!-- Cột THÊM -->
                                     <td class="text-center">
+                                        @if($permissionAction === 'create' || !$permissionAction)
                                         <div class="form-check d-flex justify-content-center">
                                             <input class="form-check-input permission-checkbox" type="checkbox"
                                                    name="permissions[{{ $permission->id }}][can_create]" value="1"
                                                    id="permission-{{ $permission->id }}-create"
                                                    {{ isset($userPermissions[$permission->id]) && $userPermissions[$permission->id]['can_create'] ? 'checked' : '' }}>
                                         </div>
+                                        @else
+                                        <span class="text-muted">-</span>
+                                        @endif
                                     </td>
+
+                                    <!-- Cột SỬA -->
                                     <td class="text-center">
+                                        @if($permissionAction === 'edit' || !$permissionAction)
                                         <div class="form-check d-flex justify-content-center">
                                             <input class="form-check-input permission-checkbox" type="checkbox"
                                                    name="permissions[{{ $permission->id }}][can_edit]" value="1"
                                                    id="permission-{{ $permission->id }}-edit"
                                                    {{ isset($userPermissions[$permission->id]) && $userPermissions[$permission->id]['can_edit'] ? 'checked' : '' }}>
                                         </div>
+                                        @else
+                                        <span class="text-muted">-</span>
+                                        @endif
                                     </td>
+
+                                    <!-- Cột XÓA -->
                                     <td class="text-center">
+                                        @if($permissionAction === 'delete' || !$permissionAction)
                                         <div class="form-check d-flex justify-content-center">
                                             <input class="form-check-input permission-checkbox" type="checkbox"
                                                    name="permissions[{{ $permission->id }}][can_delete]" value="1"
                                                    id="permission-{{ $permission->id }}-delete"
                                                    {{ isset($userPermissions[$permission->id]) && $userPermissions[$permission->id]['can_delete'] ? 'checked' : '' }}>
                                         </div>
+                                        @else
+                                        <span class="text-muted">-</span>
+                                        @endif
                                     </td>
                                 </tr>
                                 @endforeach

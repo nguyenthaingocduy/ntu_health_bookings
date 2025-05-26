@@ -19,13 +19,65 @@ class AppointmentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $appointments = Appointment::with(['customer', 'service', 'timeSlot'])
-            ->orderBy('date_appointments', 'desc')
-            ->paginate(10);
+        $query = Appointment::with(['customer', 'service', 'timeSlot']);
 
-        return view('le-tan.appointments.index', compact('appointments'));
+        // Tìm kiếm theo từ khóa
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                  ->orWhereHas('customer', function($customerQuery) use ($search) {
+                      $customerQuery->where('first_name', 'like', "%{$search}%")
+                                   ->orWhere('last_name', 'like', "%{$search}%")
+                                   ->orWhere('email', 'like', "%{$search}%")
+                                   ->orWhere('phone', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('service', function($serviceQuery) use ($search) {
+                      $serviceQuery->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Lọc theo trạng thái
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Lọc theo dịch vụ
+        if ($request->filled('service_id')) {
+            $query->where('service_id', $request->service_id);
+        }
+
+        // Lọc theo ngày cụ thể (backward compatibility)
+        if ($request->filled('date')) {
+            $query->whereDate('date_appointments', $request->date);
+        }
+
+        // Lọc theo khoảng thời gian
+        if ($request->filled('date_from')) {
+            $query->whereDate('date_appointments', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('date_appointments', '<=', $request->date_to);
+        }
+
+        // Lọc theo tháng/năm
+        if ($request->filled('month') && $request->filled('year')) {
+            $query->whereMonth('date_appointments', $request->month)
+                  ->whereYear('date_appointments', $request->year);
+        }
+
+        $appointments = $query->orderBy('date_appointments', 'desc')
+                             ->paginate(15)
+                             ->appends($request->query());
+
+        // Lấy danh sách dịch vụ để hiển thị trong filter
+        $services = Service::where('status', 'active')->get();
+
+        return view('le-tan.appointments.index', compact('appointments', 'services'));
     }
 
     /**

@@ -88,14 +88,14 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
-    public function roles()
-    {
-        return $this->belongsTo(Role::class, 'role_id');
-    }
-
     public function userPermissions()
     {
         return $this->hasMany(UserPermission::class);
+    }
+
+    public function roles()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
     }
 
     public function isAdmin()
@@ -266,7 +266,7 @@ class User extends Authenticatable
      */
     public function canView($resource)
     {
-        return $this->hasPermission($resource . '.view');
+        return $this->hasAnyPermission($resource, 'view');
     }
 
     /**
@@ -277,7 +277,7 @@ class User extends Authenticatable
      */
     public function canCreate($resource)
     {
-        return $this->hasPermission($resource . '.create');
+        return $this->hasAnyPermission($resource, 'create');
     }
 
     /**
@@ -288,7 +288,7 @@ class User extends Authenticatable
      */
     public function canEdit($resource)
     {
-        return $this->hasPermission($resource . '.edit');
+        return $this->hasAnyPermission($resource, 'edit');
     }
 
     /**
@@ -299,7 +299,7 @@ class User extends Authenticatable
      */
     public function canDelete($resource)
     {
-        return $this->hasPermission($resource . '.delete');
+        return $this->hasAnyPermission($resource, 'delete');
     }
 
     /**
@@ -309,15 +309,34 @@ class User extends Authenticatable
      */
     public function clearPermissionCache()
     {
+        // Clear all cache keys that start with user permission patterns
+        $cacheKeys = [
+            'user_role_permission_' . $this->id . '_*',
+            'user_direct_permission_' . $this->id . '_*'
+        ];
+
+        // Get all permissions to clear specific cache keys
         $permissions = Permission::all();
 
         foreach ($permissions as $permission) {
+            // Clear role permission cache
             Cache::forget('user_role_permission_' . $this->id . '_' . $permission->name);
 
+            // Clear direct permission cache for all actions
             foreach (['view', 'create', 'edit', 'delete'] as $action) {
                 Cache::forget('user_direct_permission_' . $this->id . '_' . $permission->name . '_' . $action);
+
+                // Also clear cache for resource-based permissions
+                $parts = explode('.', $permission->name);
+                if (count($parts) >= 2) {
+                    $resource = $parts[0];
+                    Cache::forget('user_direct_permission_' . $this->id . '_' . $resource . '_' . $action);
+                }
             }
         }
+
+        // Force refresh the user model to ensure fresh data
+        $this->refresh();
     }
 
     public function invoices()

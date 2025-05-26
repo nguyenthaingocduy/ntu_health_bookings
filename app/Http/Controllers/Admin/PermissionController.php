@@ -493,25 +493,51 @@ class PermissionController extends Controller
                     isset($permission['can_edit']) ||
                     isset($permission['can_delete'])
                 )) {
-                    // Log để kiểm tra
-                    Log::info('Creating permission:', [
-                        'permission_id' => $permission['id'],
-                        'can_view' => isset($permission['can_view']),
-                        'can_create' => isset($permission['can_create']),
-                        'can_edit' => isset($permission['can_edit']),
-                        'can_delete' => isset($permission['can_delete']),
-                    ]);
+                    // Get permission details to validate action
+                    $permissionModel = Permission::find($permission['id']);
+                    if (!$permissionModel) {
+                        continue;
+                    }
 
-                    UserPermission::create([
-                        'id' => Str::uuid(),
-                        'user_id' => $user->id,
-                        'permission_id' => $permission['id'],
-                        'can_view' => isset($permission['can_view']),
-                        'can_create' => isset($permission['can_create']),
-                        'can_edit' => isset($permission['can_edit']),
-                        'can_delete' => isset($permission['can_delete']),
-                        'granted_by' => Auth::id() ?? $user->id,
-                    ]);
+                    // Determine the expected action from permission name
+                    $expectedAction = null;
+                    if (str_contains($permissionModel->name, '.')) {
+                        $parts = explode('.', $permissionModel->name);
+                        $expectedAction = end($parts);
+                    }
+
+                    // Validate and filter actions based on permission name
+                    $canView = false;
+                    $canCreate = false;
+                    $canEdit = false;
+                    $canDelete = false;
+
+                    if ($expectedAction === 'view' || !$expectedAction) {
+                        $canView = isset($permission['can_view']);
+                    }
+                    if ($expectedAction === 'create' || !$expectedAction) {
+                        $canCreate = isset($permission['can_create']);
+                    }
+                    if ($expectedAction === 'edit' || !$expectedAction) {
+                        $canEdit = isset($permission['can_edit']);
+                    }
+                    if ($expectedAction === 'delete' || !$expectedAction) {
+                        $canDelete = isset($permission['can_delete']);
+                    }
+
+                    // Only create if at least one valid action is selected
+                    if ($canView || $canCreate || $canEdit || $canDelete) {
+                        UserPermission::create([
+                            'id' => Str::uuid(),
+                            'user_id' => $user->id,
+                            'permission_id' => $permission['id'],
+                            'can_view' => $canView,
+                            'can_create' => $canCreate,
+                            'can_edit' => $canEdit,
+                            'can_delete' => $canDelete,
+                            'granted_by' => Auth::id() ?? $user->id,
+                        ]);
+                    }
                 }
             }
 
