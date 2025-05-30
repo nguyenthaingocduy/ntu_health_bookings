@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Appointment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class CustomerController extends Controller
 {
@@ -53,19 +54,25 @@ class CustomerController extends Controller
      */
     public function serviceHistory($id)
     {
-        $customer = User::findOrFail($id);
+        try {
+            $customer = User::findOrFail($id);
 
-        // Kiểm tra xem người dùng có phải là khách hàng không
-        if (!$customer->hasRole('Customer')) {
+            // Kiểm tra xem người dùng có phải là khách hàng không
+            if (!$customer->hasRole('Customer')) {
+                return redirect()->route('nvkt.customers.index')
+                    ->with('error', 'Người dùng không phải là khách hàng.');
+            }
+
+            $appointments = Appointment::with(['service', 'employee'])
+                ->where('customer_id', $id)
+                ->orderBy('date_appointments', 'desc')
+                ->paginate(10);
+
+            return view('nvkt.customers.service-history', compact('customer', 'appointments'));
+        } catch (\Exception $e) {
+            Log::error('Error in serviceHistory: ' . $e->getMessage());
             return redirect()->route('nvkt.customers.index')
-                ->with('error', 'Người dùng không phải là khách hàng.');
+                ->with('error', 'Không thể tải lịch sử dịch vụ của khách hàng.');
         }
-
-        $appointments = Appointment::with(['service', 'employee'])
-            ->where('customer_id', $id)
-            ->orderBy('date_appointments', 'desc')
-            ->paginate(10);
-
-        return view('nvkt.customers.service-history', compact('customer', 'appointments'));
     }
 }

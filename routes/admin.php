@@ -39,7 +39,30 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix
     Route::resource('employees', EmployeeController::class);
     Route::post('employees/{id}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('employees.toggle-status');
     Route::post('employees/{id}/reset-password', [EmployeeController::class, 'resetPassword'])->name('employees.reset-password');
-    Route::resource('customers', CustomerController::class)->only(['index', 'show']);
+    Route::resource('customers', CustomerController::class)->except(['create', 'store']);
+
+    // Debug route
+    Route::get('/customers-debug/{id}', function($id) {
+        try {
+            $customer = \App\Models\User::whereHas('role', function($q) {
+                $q->where('name', 'Customer');
+            })->findOrFail($id);
+
+            return response()->json([
+                'success' => true,
+                'customer' => $customer,
+                'role' => $customer->role
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    })->name('customers.debug');
+
+
     Route::resource('clinics', ClinicController::class);
     Route::post('clinics/{id}/toggle-status', [ClinicController::class, 'toggleStatus'])->name('clinics.toggle-status');
 

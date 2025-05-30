@@ -97,7 +97,7 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserRole::class.':Reception
     Route::delete('/promotions/{id}', [PromotionController::class, 'destroy'])->name('promotions.destroy');
 
     // Reports - Chỉ cho phép truy cập nếu có quyền
-    Route::middleware(['permission:reports.view'])->group(function () {
+    Route::middleware([\App\Http\Middleware\CheckPermission::class.':reports.view'])->group(function () {
         Route::get('/reports/revenue', [ReportController::class, 'revenue'])->name('reports.revenue');
         Route::get('/reports/appointments', [ReportController::class, 'appointments'])->name('reports.appointments');
         Route::get('/reports/services', [ReportController::class, 'services'])->name('reports.services');

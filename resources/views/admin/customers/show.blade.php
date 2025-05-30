@@ -6,9 +6,14 @@
 <div class="container mx-auto px-6 py-8">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-semibold text-gray-800">Chi tiết khách hàng</h1>
-        <a href="{{ route('admin.customers.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition duration-300 flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Quay lại
-        </a>
+        <div class="flex space-x-3">
+            <a href="{{ route('admin.customers.edit', $customer->id) }}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition duration-300 flex items-center">
+                <i class="fas fa-edit mr-2"></i> Chỉnh sửa
+            </a>
+            <a href="{{ route('admin.customers.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition duration-300 flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i> Quay lại
+            </a>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

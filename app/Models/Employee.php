@@ -47,7 +47,7 @@ class Employee extends Model
 
     public function appointments()
     {
-        return $this->hasMany(Appointment::class);
+        return $this->hasMany(Appointment::class, 'employee_id', 'id');
     }
 
     public function notifications()

@@ -9,10 +9,10 @@
     <div class="flex justify-between items-center mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">Lịch sử sử dụng dịch vụ</h1>
-            <p class="text-sm text-gray-500 mt-1">Khách hàng: {{ $customer->first_name }} {{ $customer->last_name }}</p>
+            <p class="text-sm text-gray-500 mt-1">Khách hàng: {{ $customer ? $customer->first_name . ' ' . $customer->last_name : 'Không xác định' }}</p>
         </div>
         <div>
-            <a href="{{ route('nvkt.customers.show', $customer->id) }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-150 flex items-center">
+            <a href="{{ $customer ? route('nvkt.customers.show', $customer->id) : '#' }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-150 flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
@@ -23,6 +23,7 @@
 
     <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="p-6 border-b border-gray-200">
+            @if($customer)
             <div class="flex items-center">
                 <div class="flex-shrink-0 h-16 w-16">
                     <img class="h-16 w-16 rounded-full object-cover" src="https://ui-avatars.com/api/?name={{ $customer->first_name }}&background=0D8ABC&color=fff&size=128" alt="{{ $customer->first_name }}">
@@ -43,6 +44,11 @@
                     </div>
                 </div>
             </div>
+            @else
+            <div class="text-center py-4">
+                <p class="text-sm text-gray-500">Không tìm thấy thông tin khách hàng</p>
+            </div>
+            @endif
         </div>
 
         <div class="overflow-x-auto">
@@ -70,15 +76,25 @@
                     @forelse($appointments as $appointment)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $appointment->date_appointments->format('d/m/Y') }}</div>
+                            <div class="text-sm text-gray-900">
+                                {{ $appointment->date_appointments ? $appointment->date_appointments->format('d/m/Y') : 'N/A' }}
+                            </div>
                             <div class="text-sm text-gray-500">{{ $appointment->timeAppointment ? $appointment->timeAppointment->started_time : 'N/A' }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ $appointment->service->name }}</div>
-                            <div class="text-sm text-gray-500">{{ number_format($appointment->final_price, 0, ',', '.') }} VNĐ</div>
+                            <div class="text-sm font-medium text-gray-900">
+                                {{ $appointment->service ? $appointment->service->name : 'Dịch vụ không xác định' }}
+                            </div>
+                            <div class="text-sm text-gray-500">{{ number_format($appointment->final_price ?: 0, 0, ',', '.') }} VNĐ</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $appointment->employee->first_name }} {{ $appointment->employee->last_name }}</div>
+                            <div class="text-sm text-gray-900">
+                                @if($appointment->employee)
+                                    {{ $appointment->employee->first_name }} {{ $appointment->employee->last_name }}
+                                @else
+                                    <span class="text-gray-500">Chưa phân công</span>
+                                @endif
+                            </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($appointment->status == 'completed')

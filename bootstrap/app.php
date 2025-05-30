@@ -11,7 +11,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // Register custom middleware aliases
+        $middleware->alias([
+            'role' => \App\Http\Middleware\CheckRole::class,
+            'user.role' => \App\Http\Middleware\CheckUserRole::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'permission' => \App\Http\Middleware\CheckPermission::class,
+            'technician' => \App\Http\Middleware\TechnicianMiddleware::class,
+            'receptionist' => \App\Http\Middleware\ReceptionistMiddleware::class,
+            'staff' => \App\Http\Middleware\StaffMiddleware::class,
+            'university.staff' => \App\Http\Middleware\UniversityStaffMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

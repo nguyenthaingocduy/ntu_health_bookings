@@ -110,9 +110,20 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="{{ route('admin.customers.show', $customer->id) }}" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded-lg transition duration-200">
-                                    <i class="fas fa-eye mr-1"></i> Chi tiết
-                                </a>
+                                <div class="flex space-x-2">
+                                    <a href="{{ route('admin.customers.show', $customer->id) }}"
+                                        class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded-lg transition duration-200">
+                                        <i class="fas fa-eye mr-1"></i> Chi tiết
+                                    </a>
+                                    <a href="{{ route('admin.customers.edit', $customer->id) }}"
+                                        class="text-yellow-600 hover:text-yellow-900 bg-yellow-50 hover:bg-yellow-100 px-3 py-1 rounded-lg transition duration-200">
+                                        <i class="fas fa-edit mr-1"></i> Sửa
+                                    </a>
+                                    <button onclick="confirmDelete('{{ $customer->id }}', {{ json_encode($customer->first_name . ' ' . $customer->last_name) }})"
+                                        class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg transition duration-200">
+                                        <i class="fas fa-trash mr-1"></i> Xóa
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         @empty
@@ -134,4 +145,110 @@
         </div>
     </div>
 </div>
+
+<!-- Delete Form (Hidden) -->
+<form id="deleteForm" method="POST" style="display: none;">
+    @csrf
+    @method('DELETE')
+</form>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mt-4">Xác nhận xóa khách hàng</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-500">
+                    Bạn có chắc chắn muốn xóa khách hàng <span id="customerName" class="font-semibold"></span>?
+                </p>
+                <p class="text-sm text-red-600 mt-2">
+                    Hành động này không thể hoàn tác!
+                </p>
+            </div>
+            <div class="items-center px-4 py-3">
+                <div class="flex space-x-3">
+                    <button id="cancelDelete"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Hủy
+                    </button>
+                    <button id="confirmDelete"
+                        class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        Xóa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentCustomerId = null;
+
+function confirmDelete(customerId, customerName) {
+    console.log('confirmDelete called with:', customerId, customerName);
+
+    currentCustomerId = customerId;
+    document.getElementById('customerName').textContent = customerName;
+    document.getElementById('deleteModal').classList.remove('hidden');
+
+    // Set up the delete form action
+    const deleteForm = document.getElementById('deleteForm');
+    deleteForm.action = `/admin/customers/${customerId}`;
+
+    console.log('Form action set to:', deleteForm.action);
+}
+
+// Handle confirm delete - only set once
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, setting up event handlers');
+
+    const confirmBtn = document.getElementById('confirmDelete');
+    const cancelBtn = document.getElementById('cancelDelete');
+    const modal = document.getElementById('deleteModal');
+
+    console.log('Elements found:', {
+        confirmBtn: !!confirmBtn,
+        cancelBtn: !!cancelBtn,
+        modal: !!modal
+    });
+
+    if (confirmBtn) {
+        confirmBtn.onclick = function() {
+            console.log('Confirm delete clicked');
+            if (currentCustomerId) {
+                const deleteForm = document.getElementById('deleteForm');
+                console.log('Submitting form to:', deleteForm.action);
+                deleteForm.submit();
+            } else {
+                console.log('No customer ID set');
+            }
+        };
+    }
+
+    // Handle cancel delete
+    if (cancelBtn) {
+        cancelBtn.onclick = function() {
+            console.log('Cancel delete clicked');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+            currentCustomerId = null;
+        };
+    }
+
+    // Close modal when clicking outside
+    if (modal) {
+        modal.onclick = function(e) {
+            if (e.target === this) {
+                console.log('Modal background clicked');
+                this.classList.add('hidden');
+                currentCustomerId = null;
+            }
+        };
+    }
+});
+</script>
 @endsection
