@@ -106,7 +106,7 @@
                     <tr>
                         <td class="py-4">
                             @if($clinic->image_url)
-                                <img src="{{ asset($clinic->image_url) }}" alt="{{ $clinic->name }}"
+                                <img src="{{ secure_asset($clinic->image_url) }}" alt="{{ $clinic->name }}"
                                     class="w-16 h-16 rounded object-cover">
                             @else
                                 <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">

@@ -128,7 +128,7 @@
                 @if($service->image_url)
                     <div class="mb-4">
                         <p class="text-sm font-medium text-gray-700 mb-2">Hình ảnh hiện tại</p>
-                        <img src="{{ asset($service->image_url) }}" alt="{{ $service->name }}" class="h-48 object-cover rounded-lg border border-gray-300">
+                        <img src="{{ secure_asset($service->image_url) }}" alt="{{ $service->name }}" class="h-48 object-cover rounded-lg border border-gray-300">
                     </div>
                 @endif
 

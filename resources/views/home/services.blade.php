@@ -6,7 +6,7 @@
 <!-- Services Banner -->
 <section class="relative bg-gray-900 text-white">
     <div class="absolute inset-0">
-        <img src="{{ asset('images/services-banner.jpg') }}" alt="Services background" class="w-full h-full object-cover opacity-50">
+        <img src="{{ secure_asset('images/services-banner.jpg') }}" alt="Services background" class="w-full h-full object-cover opacity-50">
     </div>
 
     <div class="relative container mx-auto px-6 py-24">

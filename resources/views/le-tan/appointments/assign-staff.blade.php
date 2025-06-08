@@ -233,7 +233,7 @@
                             <div class="border-2 border-gray-200 rounded-xl p-4 hover:bg-gray-50 cursor-pointer technician-card shadow-sm transition-all duration-300 ease-in-out hover:shadow-md" data-technician-id="{{ $technician->id }}">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 relative">
-                                        <img class="technician-avatar rounded-full h-14 w-14 object-cover ring-2 ring-gray-200" src="{{ $technician->avatar_url ? asset('storage/' . $technician->avatar_url) : 'https://ui-avatars.com/api/?name=' . urlencode($technician->first_name) . '&background=0D8ABC&color=fff' }}" alt="{{ $technician->first_name }}">
+                                        <img class="technician-avatar rounded-full h-14 w-14 object-cover ring-2 ring-gray-200" src="{{ $technician->avatar_url ? secure_asset('storage/' . $technician->avatar_url) : 'https://ui-avatars.com/api/?name=' . urlencode($technician->first_name) . '&background=0D8ABC&color=fff' }}" alt="{{ $technician->first_name }}">
                                         <div class="absolute -bottom-1 -right-1 bg-green-500 rounded-full w-4 h-4 border-2 border-white online-indicator"></div>
                                     </div>
                                     <div class="ml-4 flex-grow">

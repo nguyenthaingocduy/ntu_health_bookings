@@ -88,7 +88,7 @@
                 @if($clinic->image_url)
                     <div class="mb-4">
                         <p class="text-sm font-medium text-gray-700 mb-2">Hình ảnh hiện tại</p>
-                        <img src="{{ asset($clinic->image_url) }}" alt="{{ $clinic->name }}" class="w-48 h-48 object-cover rounded">
+                        <img src="{{ secure_asset($clinic->image_url) }}" alt="{{ $clinic->name }}" class="w-48 h-48 object-cover rounded">
                     </div>
                 @endif
                 

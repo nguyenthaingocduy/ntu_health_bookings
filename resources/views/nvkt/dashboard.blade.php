@@ -11,14 +11,14 @@
             <h1 class="text-2xl font-bold text-gray-800">Trang chủ Kỹ thuật viên</h1>
             <p class="text-sm text-gray-500 mt-1">Quản lý lịch làm việc và tiến trình chăm sóc khách hàng</p>
         </div>
-        <div class="flex space-x-2">
+        {{-- <div class="flex space-x-2">
             <a href="{{ route('nvkt.schedule') }}" class="flex items-center px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors duration-150 shadow-md">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                 </svg>
                 Xem lịch làm việc
             </a>
-        </div>
+        </div> --}}
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

@@ -129,7 +129,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Placeholder for Related Services -->
                 <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <img src="{{ asset('images/service1.jpg') }}" alt="Service" class="w-full h-48 object-cover">
+                    <img src="{{ secure_asset('images/service1.jpg') }}" alt="Service" class="w-full h-48 object-cover">
                     <div class="p-6">
                         <h3 class="text-xl font-semibold mb-2">Massage Thư Giãn</h3>
                         <p class="text-gray-600 mb-4">Giúp thư giãn cơ thể, giảm căng thẳng và mệt mỏi.</p>
@@ -143,7 +143,7 @@
                 </div>
 
                 <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <img src="{{ asset('images/service2.jpg') }}" alt="Service" class="w-full h-48 object-cover">
+                    <img src="{{ secure_asset('images/service2.jpg') }}" alt="Service" class="w-full h-48 object-cover">
                     <div class="p-6">
                         <h3 class="text-xl font-semibold mb-2">Chăm Sóc Da Mặt</h3>
                         <p class="text-gray-600 mb-4">Làm sạch sâu, dưỡng ẩm và trẻ hóa làn da.</p>
@@ -157,7 +157,7 @@
                 </div>
 
                 <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <img src="{{ asset('images/service3.jpg') }}" alt="Service" class="w-full h-48 object-cover">
+                    <img src="{{ secure_asset('images/service3.jpg') }}" alt="Service" class="w-full h-48 object-cover">
                     <div class="p-6">
                         <h3 class="text-xl font-semibold mb-2">Tắm Thảo Dược</h3>
                         <p class="text-gray-600 mb-4">Thanh lọc cơ thể với các loại thảo dược tự nhiên.</p>

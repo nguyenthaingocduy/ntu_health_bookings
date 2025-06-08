@@ -25,7 +25,7 @@
         <div class="md:flex">
             <div class="md:flex-shrink-0 md:w-1/3">
                 @if($service->image)
-                <img class="h-64 w-full object-cover md:h-full" src="{{ asset('storage/' . $service->image) }}" alt="{{ $service->name }}">
+                <img class="h-64 w-full object-cover md:h-full" src="{{ secure_asset('storage/' . $service->image) }}" alt="{{ $service->name }}">
                 @else
                 <div class="h-64 w-full bg-indigo-100 flex items-center justify-center md:h-full">
                     <svg class="h-16 w-16 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -96,7 +96,7 @@
             <div class="bg-white rounded-xl shadow-md overflow-hidden">
                 <div class="h-40 overflow-hidden">
                     @if($relatedService->image)
-                    <img class="w-full h-full object-cover" src="{{ asset('storage/' . $relatedService->image) }}" alt="{{ $relatedService->name }}">
+                    <img class="w-full h-full object-cover" src="{{ secure_asset('storage/' . $relatedService->image) }}" alt="{{ $relatedService->name }}">
                     @else
                     <div class="w-full h-full bg-indigo-100 flex items-center justify-center">
                         <svg class="h-12 w-12 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

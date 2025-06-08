@@ -7,7 +7,7 @@
     <!-- Hero Section -->
 <section class="relative bg-gray-900 text-white">
     <div class="absolute inset-0">
-        <img src="{{ asset('images\clinics\1745049992.jpg') }}" alt="Hero background" class="w-full h-full object-cover opacity-50">
+        <img src="{{ secure_asset('images\clinics\1745049992.jpg') }}" alt="Hero background" class="w-full h-full object-cover opacity-50">
     </div>
 
     <div class="relative container mx-auto px-6 py-32">

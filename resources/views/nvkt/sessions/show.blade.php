@@ -173,7 +173,7 @@
                     <div class="flex items-center">
                         @if($appointment->service->image)
                         <div class="flex-shrink-0 h-16 w-16">
-                            <img class="h-16 w-16 rounded-lg object-cover" src="{{ asset('storage/' . $appointment->service->image) }}" alt="{{ $appointment->service->name }}">
+                            <img class="h-16 w-16 rounded-lg object-cover" src="{{ secure_asset('storage/' . $appointment->service->image) }}" alt="{{ $appointment->service->name }}">
                         </div>
                         @else
                         <div class="flex-shrink-0 h-16 w-16 bg-indigo-100 rounded-lg flex items-center justify-center">

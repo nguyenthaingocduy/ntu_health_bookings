@@ -68,7 +68,7 @@ class Post extends Model
     
     public function getFeaturedImageUrlAttribute()
     {
-        return $this->featured_image ? asset($this->featured_image) : asset('images/default-post.jpg');
+        return $this->featured_image ? secure_asset($this->featured_image) : secure_asset('images/default-post.jpg');
     }
     
     public function scopePublished($query)

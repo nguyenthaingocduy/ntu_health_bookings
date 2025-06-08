@@ -191,7 +191,7 @@
                 @if($employee->avatar_url)
                     <div class="mb-4">
                         <p class="text-sm font-medium text-gray-700 mb-2">Ảnh đại diện hiện tại</p>
-                        <img src="{{ asset($employee->avatar_url ?? 'images/employees/default-avatar.svg') }}" alt="{{ $employee->first_name }}" class="w-32 h-32 object-cover rounded-full">
+                        <img src="{{ secure_asset($employee->avatar_url ?? 'images/employees/default-avatar.svg') }}" alt="{{ $employee->first_name }}" class="w-32 h-32 object-cover rounded-full">
                     </div>
                 @endif
 

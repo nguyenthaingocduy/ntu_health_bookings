@@ -4,11 +4,11 @@
     <div id="promotionOverlay" onclick="hidePromotionPopup()" class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
 
     <!-- Pop-up Content -->
-    <div id="promotionContent" class="relative bg-white rounded-2xl w-11/12 md:w-2/3 lg:w-1/2 xl:w-2/5 max-w-lg mx-auto overflow-hidden shadow-2xl transform transition-all duration-300 scale-95 hover:scale-100 max-h-[90vh] overflow-y-auto">
+    <div id="promotionContent" class="relative bg-white rounded-2xl w-11/12 md:w-2/3 lg:w-1/2 xl:w-2/5 max-w-lg mx-auto  shadow-2xl transform transition-all overflow-hidden duration-300 scale-95 hover:scale-100 max-h-[90vh] overflow-y-auto">
 
         <!-- Close Button -->
         <button type="button" id="closePromotionBtn" onclick="hidePromotionPopup()"
-                class="absolute top-4 right-4 z-20 w-8 h-8 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110 group">
+               class="absolute top-4 right-4 z-20 w-8 h-8 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full flex items-center justify-center shadow-lg duration-200 hover:scale-110 group">
             <svg class="w-4 h-4 text-gray-600 group-hover:text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>

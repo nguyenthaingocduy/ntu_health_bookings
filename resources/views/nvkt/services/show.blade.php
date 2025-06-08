@@ -25,7 +25,7 @@
         <div class="md:flex">
             <div class="md:flex-shrink-0 md:w-1/3">
                 @if($service->image)
-                <img class="h-64 w-full object-cover md:h-full" src="{{ asset('storage/' . $service->image) }}" alt="{{ $service->name }}">
+                <img class="h-64 w-full object-cover md:h-full" src="{{ secure_asset('storage/' . $service->image) }}" alt="{{ $service->name }}">
                 @else
                 <div class="h-64 w-full bg-indigo-100 flex items-center justify-center md:h-full">
                     <svg class="h-16 w-16 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

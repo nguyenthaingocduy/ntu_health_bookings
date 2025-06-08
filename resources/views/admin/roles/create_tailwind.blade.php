@@ -64,7 +64,7 @@
                         
                         <div class="mb-6">
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Tên vai trò <span class="text-red-500">*</span></label>
-                            <input type="text" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('name') border-red-500 @enderror" id="name" name="name" value="{{ old('name') }}" required placeholder="Ví dụ: Admin, Nhân viên, Khách hàng">
+                            <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:pink-2 focus:ring-pink-500  @error('name') border-red-500 @enderror" id="name" name="name" value="{{ old('name') }}" required placeholder="Ví dụ: Admin, Nhân viên, Khách hàng">
                             @error('name')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -72,7 +72,7 @@
                         
                         <div class="mb-6">
                             <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Mô tả</label>
-                            <textarea class="w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-200 focus:ring-opacity-50 @error('description') border-red-500 @enderror" id="description" name="description" rows="4" placeholder="Mô tả chi tiết về vai trò này">{{ old('description') }}</textarea>
+                            <textarea class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500  @error('description') border-red-500 @enderror" id="description" name="description" rows="4" placeholder="Mô tả chi tiết về vai trò này">{{ old('description') }}</textarea>
                             @error('description')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror

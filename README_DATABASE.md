@@ -419,8 +419,3 @@ CREATE INDEX idx_invoices_date ON invoices(invoice_date);
 CREATE INDEX idx_invoices_status ON invoices(payment_status);
 ```
 
-## Kết Luận
-
-Mã SQL trên tạo cơ sở dữ liệu đầy đủ cho hệ thống đặt lịch làm đẹp, bao gồm các bảng chính và mối quan hệ giữa chúng. Cấu trúc này hỗ trợ tất cả các chức năng cần thiết như quản lý người dùng, dịch vụ, lịch hẹn, thanh toán và các tính năng khác.
-
-Các kiểu dữ liệu được chọn phù hợp với nhu cầu lưu trữ và xử lý dữ liệu của hệ thống, đảm bảo hiệu suất và tính nhất quán. Các chỉ mục được thêm vào giúp tối ưu hóa các truy vấn thường xuyên, đặc biệt là các truy vấn liên quan đến tìm kiếm và lọc dữ liệu.

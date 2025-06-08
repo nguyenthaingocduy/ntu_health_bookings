@@ -334,7 +334,7 @@
                                         <div class="card h-100 technician-card shadow-sm border-0 rounded-lg overflow-hidden" data-technician-id="{{ $technician->id }}">
                                             <div class="card-header bg-gradient-light py-3 text-center border-bottom-0">
                                                 <div class="position-relative d-inline-block">
-                                                    <img class="rounded-circle technician-avatar border-4 border-white shadow" src="{{ $technician->avatar_url ? asset('storage/' . $technician->avatar_url) : 'https://ui-avatars.com/api/?name=' . urlencode($technician->first_name) . '&background=4e73df&color=ffffff' }}" alt="{{ $technician->first_name }}">
+                                                    <img class="rounded-circle technician-avatar border-4 border-white shadow" src="{{ $technician->avatar_url ? secure_asset('storage/' . $technician->avatar_url) : 'https://ui-avatars.com/api/?name=' . urlencode($technician->first_name) . '&background=4e73df&color=ffffff' }}" alt="{{ $technician->first_name }}">
                                                     <div class="online-indicator"></div>
                                                 </div>
                                             </div>

@@ -116,7 +116,7 @@
                     @forelse($employees as $employee)
                     <tr>
                         <td class="py-4">
-                            <img src="{{ asset($employee->avatar_url ?? 'images/employees/default-avatar.svg') }}" alt="{{ $employee->name }}"
+                            <img src="{{ secure_asset($employee->avatar_url ?? 'images/employees/default-avatar.svg') }}" alt="{{ $employee->name }}"
                                 class="w-16 h-16 rounded-full object-cover">
                         </td>
                         <td class="py-4">

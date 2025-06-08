@@ -79,7 +79,7 @@
         <aside id="sidebar" class="bg-gray-800 text-white w-full md:w-64 flex-shrink-0 md:sticky md:top-0 md:h-screen overflow-y-auto transition-transform duration-300 ease-in-out md:transform-none mobile-sidebar-closed fixed inset-y-0 left-0 z-30">
             <div class="p-4 flex items-center justify-between md:justify-start">
                 <div class="flex items-center">
-                    <img src="{{ asset('images/beauty-icon.png') }}" alt="Beauty Icon" class="w-10 h-10" onerror="this.src='https://img.icons8.com/color/96/spa-flower.png'">
+                    <img src="{{ secure_asset('images/beauty-icon.png') }}" alt="Beauty Icon" class="w-10 h-10" onerror="this.src='https://img.icons8.com/color/96/spa-flower.png'">
 
                     <span class="text-xl font-semibold">Beauty Spa</span>
                 </div>
@@ -110,12 +110,12 @@
                         </svg>
                     </div>
                     <div id="schedule-dropdown" class="sidebar-dropdown">
-                        <a href="{{ route('nvkt.schedule') }}" class="sidebar-submenu-item {{ request()->routeIs('nvkt.schedule') ? 'active' : '' }}">
+                        {{-- <a href="{{ route('nvkt.schedule') }}" class="sidebar-submenu-item {{ request()->routeIs('nvkt.schedule') ? 'active' : '' }}">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                             <span>Xem lịch làm việc (cũ)</span>
-                        </a>
+                        </a> --}}
 
                         <a href="{{ route('nvkt.appointments.assigned') }}" class="sidebar-submenu-item {{ request()->routeIs('nvkt.appointments.assigned') ? 'active' : '' }}">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -303,7 +303,7 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{ asset('js/nvkt-api.js') }}"></script>
+    <script src="{{ secure_asset('js/nvkt-api.js') }}"></script>
     <script>
         // Mobile sidebar toggle
         document.getElementById('openSidebar').addEventListener('click', function() {

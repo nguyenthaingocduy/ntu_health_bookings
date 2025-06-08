@@ -52,7 +52,7 @@
                     <div class="flex">
                         <div class="flex-shrink-0 flex items-center">
                             <a href="{{ route('staff.dashboard') }}" class="flex items-center">
-                                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-8 w-auto mr-2">
+                                <img src="{{ secure_asset('images/logo.png') }}" alt="Logo" class="h-8 w-auto mr-2">
                                 <span class="font-semibold text-lg">Đăng ký khám sức khỏe - CBVC</span>
                             </a>
                         </div>

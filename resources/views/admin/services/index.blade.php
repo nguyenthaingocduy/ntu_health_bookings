@@ -91,7 +91,7 @@
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($service->image_url)
-                                            <img src="{{ asset($service->image_url) }}" alt="{{ $service->name }}" class="h-16 w-16 object-cover rounded-md">
+                                            <img src="{{ secure_asset($service->image_url) }}" alt="{{ $service->name }}" class="h-16 w-16 object-cover rounded-md">
                                         @else
                                             <div class="h-16 w-16 bg-gray-100 flex items-center justify-center rounded-md">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

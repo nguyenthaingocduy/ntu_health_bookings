@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Time Display Fix -->
-    <link rel="stylesheet" href="{{ asset('css/time-display-fix.css') }}">
+    <link rel="stylesheet" href="{{ secure_asset('css/time-display-fix.css') }}">
 
     <!-- Scripts and Styles -->
     @viteReactRefresh
@@ -646,9 +646,9 @@
 
     @stack('scripts')
     <!-- Service Popup JS -->
-    <script src="{{ asset('js/service-popup.js') }}"></script>
+    <script src="{{ secure_asset('js/service-popup.js') }}"></script>
     <!-- Promotion Popup JS -->
-    <script src="{{ asset('js/promotion-popup.js') }}"></script>
+    <script src="{{ secure_asset('js/promotion-popup.js') }}"></script>
     <!-- Toastr JS -->
     <script>
         // Script chạy ngay lập tức
