@@ -99,7 +99,7 @@
     </div>
 
     <div class="footer">
-        <p>&copy; {{ $current_year }} {{ $app_name }}. Tất cả các quyền được bảo lưu.</p>
+        <p>&copy; {{ $current_year }} {{ $app_name }}. </p>
         <p>Đây là email tự động, vui lòng không trả lời email này.</p>
     </div>
 </body>

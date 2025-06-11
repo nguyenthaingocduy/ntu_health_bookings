@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chào mừng đến với NTU Health Booking</title>
+    <title>Chào mừng đến với Trang Nhã Spa</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -50,13 +50,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Beauty Salon</h1>
+            <h1>Trang Nhã Spa</h1>
         </div>
         
         <div class="content">
             <h2>Xin chào {{ $user->first_name }} {{ $user->last_name }},</h2>
             
-            <p>Chúng tôi rất vui mừng thông báo rằng bạn đã đăng ký tài khoản thành công tại NTU Health Booking!</p>
+            <p>Chúng tôi rất vui mừng thông báo rằng bạn đã đăng ký tài khoản thành công tại Trang Nhã Spa!</p>
             
             <p>Thông tin tài khoản của bạn:</p>
             <ul>
@@ -74,11 +74,11 @@
             <p>Nếu bạn có bất kỳ câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi qua email hoặc hotline.</p>
             
             <p>Trân trọng,<br>
-            Đội ngũ Beauty Salon</p>
+            Đội ngũ Trang Nhã Spa</p>
         </div>
         
         <div class="footer">
-            <p>&copy; {{ date('Y') }} Beauty Salon. Tất cả các quyền được bảo lưu.</p>
+            <p>&copy; {{ date('Y') }} Trang Nhã Spa. </p>
             <p>Đây là email tự động, vui lòng không trả lời email này.</p>
         </div>
     </div>

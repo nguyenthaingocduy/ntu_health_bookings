@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Lễ tân - Hệ thống đặt lịch làm đẹp')</title>
+    <title>@yield('title', 'Lễ tân - Trang Nhã Spa')</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ secure_asset('css/time-display-fix.css') }}">
@@ -150,7 +150,7 @@
                 <div class="flex items-center cursor-pointer" id="logoContainer">
                      <img src="/storage/logo/beauty-icon.png" alt="Beauty Icon" class="w-10 h-10" onerror="this.src='https://img.icons8.com/color/96/spa-flower.png'">
 
-                    <span class="text-xl font-semibold">Beauty Spa</span>
+                    <span class="text-xl font-semibold">Trang Nhã Spa</span>
                 </div>
                 <button id="closeSidebar" class="md:hidden text-white">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

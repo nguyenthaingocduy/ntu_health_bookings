@@ -5,7 +5,7 @@
     <div class="max-w-4xl mx-auto">
         <!-- Tiêu đề -->
         <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-gray-800 mb-4">Giới thiệu về Beauty Salon</h1>
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Giới thiệu về Trang Nhã Spa</h1>
             <div class="h-1 w-24 bg-gradient-to-r from-pink-500 to-purple-600 mx-auto"></div>
         </div>
         
@@ -13,7 +13,7 @@
         <div class="bg-white rounded-xl shadow-lg p-8 mb-10">
             <div class="prose prose-lg max-w-none">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-4">Câu chuyện của chúng tôi</h2>
-                <p class="mb-4">BeautySalon được thành lập vào năm 2020 với sứ mệnh mang đến những dịch vụ chăm sóc sức khỏe và sắc đẹp chất lượng cao, kết hợp giữa y học hiện đại và phương pháp truyền thống.</p>
+                <p class="mb-4">Trang Nhã Spa được thành lập vào năm 2025 với sứ mệnh mang đến những dịch vụ chăm sóc sức khỏe và sắc đẹp chất lượng cao, kết hợp giữa y học hiện đại và phương pháp truyền thống.</p>
                 
                 <p class="mb-4">Với đội ngũ bác sĩ, chuyên gia thẩm mỹ và kỹ thuật viên có trình độ chuyên môn cao, cùng với trang thiết bị hiện đại, chúng tôi cam kết mang đến cho khách hàng những trải nghiệm dịch vụ tốt nhất.</p>
                 
@@ -91,7 +91,7 @@
         
         <!-- CTA -->
         <div class="bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl shadow-lg p-8 text-center text-white">
-            <h2 class="text-3xl font-bold mb-4 text-black">Hãy đến với Beauty Salon</h2>
+            <h2 class="text-3xl font-bold mb-4 text-black">Hãy đến với Trang Nhã Spa</h2>
             <p class="text-lg mb-6 text-black font-medium">Trải nghiệm dịch vụ chăm sóc sức khỏe và sắc đẹp chất lượng cao</p>
             <a href="{{ route('customer.appointments.create') }}" class="inline-block px-6 py-3 bg-pink text-pink-500 font-semibold rounded-full hover:bg-gray-50 transition shadow-md border border-pink-100">Đặt lịch ngay</a>
         </div>

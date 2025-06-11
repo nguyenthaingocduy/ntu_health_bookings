@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Quản trị') - Beauty Spa</title>
+    <title>@yield('title', 'Quản trị') - Trang Nhã Spa</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -113,7 +113,7 @@
         <aside class="w-64 bg-gray-800 text-white overflow-y-auto">
             <div class="p-4">
                 <a href="{{ route('admin.dashboard') }}" class="text-2xl font-bold text-pink-500">
-                    Beauty Spa
+                    Trang Nhã Spa
                 </a>
             </div>
 

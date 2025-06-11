@@ -27,8 +27,8 @@
                         <i class="fas fa-spa text-black text-xl"></i>
                     </div>
                     <div>
-                        <span class="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent leading-none">Beauty</span>
-                        <span class="text-2xl md:text-3xl font-bold text-gray-800 ml-1 leading-none">Salon</span>
+                        <span class="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent leading-none">Trang Nhã</span>
+                        <span class="text-2xl md:text-3xl font-bold text-gray-800 ml-1 leading-none">Spa</span>
                         <div class="text-xs text-gray-500 mt-0.5">Nha Trang University</div>
                     </div>
                 </a>
@@ -201,6 +201,10 @@
         </div>
 
         <!-- Mobile Auth Buttons (Only show if not logged in) -->
+
+        
+
+
 
     </div>
 </nav>

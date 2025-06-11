@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Time Display Fix -->
-    <link rel="stylesheet" href="{{ secure_asset('css/time-display-fix.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/time-display-fix.css') }}">
 
     <!-- Scripts and Styles -->
     @viteReactRefresh
@@ -539,17 +539,17 @@
 
         .footer-brand {
             margin-bottom: 1rem;
-            flex: 1 1 250px;
+            /* flex: 1 1 250px; */
         }
 
         .footer-info {
             margin-bottom: 1rem;
-            flex: 2 1 400px;
+            /* flex: 2 1 400px; */
             font-size: 0.9rem;
         }
 
         .footer-socials {
-            flex: 1 1 150px;
+            /* flex: 1 1 150px; */
             display: flex;
             justify-content: flex-end;
         }
@@ -606,11 +606,11 @@
         @include('components.promotion-popup')
 
         <!-- Footer -->
-        <footer class="footer">
+<footer class="footer">
             <div class="container mx-auto px-6">
-                <div class="footer-content">
+                <div class="footer-content grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div class="footer-brand">
-                        <span class="text-xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">Beauty Salon</span>
+                        <span class="text-xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">Trang Nhã Spa</span>
                         <p class="text-sm text-gray-600 mt-1">Chăm sóc sức khỏe và sắc đẹp của bạn</p>
                     </div>
 
@@ -638,17 +638,18 @@
                 </div>
 
                 <div class="text-center text-gray-600 text-sm mt-4">
-                    &copy; {{ date('Y') }} Beauty Salon. Tất cả quyền được bảo lưu.
+                    &copy; {{ date('Y') }} Trang Nhã Spa.
                 </div>
             </div>
-        </footer>
+</footer>
+
     </div>
 
     @stack('scripts')
     <!-- Service Popup JS -->
-    <script src="{{ secure_asset('js/service-popup.js') }}"></script>
+    <script src="{{ asset('js/service-popup.js') }}"></script>
     <!-- Promotion Popup JS -->
-    <script src="{{ secure_asset('js/promotion-popup.js') }}"></script>
+    <script src="{{ asset('js/promotion-popup.js') }}"></script>
     <!-- Toastr JS -->
     <script>
         // Script chạy ngay lập tức

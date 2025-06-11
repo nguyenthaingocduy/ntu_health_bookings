@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Beauty Spa') - {{ config('app.name', 'Laravel') }}</title>
+    <title>@yield('title', 'Trang Nhã Spa') - {{ config('app.name', 'Laravel') }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Time Display Fix -->
-    <link rel="stylesheet" href="{{ secure_asset('css/time-display-fix.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/time-display-fix.css') }}">
 
     <!-- Scripts and Styles -->
     @viteReactRefresh
@@ -263,17 +263,17 @@
 
         .footer-brand {
             margin-bottom: 1rem;
-            flex: 1 1 250px;
+            /* flex: 1 1 250px; */
         }
 
         .footer-info {
             margin-bottom: 1rem;
-            flex: 2 1 400px;
+            /* flex: 2 1 400px; */
             font-size: 0.9rem;
         }
 
         .footer-socials {
-            flex: 1 1 150px;
+            /* flex: 1 1 150px; */
             display: flex;
             justify-content: flex-end;
         }
@@ -299,6 +299,7 @@
         @media (max-width: 768px) {
             .footer-content {
                 flex-direction: column;
+                margin: 0;
             }
 
             .footer-socials {
@@ -309,7 +310,10 @@
             .footer-socials a:first-child {
                 margin-left: 0;
             }
+           
         }
+  
+        
     </style>
 
     @stack('styles')
@@ -325,49 +329,56 @@
         </main>
 
         <!-- Footer -->
-              <footer class="footer">
-            <div class="container mx-auto px-6">
-                <div class="footer-content">
-                    <div class="footer-brand">
-                        <span class="text-xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">Beauty Salon</span>
-                        <p class="text-sm text-gray-600 mt-1">Chăm sóc sức khỏe và sắc đẹp của bạn</p>
-                    </div>
+   <footer class="footer bg-gray-100">
+    <div class="container mx-auto px-6 py-10">
+        <!-- Sử dụng grid cho responsive layout -->
+        <div class="footer-content grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Thương hiệu -->
+            <div class="footer-brand text-center md:text-left">
+                <span class="text-xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent block">
+                    Trang Nhã Spa
+                </span>
+                <p class="text-sm text-gray-600 mt-1">Chăm sóc sức khỏe và sắc đẹp của bạn</p>
+            </div>
 
-                    <div class="footer-info">
-                        <div class="mb-2">
-                            <i class="fas fa-map-marker-alt text-pink-500 mr-2"></i>
-                            <span class="text-gray-700">Đ. Nguyễn Đình Chiểu, Vĩnh Thọ, Nha Trang, Khánh Hòa, Vietnam </span>
-                        </div>
-                        <div class="mb-2">
-                            <i class="fas fa-phone-alt text-pink-500 mr-2"></i>
-                            <span class="text-gray-700">+84 123 456 789</span>
-                        </div>
-                        <div>
-                            <i class="fas fa-envelope text-pink-500 mr-2"></i>
-                            <span class="text-gray-700">ntuhealthbooking@gmail.com</span>
-                        </div>
-                    </div>
-
-                    <div class="footer-socials">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                    </div>
+            <!-- Thông tin liên hệ -->
+            <div class="footer-info space-y-2 text-center md:text-left">
+                <div class="flex items-center justify-center md:justify-start">
+                    <i class="fas fa-map-marker-alt text-pink-500 mr-2"></i>
+                    <span class="text-gray-700">Đ. Nguyễn Đình Chiểu, Vĩnh Thọ, Nha Trang, Khánh Hòa</span>
                 </div>
-
-                <div class="text-center text-gray-600 text-sm mt-4">
-                    &copy; {{ date('Y') }} Beauty Salon. Tất cả quyền được bảo lưu.
+                <div class="flex items-center justify-center md:justify-start">
+                    <i class="fas fa-phone-alt text-pink-500 mr-2"></i>
+                    <span class="text-gray-700">+84 123 456 789</span>
+                </div>
+                <div class="flex items-center justify-center md:justify-start">
+                    <i class="fas fa-envelope text-pink-500 mr-2"></i>
+                    <span class="text-gray-700">ntuhealthbooking@gmail.com</span>
                 </div>
             </div>
-        </footer>
+
+            <!-- Mạng xã hội -->
+            <div class="footer-socials flex justify-center md:justify-start items-center gap-4 text-pink-500 text-xl mt-4 md:mt-0">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+
+        <!-- Bản quyền -->
+        <div class="text-center text-gray-600 text-sm mt-8">
+            &copy; <script>document.write(new Date().getFullYear())</script> Trang Nhã Spa.
+        </div>
+    </div>
+</footer>
     </div>
 
    @stack('scripts')
     <!-- Service Popup JS -->
-    <script src="{{ secure_asset('js/service-popup.js') }}"></script>
+    <script src="{{ asset('js/service-popup.js') }}"></script>
     <!-- Promotion Popup JS -->
-    <script src="{{ secure_asset('js/promotion-popup.js') }}"></script>
+    <script src="{{ asset('js/promotion-popup.js') }}"></script>
     <!-- Toastr JS -->
     <script>
         // Script chạy ngay lập tức

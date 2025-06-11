@@ -136,7 +136,7 @@
                         <div class="bg-white rounded-lg border-2 border-gray-200 p-4 hover:border-pink-500 hover:shadow-md transition-all duration-200 technician-card">
                             <div class="flex items-center mb-4">
                                 <img class="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
-                                    src="{{ $technician->avatar_url ? secure_asset('storage/' . $technician->avatar_url) : 'https://ui-avatars.com/api/?name=' . urlencode($technician->first_name) . '&background=4e73df&color=ffffff' }}"
+                                    src="{{ $technician->avatar_url ? asset('storage/' . $technician->avatar_url) : 'https://ui-avatars.com/api/?name=' . urlencode($technician->first_name) . '&background=4e73df&color=ffffff' }}"
                                     alt="{{ $technician->first_name }}">
                                 <div class="ml-4">
                                     <h4 class="font-semibold text-gray-800">{{ $technician->first_name }} {{ $technician->last_name }}</h4>

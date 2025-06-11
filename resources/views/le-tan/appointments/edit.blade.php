@@ -36,7 +36,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                         <label for="customer_id" class="block text-sm font-medium text-gray-700 mb-2">Khách hàng <span class="text-red-500">*</span></label>
-                        <select id="customer_id" name="customer_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md @error('customer_id') border-red-500 @enderror" required>
+                        <select id="customer_id" name="customer_id" class="mt-1 block border w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-gray-500 sm:text-sm rounded-md @error('customer_id') border-red-500 @enderror" required>
                             <option value="">-- Chọn khách hàng --</option>
                             @foreach($customers as $customer)
                                 <option value="{{ $customer->id }}" {{ (old('customer_id', $appointment->customer_id) == $customer->id) ? 'selected' : '' }}>
@@ -51,7 +51,7 @@
 
                     <div>
                         <label for="service_id" class="block text-sm font-medium text-gray-700 mb-2">Dịch vụ <span class="text-red-500">*</span></label>
-                        <select id="service_id" name="service_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md @error('service_id') border-red-500 @enderror" required>
+                        <select id="service_id" name="service_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-gray-500 sm:text-sm rounded-md @error('service_id') border-red-500 @enderror" required>
                             <option value="">-- Chọn dịch vụ --</option>
                             @foreach($services as $service)
                                 <option value="{{ $service->id }}" {{ (old('service_id', $appointment->service_id) == $service->id) ? 'selected' : '' }}
@@ -70,7 +70,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                         <label for="appointment_date" class="block text-sm font-medium text-gray-700 mb-2">Ngày hẹn <span class="text-red-500">*</span></label>
-                        <input type="date" id="appointment_date" name="appointment_date" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('appointment_date') border-red-500 @enderror"
+                        <input type="date" id="appointment_date" name="appointment_date" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-gray-500 sm:text-sm rounded-md @error('appointment_date') border-red-500 @enderror"
                         value="{{ old('appointment_date', $appointment->formatted_date ?? date('Y-m-d')) }}"
                         min="{{ date('Y-m-d') }}" required>
                         @error('appointment_date')
@@ -80,7 +80,7 @@
 
                     <div>
                         <label for="time_appointments_id" class="block text-sm font-medium text-gray-700 mb-2">Giờ hẹn <span class="text-red-500">*</span></label>
-                        <select id="time_appointments_id" name="time_appointments_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md @error('time_appointments_id') border-red-500 @enderror" required>
+                        <select id="time_appointments_id" name="time_appointments_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-gray-500 sm:text-sm rounded-md @error('time_appointments_id') border-red-500 @enderror" required>
                             <option value="">-- Chọn giờ hẹn --</option>
                             @foreach($timeSlots as $timeSlot)
                                 <option value="{{ $timeSlot->id }}" {{ (old('time_appointments_id', $appointment->time_appointments_id) == $timeSlot->id) ? 'selected' : '' }}>
@@ -97,7 +97,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                         <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Trạng thái <span class="text-red-500">*</span></label>
-                        <select id="status" name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md @error('status') border-red-500 @enderror" required>
+                        <select id="status" name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-gray-500 sm:text-sm rounded-md @error('status') border-red-500 @enderror" required>
                             <option value="pending" {{ (old('status', $appointment->status) == 'pending') ? 'selected' : '' }}>Chờ xác nhận</option>
                             <option value="confirmed" {{ (old('status', $appointment->status) == 'confirmed') ? 'selected' : '' }}>Đã xác nhận</option>
                             <option value="completed" {{ (old('status', $appointment->status) == 'completed') ? 'selected' : '' }}>Đã hoàn thành</option>
@@ -111,7 +111,7 @@
 
                     <div>
                         <label for="employee_id" class="block text-sm font-medium text-gray-700 mb-2">Nhân viên kỹ thuật</label>
-                        <select id="employee_id" name="employee_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm rounded-md @error('employee_id') border-red-500 @enderror">
+                        <select id="employee_id" name="employee_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-gray-500 sm:text-sm rounded-md @error('employee_id') border-red-500 @enderror">
                             <option value="">-- Chọn nhân viên kỹ thuật --</option>
                             @foreach($technicians as $technician)
                                 <option value="{{ $technician->id }}" {{ (old('employee_id', $appointment->employee_id) == $technician->id) ? 'selected' : '' }}>
@@ -127,7 +127,7 @@
 
                 <div class="mb-6">
                     <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Ghi chú</label>
-                    <textarea id="notes" name="notes" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('notes') border-red-500 @enderror" placeholder="Nhập ghi chú nếu có">{{ old('notes', $appointment->notes) }}</textarea>
+                    <textarea id="notes" name="notes" rows="3" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-pink-500 focus:border-gray-500 sm:text-sm rounded-md @error('notes') border-red-500 @enderror" placeholder="Nhập ghi chú nếu có">{{ old('notes', $appointment->notes) }}</textarea>
                     @error('notes')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror

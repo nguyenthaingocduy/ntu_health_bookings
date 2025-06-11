@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Xác nhận đặt lịch tại Beauty Salon</title>
+    <title>Xác nhận đặt lịch tại Trang Nhã Spa</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -60,13 +60,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Beauty Salon</h1>
+            <h1>Trang Nhã Spa</h1>
         </div>
 
         <div class="content">
             <h2>Xin chào {{ $appointment->customer->first_name }} {{ $appointment->customer->last_name }},</h2>
 
-            <p>Cảm ơn bạn đã đặt lịch dịch vụ tại Beauty Salon. Chúng tôi xác nhận lịch hẹn của bạn đã được đặt thành công!</p>
+            <p>Cảm ơn bạn đã đặt lịch dịch vụ tại Trang Nhã Spa. Chúng tôi xác nhận lịch hẹn của bạn đã được đặt thành công!</p>
 
             <div class="appointment-details">
                 <h3>Thông tin lịch hẹn:</h3>
@@ -102,11 +102,11 @@
             </ul>
 
             <p>Trân trọng,<br>
-            Đội ngũ Beauty Salon</p>
+            Đội ngũ Trang Nhã Spa</p>
         </div>
 
         <div class="footer">
-            <p>&copy; {{ date('Y') }} Beauty Salon. Tất cả các quyền được bảo lưu.</p>
+            <p>&copy; {{ date('Y') }} Trang Nhã Spa. </p>
             <p>Đây là email tự động, vui lòng không trả lời email này.</p>
         </div>
     </div>
